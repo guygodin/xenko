@@ -28,7 +28,7 @@ namespace Xenko.Rendering
                 var effect = new Effect(graphicsDevice, SpriteEffect.Bytecode).DisposeBy(graphicsDevice);
                 _simpleEffect = new EffectInstance(effect).DisposeBy(graphicsDevice);
                 _simpleEffect.UpdateEffect(graphicsDevice);
-                _pipelineState = new MutablePipelineState(graphicsDevice).DisposeBy(graphicsDevice);
+                _pipelineState = new MutablePipelineState(graphicsDevice);
                 _pipelineState.State.SetDefaults();
                 _pipelineState.State.RootSignature = _simpleEffect.RootSignature;
                 _pipelineState.State.EffectBytecode = _simpleEffect.Effect.Bytecode;

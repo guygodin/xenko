@@ -156,8 +156,7 @@ namespace Xenko.Graphics
                 //Any "proper" way to do this? (GLES20 could directly accept it, not GLES30 anymore)
                 TextureTarget = (TextureTarget)Android.Opengl.GLES11Ext.GlTextureExternalOes;
                 GL.BindTexture(TextureTarget, TextureId);
-                
-                //GL.BindTexture(TextureTarget, 0);
+                GL.BindTexture(TextureTarget, 0);
             }
         }
 #endif
