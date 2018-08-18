@@ -111,8 +111,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xenko.Input.Tests.Android",
 		{42780CBD-3FE7-48E3-BD5B-59945EA20137} = {42780CBD-3FE7-48E3-BD5B-59945EA20137}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xenko.Core.Tests.Android", "..\sources\core\Xenko.Core.Tests\Xenko.Core.Tests.Android.csproj", "{5AA408BA-E766-453E-B661-E3D7EC46E2A6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xenko.Core.Shaders", "..\sources\shaders\Xenko.Core.Shaders\Xenko.Core.Shaders.csproj", "{F2D52EDB-BC17-4243-B06D-33CD20F87A7F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5210FB81-B807-49BB-AF0D-31FB6A83A572} = {5210FB81-B807-49BB-AF0D-31FB6A83A572}

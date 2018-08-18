@@ -116,7 +116,8 @@ namespace Xenko.Games
         /// <value><c>true</c> if the <see cref="FramePerSecond"/> and <see cref="TimePerFrame"/> were updated for this frame; otherwise, <c>false</c>.</value>
         public bool FramePerSecondUpdated { get; private set; }
 
-        internal void Update(TimeSpan totalGameTime, TimeSpan elapsedGameTime, TimeSpan elapsedUpdateTime, bool isRunningSlowly, bool incrementFrameCount)
+        // GG: Making it public so it can be updated manually
+        public void Update(TimeSpan totalGameTime, TimeSpan elapsedGameTime, TimeSpan elapsedUpdateTime, bool isRunningSlowly, bool incrementFrameCount)
         {
             Total = totalGameTime;
             Elapsed = elapsedGameTime;
@@ -141,7 +142,8 @@ namespace Xenko.Games
             }
         }
 
-        internal void Reset(TimeSpan totalGameTime)
+        // GG: Making it public so it can be reset
+        public void Reset(TimeSpan totalGameTime)
         {
             Update(totalGameTime, TimeSpan.Zero, TimeSpan.Zero, false, false);
             accumulatedElapsedTime = TimeSpan.Zero;

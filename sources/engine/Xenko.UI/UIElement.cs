@@ -609,7 +609,7 @@ namespace Xenko.UI
         /// <summary>
         /// The maximum depth bias value among the children of the element resulting from the parent/children z order update.
         /// </summary>
-        internal int MaxChildrenDepthBias { get; private set; }
+        public int MaxChildrenDepthBias { get; private set; }
 
         internal bool ForceNextMeasure = true;
         internal bool ForceNextArrange = true;
@@ -617,7 +617,7 @@ namespace Xenko.UI
         /// <summary>
         /// The ratio between the element real size on the screen and the element virtual size.
         /// </summary>
-        protected internal LayoutingContext LayoutingContext
+        public LayoutingContext LayoutingContext
         {
             get => layoutingContext;
             set
@@ -637,7 +637,7 @@ namespace Xenko.UI
 
         private UIElementServices uiElementServices;
 
-        internal UIElementServices UIElementServices
+        public UIElementServices UIElementServices
         {
             get
             {
@@ -660,7 +660,7 @@ namespace Xenko.UI
         /// </summary>
         /// <remarks>If the class is inherited it is the responsibility of the descendant class to correctly update this collection</remarks>
         [DataMemberIgnore]
-        protected internal UIElementCollection VisualChildrenCollection { get; }
+        public UIElementCollection VisualChildrenCollection { get; }
 
         /// <summary>
         /// Invalidates the arrange state (layout) for the element.

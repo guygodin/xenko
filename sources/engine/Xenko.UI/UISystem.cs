@@ -16,13 +16,13 @@ namespace Xenko.UI
     /// </summary>
     public class UISystem : GameSystemBase
     {
-        internal UIBatch Batch { get; private set; }
+        public UIBatch Batch { get; private set; }
 
-        internal DepthStencilStateDescription KeepStencilValueState { get; private set; }
+        public DepthStencilStateDescription KeepStencilValueState { get; private set; }
 
-        internal DepthStencilStateDescription IncreaseStencilValueState { get; private set; }
+        public DepthStencilStateDescription IncreaseStencilValueState { get; private set; }
 
-        internal DepthStencilStateDescription DecreaseStencilValueState { get; private set; }
+        public DepthStencilStateDescription DecreaseStencilValueState { get; private set; }
 
         private InputManager input;
 

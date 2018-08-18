@@ -43,7 +43,7 @@ namespace Xenko.Graphics
         public UseOpenGLCreationContext(GraphicsDevice graphicsDevice)
             : this()
         {
-            if (OpenTK.Graphics.GraphicsContext.CurrentContextHandle.Handle == IntPtr.Zero)
+            if (EglContext.CurrentContext == IntPtr.Zero)
             {
                 needUnbindContext = true;
                 useDeviceCreationContext = true;

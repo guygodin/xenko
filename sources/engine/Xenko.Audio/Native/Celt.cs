@@ -9,7 +9,7 @@ namespace Xenko.Audio
     /// <summary>
     /// Wrapper around Celt
     /// </summary>
-    internal class Celt : IDisposable
+    public class Celt : IDisposable
     {
         public int SampleRate { get; set; }
 
@@ -88,6 +88,18 @@ namespace Xenko.Audio
         }
 
         /// <summary>
+        /// Decodes compressed celt data into PCM 16 bit shorts
+        /// </summary>
+        /// <param name="inputBufferPtr">The input buffer</param>
+        /// <param name="inputBufferSize">The size of the valid bytes in the input buffer</param>
+        /// <param name="outputSamples">The output buffer, the size of frames should be the same amount that is contained in the input buffer</param>
+        /// <returns></returns>
+        public unsafe int Decode(IntPtr inputBufferPtr, int inputBufferSize, IntPtr outputSamples)
+        {
+            return xnCeltDecodeShort(celtPtr, (byte*)inputBufferPtr, inputBufferSize, (short*)outputSamples, BufferSize);
+        }
+
+        /// <summary>
         /// Encode PCM audio into celt compressed format
         /// </summary>
         /// <param name="audioSamples">A buffer containing interleaved channels (as from constructor channels) and samples (can be any number of samples)</param>
@@ -131,6 +143,17 @@ namespace Xenko.Audio
             {
                 return xnCeltEncodeFloat(celtPtr, samplesPtr, audioSamples.Length / Channels, bufferPtr, outputBuffer.Length);
             }
+        }
+
+        /// <summary>
+        /// Encode PCM audio into celt compressed format
+        /// </summary>
+        /// <param name="audioSamples">A buffer containing interleaved channels (as from constructor channels) and samples (can be any number of samples)</param>
+        /// <param name="outputBuffer">An array of bytes, the size of the array will be the max possible size of the compressed packet</param>
+        /// <returns></returns>
+        public unsafe int Encode(IntPtr audioSamples, int sampleCount, IntPtr outputBuffer, int outputBufferLength)
+        {
+            return xnCeltEncodeFloat(celtPtr, (float*)audioSamples, sampleCount / Channels, (byte*)outputBuffer, outputBufferLength);
         }
 
         [SuppressUnmanagedCodeSecurity]

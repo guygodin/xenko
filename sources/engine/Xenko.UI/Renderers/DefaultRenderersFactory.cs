@@ -12,7 +12,7 @@ namespace Xenko.UI.Renderers
     /// <summary>
     /// A factory that create the default renderer for each <see cref="UIElement"/> type.
     /// </summary>
-    internal class DefaultRenderersFactory : IElementRendererFactory
+    public class DefaultRenderersFactory : IElementRendererFactory
     {
         private readonly ElementRenderer defaultRenderer;
 

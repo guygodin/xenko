@@ -69,7 +69,7 @@ namespace Xenko.Graphics
         /// <summary>
         /// Boolean indicating if this device supports SRGB texture and render targets.
         /// </summary>
-        public readonly bool HasSRgb;
+        public bool HasSRgb;
 
         /// <summary>
         /// Boolean indicating if the Depth buffer can also be used as ShaderResourceView for some passes.
@@ -90,6 +90,11 @@ namespace Xenko.Graphics
         /// Boolean indicating if the graphics API supports resource renaming (with either <see cref="MapMode.WriteDiscard"/> or <see cref="CommandList.UpdateSubresource"/> with full size).
         /// </summary>
         public readonly bool HasResourceRenaming;
+
+        /// <summary>
+        /// Boolean indicating if the graphics API supports clamping to border.
+        /// </summary>
+        public readonly bool HasClampToBorder;
 
         /// <summary>
         /// Gets the <see cref="FeaturesPerFormat" /> for the specified <see cref="SharpDX.DXGI.Format" />.

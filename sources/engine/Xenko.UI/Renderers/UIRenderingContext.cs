@@ -22,7 +22,7 @@ namespace Xenko.UI.Renderers
         /// <summary>
         /// The current time.
         /// </summary>
-        public GameTime Time { get; internal set; }
+        public GameTime Time { get; set; }
 
         /// <summary>
         /// The final render target to draw to.

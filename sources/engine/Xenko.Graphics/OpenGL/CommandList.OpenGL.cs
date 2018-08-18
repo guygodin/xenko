@@ -312,6 +312,8 @@ namespace Xenko.Graphics
             for (int i = 0; i < boundShaderResourceViews.Length; ++i)
             {
                 shaderResourceViews[i] = null;
+                // GG: when drawing the same mesh every frame, it ended up black because boundShaderResourceViews were not reset
+                boundShaderResourceViews[i] = null;
             }
 
             // Clear active texture state

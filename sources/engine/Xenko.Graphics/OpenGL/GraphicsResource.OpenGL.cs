@@ -28,6 +28,12 @@ namespace Xenko.Graphics
         internal PixelFormatGl TextureFormat;
         internal PixelType TextureType;
         internal int TexturePixelSize;
+
+        // GG: This is needed when creating TextureSwapChains with the Oculus Mobile SDK
+        public int GetTextureId()
+        {
+            return TextureId;
+        }
     }
 }
  

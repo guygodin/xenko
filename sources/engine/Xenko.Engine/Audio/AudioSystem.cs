@@ -65,8 +65,12 @@ namespace Xenko.Audio
                 AudioEngine = audioEngineSingleton;
             }
 
-            Game.Activated += OnActivated;
-            Game.Deactivated += OnDeactivated;
+            // GG: So that it works without the Game class
+            if (Game != null)
+            {
+                Game.Activated += OnActivated;
+                Game.Deactivated += OnDeactivated;
+            }
         }
 
         /// <summary>
@@ -103,8 +107,12 @@ namespace Xenko.Audio
         // called on dispose
         protected override void Destroy()
         {
-            Game.Activated -= OnActivated;
-            Game.Deactivated -= OnDeactivated;
+            // GG: So that it works without the Game class
+            if (Game != null)
+            {
+                Game.Activated -= OnActivated;
+                Game.Deactivated -= OnDeactivated;
+            }
 
             base.Destroy();
 

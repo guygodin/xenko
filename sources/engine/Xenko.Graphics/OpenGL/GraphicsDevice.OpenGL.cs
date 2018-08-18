@@ -158,7 +158,7 @@ namespace Xenko.Graphics
         private OpenTK.GameWindow gameWindow;
 #endif
 #elif XENKO_PLATFORM_ANDROID
-        private AndroidGameView gameWindow;
+        private OpenTK.GameViewBase gameWindow;
 #elif XENKO_PLATFORM_IOS
         private iPhoneOSGameView gameWindow;
         public ThreadLocal<OpenGLES.EAGLContext> ThreadLocalContext { get; private set; }
@@ -836,7 +836,8 @@ namespace Xenko.Graphics
             gameWindow = (OpenTK.GameWindow)windowHandle.NativeWindow;
 #endif
 #elif XENKO_PLATFORM_ANDROID
-            gameWindow = (AndroidGameView)windowHandle.NativeWindow;
+            // GG: Doesn't need to cast to AndroidGameView here
+            gameWindow = (OpenTK.GameViewBase)windowHandle.NativeWindow;
 #elif XENKO_PLATFORM_IOS
             gameWindow = (iPhoneOSGameView)windowHandle.NativeWindow;
             ThreadLocalContext = new ThreadLocal<OpenGLES.EAGLContext>(() => new OpenGLES.EAGLContext(IsOpenGLES2 ? OpenGLES.EAGLRenderingAPI.OpenGLES2 : OpenGLES.EAGLRenderingAPI.OpenGLES3, gameWindow.EAGLContext.ShareGroup));
@@ -874,9 +875,7 @@ namespace Xenko.Graphics
 
                 // Create PBuffer
                 deviceCreationWindowInfo = new AndroidWindow(null);
-                ((AndroidWindow)deviceCreationWindowInfo).CreateSurface(graphicsContext.GraphicsMode.Index.Value);
-
-                deviceCreationContext = new OpenTK.Graphics.GraphicsContext(graphicsContext.GraphicsMode, deviceCreationWindowInfo, version / 100, (version % 100) / 10, creationFlags);
+                deviceCreationContext = new EglContext(deviceCreationWindowInfo, ((EglContext)graphicsContext).Context);
             }
 
             graphicsContextEglPtr = EglGetCurrentContext();

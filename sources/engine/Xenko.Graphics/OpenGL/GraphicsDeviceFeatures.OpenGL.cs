@@ -144,7 +144,10 @@ namespace Xenko.Graphics
             HasMultisampleDepthAsSRV = isOpenGLES3;
 
             deviceRoot.HasDepthClamp = SupportedExtensions.Contains("GL_ARB_depth_clamp");
-  
+
+            // GG: Needed for Oculus Mobile SDK
+            HasClampToBorder = SupportedExtensions.Contains("GL_EXT_texture_border_clamp") || SupportedExtensions.Contains("GL_OES_texture_border_clamp");
+
             // TODO: from 3.1: draw indirect, separate shader object
             // TODO: check tessellation & geometry shaders: GL_ANDROID_extension_pack_es31a
 #else

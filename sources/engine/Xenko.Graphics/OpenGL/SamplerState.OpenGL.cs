@@ -142,7 +142,7 @@ namespace Xenko.Graphics
 
 #if !XENKO_PLATFORM_IOS
             if (maxAnisotropy != oldSamplerState.maxAnisotropy && GraphicsDevice.HasAnisotropicFiltering)
-                GL.TexParameter(target, (TextureParameterName)OpenTK.Graphics.ES20.ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, Description.MaxAnisotropy);
+                GL.TexParameter(target, (TextureParameterName)OpenTK.Graphics.ES20.ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, maxAnisotropy);
 #endif
             if (magFilter != oldSamplerState.magFilter)
                 GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)magFilter);
