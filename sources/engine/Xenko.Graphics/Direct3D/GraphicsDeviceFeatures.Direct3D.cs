@@ -52,6 +52,7 @@ namespace Xenko.Graphics
             CurrentProfile = GraphicsProfileHelper.FromFeatureLevel(nativeDevice.FeatureLevel);
 
             HasResourceRenaming = true;
+            HasClampToBorder = false;
 
             HasComputeShaders = nativeDevice.CheckFeatureSupport(SharpDX.Direct3D11.Feature.ComputeShaders);
             HasDoublePrecision = nativeDevice.CheckFeatureSupport(SharpDX.Direct3D11.Feature.ShaderDoubles);
