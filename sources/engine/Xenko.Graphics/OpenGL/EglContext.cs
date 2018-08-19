@@ -1,15 +1,15 @@
 #if XENKO_PLATFORM_ANDROID
 
-using Android.Opengl;
-using OpenTK.Graphics;
-using OpenTK.Platform;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using Android.Opengl;
+using OpenTK.Graphics;
+using OpenTK.Platform;
 
 namespace Xenko.Graphics
 {
@@ -89,8 +89,10 @@ namespace Xenko.Graphics
 
             var surfaceAttribs = new[]
             {
-                EGL14.EglWidth, 16,
-                EGL14.EglHeight, 16,
+                EGL14.EglWidth, 1,
+                EGL14.EglHeight, 1,
+                EGL14.EglTextureTarget, EGL14.EglNoTexture,
+                EGL14.EglTextureFormat, EGL14.EglNoTexture,
                 EGL14.EglNone
             };
 
@@ -138,7 +140,11 @@ namespace Xenko.Graphics
 
         public void MakeCurrent(IWindowInfo window)
         {
-            EGL14.EglMakeCurrent(_display, _surface, _surface, Context);
+            var result = window != null ? EGL14.EglMakeCurrent(_display, _surface, _surface, Context) : EGL14.EglMakeCurrent(_display, EGL14.EglNoSurface, EGL14.EglNoSurface, EGL14.EglNoContext);
+            if (!result)
+            {
+                throw new InvalidOperationException("Failed to make EglContext current");
+            }
         }
 
         public void SwapBuffers()

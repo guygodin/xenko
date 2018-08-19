@@ -10,6 +10,7 @@ using Xenko.Core.Mathematics;
 using Xenko;
 using Xenko.Shaders;
 using Color4 = Xenko.Core.Mathematics.Color4;
+using static Xenko.Graphics.GraphicsDevice;
 #if XENKO_GRAPHICS_API_OPENGLES
 using OpenTK.Graphics.ES30;
 using PixelFormatGl = OpenTK.Graphics.ES30.PixelFormat;
@@ -44,22 +45,25 @@ namespace Xenko.Graphics
         private GraphicsDevice.FBOTexture boundDepthStencilBuffer;
         private int boundRenderTargetCount = 0;
         private GraphicsDevice.FBOTexture[] boundRenderTargets = new GraphicsDevice.FBOTexture[MaxBoundRenderTargets];
-        internal GraphicsResource[] boundShaderResourceViews = new GraphicsResource[64];
-        private GraphicsResource[] shaderResourceViews = new GraphicsResource[64];
-        private SamplerState[] samplerStates = new SamplerState[64];
+        // GG: Reduced size of arrays here from 64 to 16 because I won't have that many resources
+        internal GraphicsResource[] boundShaderResourceViews = new GraphicsResource[16];
+        private GraphicsResource[] shaderResourceViews = new GraphicsResource[16];
+        private SamplerState[] samplerStates = new SamplerState[16];
 
         internal DepthStencilBoundState DepthStencilBoundState;
         internal RasterizerBoundState RasterizerBoundState;
 
-        private Buffer[] constantBuffers = new Buffer[64];
+        private Buffer[] constantBuffers = new Buffer[16];
 
-        private int boundFBO;
+        // GG: Storing FramebufferTarget in addition to TextureId (will be useful for MultiView)
+        private FBOValue boundFBO;
         private bool needUpdateFBO = true;
 
         private PipelineState newPipelineState;
         private PipelineState currentPipelineState;
 
-        private DescriptorSet[] currentDescriptorSets = new DescriptorSet[32];
+        // GG: Reduced size of array from 32 to 8
+        private DescriptorSet[] currentDescriptorSets = new DescriptorSet[8];
 
         internal int activeTexture = 0;
 
@@ -123,8 +127,8 @@ namespace Xenko.Graphics
 #endif
 
             var clearFBO = GraphicsDevice.FindOrCreateFBO(depthStencilBuffer);
-            if (clearFBO != boundFBO)
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, clearFBO);
+            if (clearFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(clearFBO.Target, clearFBO.Id);
 
             ClearBufferMask clearBufferMask =
                 ((options & DepthStencilClearOptions.DepthBuffer) == DepthStencilClearOptions.DepthBuffer ? ClearBufferMask.DepthBufferBit : 0)
@@ -141,8 +145,8 @@ namespace Xenko.Graphics
             if (!currentDepthMask)
                 GL.DepthMask(false);
 
-            if (clearFBO != boundFBO)
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+            if (clearFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
         }
 
         public void Clear(Texture renderTarget, Color4 color)
@@ -152,8 +156,8 @@ namespace Xenko.Graphics
 #endif
 
             var clearFBO = GraphicsDevice.FindOrCreateFBO(renderTarget);
-            if (clearFBO != boundFBO)
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, clearFBO);
+            if (clearFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(clearFBO.Target, clearFBO.Id);
 
             // Check if we need to change color mask
             var blendState = currentPipelineState.BlendState;
@@ -169,8 +173,8 @@ namespace Xenko.Graphics
             if (needColorMaskOverride)
                 blendState.RestoreColorMask();
 
-            if (clearFBO != boundFBO)
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+            if (clearFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
         }
 
         public unsafe void ClearReadWrite(Buffer buffer, Vector4 value)
@@ -311,8 +315,8 @@ namespace Xenko.Graphics
 
             for (int i = 0; i < boundShaderResourceViews.Length; ++i)
             {
-                shaderResourceViews[i] = null;
                 // GG: when drawing the same mesh every frame, it ended up black because boundShaderResourceViews were not reset
+                shaderResourceViews[i] = null;
                 boundShaderResourceViews[i] = null;
             }
 
@@ -451,7 +455,7 @@ namespace Xenko.Graphics
                     GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentType, TextureTarget2d.Texture2D, 0, 0);
 
                     // Restore FBO and viewport
-                    GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+                    GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
                     GL.Viewport((int)viewports[0].X, (int)viewports[0].Y, (int)viewports[0].Width, (int)viewports[0].Height);
                 }
                 return;
@@ -516,7 +520,7 @@ namespace Xenko.Graphics
                 GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentType, TextureTarget2d.Texture2D, 0, 0);
 
                 // Restore FBO and viewport
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+                GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
                 GL.Viewport((int)viewports[0].X, (int)viewports[0].Y, (int)viewports[0].Width, (int)viewports[0].Height);
             }
         }
@@ -525,7 +529,8 @@ namespace Xenko.Graphics
         {
             // Use rendering
             GL.Viewport(0, 0, destTexture.Description.Width, destTexture.Description.Height);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, GraphicsDevice.FindOrCreateFBO(destTexture));
+            var fbo = GraphicsDevice.FindOrCreateFBO(destTexture);
+            GL.BindFramebuffer(fbo.Target, fbo.Id);
 
             var sourceRegionSize = new Vector2(sourceRectangle.Width, sourceRectangle.Height);
             var destRegionSize = new Vector2(destRectangle.Width, destRectangle.Height);
@@ -602,7 +607,7 @@ namespace Xenko.Graphics
             GL.ColorMask(enabledColors[0], enabledColors[1], enabledColors[2], enabledColors[3]);
 
             // Restore FBO and viewport
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+            GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
             GL.Viewport((int)viewports[0].X, (int)viewports[0].Y, (int)viewports[0].Width, (int)viewports[0].Height);
         }
 
@@ -716,12 +721,12 @@ namespace Xenko.Graphics
             }
 
             // Set up the read (source) buffer to use for the blitting operation:
-            int readFBOID = GraphicsDevice.FindOrCreateFBO(sourceMultisampleTexture);   // Find the FBO that the sourceMultisampleTexture is bound to.
-            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, readFBOID);
+            var readFBO = GraphicsDevice.FindOrCreateFBO(sourceMultisampleTexture);   // Find the FBO that the sourceMultisampleTexture is bound to.
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, readFBO.Id);
 
             // Set up the draw (destination) buffer to use for the blitting operation:
-            int drawFBOID = GraphicsDevice.FindOrCreateFBO(destTexture);   // Find the FBO that the destTexture is bound to.
-            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, drawFBOID);
+            var drawFBO = GraphicsDevice.FindOrCreateFBO(destTexture);   // Find the FBO that the destTexture is bound to.
+            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, drawFBO.Id);
 
             ClearBufferMask clearBufferMask;
             BlitFramebufferFilter blitFramebufferFilter;
@@ -1609,7 +1614,7 @@ namespace Xenko.Graphics
             {
                 boundFBO = GraphicsDevice.FindOrCreateFBO(boundDepthStencilBuffer, boundRenderTargets, boundRenderTargetCount);
             }
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, boundFBO);
+            GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
         }
 
         public void SetPipelineState(PipelineState pipelineState)

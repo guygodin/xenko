@@ -164,7 +164,7 @@ namespace Xenko.Graphics
         private TextureTarget GetTextureTarget(TextureDimension dimension)
         {
             switch (Dimension)
-        	{
+            {
                 case TextureDimension.Texture1D:
 #if !XENKO_GRAPHICS_API_OPENGLES
                         if (ArraySize > 1)
@@ -234,36 +234,88 @@ namespace Xenko.Graphics
 
                 using (var openglContext = GraphicsDevice.UseOpenGLCreationContext())
                 {
+                    // Depth texture are render buffer for now
+                    // TODO: enable switch
+                    if ((Description.Flags & TextureFlags.DepthStencil) != 0 && (Description.Flags & TextureFlags.ShaderResource) == 0)
+                    {
+                        RenderbufferStorage depth, stencil;
+                        ConvertDepthFormat(GraphicsDevice, Description.Format, out depth, out stencil);
+
+                        GL.GenRenderbuffers(1, out TextureId);
+                        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, TextureId);
+
+                        // GG: Added support for MSAA
+                        if (IsMultisample)
+                        {                            
+                            GL.Ext.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, (int)Description.MultisampleCount, (RenderbufferStorage)TextureInternalFormat, Width, Height);
+                        }
+                        else
+                        {
+                            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, depth, Width, Height);
+                        }
+
+                        if (stencil != 0)
+                        {
+                            // separate stencil
+                            GL.GenRenderbuffers(1, out stencilId);
+                            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, stencilId);
+                            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, stencil, Width, Height);
+                        }
+                        else if (HasStencil)
+                        {
+                            // depth+stencil in a single texture
+                            stencilId = TextureId;
+                        }
+
+                        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+
+                        IsRenderbuffer = true;
+                        return;
+                    }
+
+                    IsRenderbuffer = false;
+
                     TextureTotalSize = ComputeBufferTotalSize();
 
                     if (Description.Usage == GraphicsResourceUsage.Staging)
                     {
                         InitializeStagingPixelBufferObject(dataBoxes);
-                        return; // TODO: This return causes "GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);" not to get entered. Is that okay?
-                    }
-
-                    // Depth textures are renderbuffers for now // TODO: PERFORMANCE: Why? I think we should change that so we can sample them directly.
-                    // TODO: enable switch  // TODO: What does this comment even mean?
-
-                    IsRenderbuffer = !Description.IsShaderResource;
-
-                    // Force to renderbuffer if MSAA is on because we don't support MSAA textures ATM (and they don't exist on OpenGL ES).
-                    if (Description.IsMultisample)
-                    {
-                        // TODO: Ideally the caller of this method should be aware of this "force to renderbuffer",
-                        //       because the caller won't be able to bind it as a texture.
-                        IsRenderbuffer = true;
-                    }
-
-                    if (IsRenderbuffer)
-                    {
-                        CreateRenderbuffer();
-                        return; // TODO: This return causes "GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);" not to get entered. Is that okay?
+                        return;
                     }
 
                     GL.GenTextures(1, out TextureId);
                     GL.BindTexture(TextureTarget, TextureId);
-                    SetFilterMode();
+
+                    // No filtering on depth buffer
+                    if ((Description.Flags & (TextureFlags.RenderTarget | TextureFlags.DepthStencil)) != TextureFlags.None)
+                    {
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                        BoundSamplerState = GraphicsDevice.SamplerStates.PointClamp;
+
+                        if (HasStencil)
+                        {
+                            // depth+stencil in a single texture
+                            stencilId = TextureId;
+                        }
+                    }
+#if XENKO_GRAPHICS_API_OPENGLES
+                    else if (Description.MipLevels <= 1)
+                    {
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                    }
+#endif
+
+#if XENKO_GRAPHICS_API_OPENGLES
+                    if (!GraphicsDevice.IsOpenGLES2)
+#endif
+                    {
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureBaseLevel, 0);
+                        GL.TexParameter(TextureTarget, TextureParameterName.TextureMaxLevel, Description.MipLevels - 1);
+                    }
 
                     if (Description.MipLevels == 0)
                         throw new NotImplementedException();
@@ -272,46 +324,97 @@ namespace Xenko.Graphics
 
                     for (var arrayIndex = 0; arrayIndex < Description.ArraySize; ++arrayIndex)
                     {
-                        int offsetArray = arrayIndex * Description.MipLevels;
-
-                        for (int mipLevel = 0; mipLevel < Description.MipLevels; ++mipLevel)
+                        var offsetArray = arrayIndex*Description.MipLevels;
+                        for (int i = 0; i < Description.MipLevels; ++i)
                         {
                             DataBox dataBox;
-                            Int3 dimensions = new Int3(CalculateMipSize(Description.Width, mipLevel),
-                                                       CalculateMipSize(Description.Height, mipLevel),
-                                                       CalculateMipSize(Description.Depth, mipLevel));
-                            if (dataBoxes != null && mipLevel < dataBoxes.Length)
+                            var width = CalculateMipSize(Description.Width, i);
+                            var height = CalculateMipSize(Description.Height, i);
+                            var depth = CalculateMipSize(Description.Depth, i);
+                            if (dataBoxes != null && i < dataBoxes.Length)
                             {
-                                if (setSize > 1 && !compressed && dataBoxes[mipLevel].RowPitch != dimensions.X * TexturePixelSize)
+                                if (setSize > 1 && !compressed && dataBoxes[i].RowPitch != width*TexturePixelSize)
                                     throw new NotSupportedException("Can't upload texture with pitch in glTexImage2D/3D.");
                                 // Might be possible, need to check API better.
-                                dataBox = dataBoxes[offsetArray + mipLevel];
+                                dataBox = dataBoxes[offsetArray + i];
                             }
                             else
-                        {
+                            {
                                 dataBox = new DataBox();
-                        }
+                            }
 
                             switch (TextureTarget)
-                        {
+                            {
+#if !XENKO_GRAPHICS_API_OPENGLES
                                 case TextureTarget.Texture1D:
-                                    CreateTexture1D(compressed, dimensions.X, mipLevel, dataBox);
+                                    if (compressed)
+                                    {
+                                        GL.CompressedTexImage1D(TextureTarget, i, TextureInternalFormat, width, 0, dataBox.SlicePitch, dataBox.DataPointer);
+                                    }
+                                    else
+                                    {
+                                        GL.TexImage1D(TextureTarget, i, TextureInternalFormat, width, 0, TextureFormat, TextureType, dataBox.DataPointer);
+                                    }
                                     break;
+#endif
                                 case TextureTarget.Texture2D:
                                 case TextureTarget.TextureCubeMap:
-                                    CreateTexture2D(compressed, dimensions.X, dimensions.Y, mipLevel, arrayIndex, dataBox);
+                                {
+                                    var dataSetTarget = GetTextureTargetForDataSet2D(TextureTarget, arrayIndex);
+                                    if (compressed)
+                                    {
+                                        GL.CompressedTexImage2D(dataSetTarget, i, (CompressedInternalFormat2D)TextureInternalFormat, width, height, 0, dataBox.SlicePitch, dataBox.DataPointer);
+                                    }
+                                    else
+                                    {
+                                        GL.TexImage2D(dataSetTarget, i, (TextureComponentCount2D)TextureInternalFormat, width, height, 0, TextureFormat, TextureType, dataBox.DataPointer);
+                                    }
                                     break;
+                                }
                                 case TextureTarget.Texture3D:
-                                    CreateTexture3D(compressed, dimensions.X, dimensions.Y, dimensions.Z, mipLevel, dataBox);
+                                {
+                                    if (compressed)
+                                    {
+                                        GL.CompressedTexImage3D((TextureTarget3d)TextureTarget, i, (CompressedInternalFormat3D)TextureInternalFormat, width, height, depth, 0, dataBox.SlicePitch, dataBox.DataPointer);
+                                    }
+                                    else
+                                    {
+                                        GL.TexImage3D((TextureTarget3d)TextureTarget, i, (TextureComponentCount3D)TextureInternalFormat, width, height, depth, 0, TextureFormat, TextureType, dataBox.DataPointer);
+                                    }
                                     break;
+                                }
                                 case TextureTarget.Texture2DArray:
-                                    CreateTexture2DArray(compressed, dimensions.X, dimensions.Y, mipLevel, arrayIndex, dataBox);
+                                {
+                                    // We create all array slices at once, but upload them one by one
+                                    if (arrayIndex == 0)
+                                    {
+                                        if (compressed)
+                                        {
+                                            GL.CompressedTexImage3D((TextureTarget3d)TextureTarget, i, (CompressedInternalFormat3D)TextureInternalFormat, width, height, ArraySize, 0, 0, IntPtr.Zero);
+                                        }
+                                        else
+                                        {
+                                            GL.TexImage3D((TextureTarget3d)TextureTarget, i, (TextureComponentCount3D)TextureInternalFormat, width, height, ArraySize, 0, TextureFormat, TextureType, IntPtr.Zero);
+                                        }
+                                    }
+
+                                    if (dataBox.DataPointer != IntPtr.Zero)
+                                    {
+                                        if (compressed)
+                                        {
+                                            GL.CompressedTexSubImage3D((TextureTarget3d)TextureTarget, i, 0, 0, arrayIndex, width, height, 1, TextureFormat, dataBox.SlicePitch, dataBox.DataPointer);
+                                        }
+                                        else
+                                        {
+                                            GL.TexSubImage3D((TextureTarget3d)TextureTarget, i, 0, 0, arrayIndex, width, height, 1, TextureFormat, TextureType, dataBox.DataPointer);
+                                        }
+                                    }
                                     break;
+                                }
                             }
                         }
                     }
-
-                    GL.BindTexture(TextureTarget, 0);   // This unbinds the texture.
+                    GL.BindTexture(TextureTarget, 0);
                     if (openglContext.CommandList != null)
                     {
                         // If we messed up with some states of a command list, mark dirty states
@@ -320,181 +423,6 @@ namespace Xenko.Graphics
                 }
 
                 GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);
-            }
-        }
-
-        private void CreateRenderbuffer()
-        {
-            if (Description.IsDepthStencil) // If it is a depth/stencil attachment:
-            {
-                RenderbufferStorage depthRenderbufferFormat;
-                RenderbufferStorage stencilRenderbufferFormat;
-                ConvertDepthFormat(GraphicsDevice, Description.Format, out depthRenderbufferFormat, out stencilRenderbufferFormat);
-
-                CreateRenderbuffer(Width, Height, (int)Description.MultisampleCount, depthRenderbufferFormat, out TextureId);
-
-                if (stencilRenderbufferFormat != 0)   // If we have a separate stencil attachment:
-                {
-                    CreateRenderbuffer(Width, Height, (int)Description.MultisampleCount, stencilRenderbufferFormat, out stencilId);
-                }
-                else if (HasStencil)    // If depth and stencil are stored inside the same renderbuffer:
-                {
-                    stencilId = TextureId;
-                }
-            }
-            else if (Description.IsRenderTarget)    // If it is a color attachment:
-            {
-                CreateRenderbuffer(Width, Height, (int)Description.MultisampleCount, (RenderbufferStorage)TextureInternalFormat, out TextureId);
-            }
-            else
-            {
-                throw new NotSupportedException("Requested renderbuffer is neither a render target nor a depth/stencil attachment.");
-            }
-
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);    // Unbinds the renderbuffer.
-        }
-
-        private void SetFilterMode()
-        {
-            if (Description.IsDepthStencil || Description.IsRenderTarget)   // Set the filtering mode of depth, stencil and color FBO attachments:
-            {
-                // Disable filtering on FBO attachments:
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);   // TODO: Do we enter this for MSAA buffers too? Is this an issue?
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);   // TODO: Why would we force the filter to "nearest"?
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-                BoundSamplerState = GraphicsDevice.SamplerStates.PointClamp;
-
-                if (HasStencil)
-                {
-                    // Since we store depth and stencil in a single texture, we assign the depth buffer's texture ID as the stencil texture ID.
-                    stencilId = TextureId;
-                }
-            }
-#if XENKO_GRAPHICS_API_OPENGLES
-            else if (Description.MipLevels <= 1)
-            {
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);   // TODO: Why does this use the nearest filter for minification? Using Linear filtering would result in a smoother appearance for minified textures.
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            }
-#endif
-
-#if XENKO_GRAPHICS_API_OPENGLES
-            if (!GraphicsDevice.IsOpenGLES2)
-#endif
-            {
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureBaseLevel, 0);
-                GL.TexParameter(TextureTarget, TextureParameterName.TextureMaxLevel, Description.MipLevels - 1);
-            }
-        }
-
-        private void CreateRenderbuffer(int width, int height, int multisampleCount, RenderbufferStorage internalFormat, out int textureID)
-        {
-            GL.GenRenderbuffers(1, out textureID);
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, textureID);
-
-            if (Description.IsMultisample)
-            {
-#if !XENKO_PLATFORM_IOS
-                // MSAA is not supported on iOS currently because OpenTK doesn't expose "GL.BlitFramebuffer()" on iOS for some reason.
-                GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, multisampleCount, internalFormat, width, height);
-#endif
-            }
-            else
-            {
-                GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, internalFormat, width, height);
-            }
-        }
-
-        private void CreateTexture1D(bool compressed, int width, int mipLevel, DataBox dataBox)
-        {
-            // TODO: STABILITY: Since 1D textures are not supported on OpenGL ES, what should we do in this case? Throw an exception? I mean currently we just silently ignore that case on OpenGL ES.
-#if !XENKO_GRAPHICS_API_OPENGLES
-            if (compressed)
-            {
-                GL.CompressedTexImage1D(TextureTarget, mipLevel, TextureInternalFormat, width, 0, dataBox.SlicePitch, dataBox.DataPointer);
-            }
-            else
-            {
-                GL.TexImage1D(TextureTarget, mipLevel, TextureInternalFormat, width, 0, TextureFormat, TextureType, dataBox.DataPointer);
-            }
-#endif
-        }
-
-        private void CreateTexture2D(bool compressed, int width, int height, int mipLevel, int arrayIndex, DataBox dataBox)
-        {
-            if (IsMultisample)
-            {
-                throw new InvalidOperationException("Currently if multisampling is on, a renderbuffer will be created (not a texture) in any case and this code will not be reached." +
-                                                    "Therefore if this place is reached, it means something went wrong. Once multisampling has been implemented for OpenGL textures, you can remove this exception.");
-
-                if (IsRenderbuffer)
-                {
-#if !XENKO_PLATFORM_IOS
-                    // MSAA is not supported on iOS currently because OpenTK doesn't expose "GL.BlitFramebuffer()" on iOS for some reason.
-                    GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, (int)Description.MultisampleCount, (RenderbufferStorage)TextureInternalFormat, width, height);
-#endif
-                }
-                else
-                {
-#if XENKO_GRAPHICS_API_OPENGLES
-                    throw new NotSupportedException("Multisample textures are not supported on OpenGL ES.");
-#else
-                    GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, (int)Description.MultisampleCount, (TextureComponentCount2D)TextureInternalFormat, width, height, false);
-#endif
-                }
-            }
-            else
-            {
-                var dataSetTarget = GetTextureTargetForDataSet2D(TextureTarget, arrayIndex);
-                if (compressed)
-                {
-                    GL.CompressedTexImage2D(dataSetTarget, mipLevel, (CompressedInternalFormat2D)TextureInternalFormat, width, height, 0, dataBox.SlicePitch, dataBox.DataPointer);
-                }
-                else
-                {
-                    GL.TexImage2D(dataSetTarget, mipLevel, (TextureComponentCount2D)TextureInternalFormat, width, height, 0, TextureFormat, TextureType, dataBox.DataPointer);
-                }
-            }
-        }
-
-        private void CreateTexture3D(bool compressed, int width, int height, int depth, int mipLevel, DataBox dataBox)
-        {
-            if (compressed)
-            {
-                GL.CompressedTexImage3D((TextureTarget3d)TextureTarget, mipLevel, (CompressedInternalFormat3D)TextureInternalFormat, width, height, depth, 0, dataBox.SlicePitch, dataBox.DataPointer);
-            }
-            else
-            {
-                GL.TexImage3D((TextureTarget3d)TextureTarget, mipLevel, (TextureComponentCount3D)TextureInternalFormat, width, height, depth, 0, TextureFormat, TextureType, dataBox.DataPointer);
-            }
-        }
-
-        private void CreateTexture2DArray(bool compressed, int width, int height, int mipLevel, int arrayIndex, DataBox dataBox)
-        {
-            // We create all array slices at once, but upload them one by one
-            if (arrayIndex == 0)
-            {
-                if (compressed)
-                {
-                    GL.CompressedTexImage3D((TextureTarget3d)TextureTarget, mipLevel, (CompressedInternalFormat3D)TextureInternalFormat, width, height, ArraySize, 0, 0, IntPtr.Zero);
-                }
-                else
-                {
-                    GL.TexImage3D((TextureTarget3d)TextureTarget, mipLevel, (TextureComponentCount3D)TextureInternalFormat, width, height, ArraySize, 0, TextureFormat, TextureType, IntPtr.Zero);
-                }
-            }
-
-            if (dataBox.DataPointer != IntPtr.Zero)
-            {
-                if (compressed)
-                {
-                    GL.CompressedTexSubImage3D((TextureTarget3d)TextureTarget, mipLevel, 0, 0, arrayIndex, width, height, 1, TextureFormat, dataBox.SlicePitch, dataBox.DataPointer);
-                }
-                else
-                {
-                    GL.TexSubImage3D((TextureTarget3d)TextureTarget, mipLevel, 0, 0, arrayIndex, width, height, 1, TextureFormat, TextureType, dataBox.DataPointer);
-                }
             }
         }
 

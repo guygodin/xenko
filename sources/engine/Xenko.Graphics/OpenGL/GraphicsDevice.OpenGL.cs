@@ -118,7 +118,7 @@ namespace Xenko.Graphics
         internal bool HasTextureHalf;
         internal bool HasRenderTargetFloat;
         internal bool HasRenderTargetHalf;
-        internal bool HasTextureRG;
+        internal bool HasTextureRG;        
 #endif
 
         private bool isFramebufferSRGB;
@@ -126,7 +126,7 @@ namespace Xenko.Graphics
         private int contextBeginCounter = 0;
 
         // TODO: Use some LRU scheme to clean up FBOs if not used frequently anymore.
-        internal Dictionary<FBOKey, int> existingFBOs = new Dictionary<FBOKey,int>(); 
+        internal Dictionary<FBOKey, FBOValue> existingFBOs = new Dictionary<FBOKey, FBOValue>(); 
 
         private static GraphicsDevice _currentGraphicsDevice = null;
 
@@ -478,10 +478,17 @@ namespace Xenko.Graphics
             throw new NotImplementedException();
         }
 
-        internal int FindOrCreateFBO(GraphicsResourceBase graphicsResource, int subresource)
+        public void RegisterFBO(Texture depthStencilBuffer, Texture renderTarget, FramebufferTarget framebufferTarget, int framebufferId)
+        {
+            var fboTextures = new FBOTexture[] { renderTarget };
+            UpdateFBO(framebufferTarget, depthStencilBuffer, fboTextures, 1);
+            existingFBOs.Add(new FBOKey(depthStencilBuffer, fboTextures, 1), new FBOValue(framebufferTarget, framebufferId));
+        }
+
+        internal FBOValue FindOrCreateFBO(GraphicsResourceBase graphicsResource, int subresource)
         {
             if (graphicsResource == WindowProvidedRenderTexture)
-                return WindowProvidedFrameBuffer;
+                return new FBOValue(FramebufferTarget.Framebuffer, WindowProvidedFrameBuffer);
 
             var texture = graphicsResource as Texture;
             if (texture != null)
@@ -492,7 +499,7 @@ namespace Xenko.Graphics
             throw new NotSupportedException();
         }
 
-        internal int FindOrCreateFBO(FBOTexture texture)
+        internal FBOValue FindOrCreateFBO(FBOTexture texture)
         {
             var isDepthBuffer = ((texture.Texture.Flags & TextureFlags.DepthStencil) != 0);
             lock (existingFBOs)
@@ -510,64 +517,46 @@ namespace Xenko.Graphics
             return FindOrCreateFBO(null, new FBOTexture[] { texture }, 1);
         }
 
-        // TODO: I think having a class for FBOs would simplify some stuff. We could implement methods like "Bind()" for it.
-        int GenerateFBO(FBOTexture depthStencilBuffer, FBOTexture[] renderTargets, int renderTargetCount)
+        internal FBOValue FindOrCreateFBO(FBOTexture depthStencilBuffer, FBOTexture[] renderTargets, int renderTargetCount)
         {
-            int fboID;
+            FBOValue value;
 
-            GL.GenFramebuffers(1, out fboID);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fboID);
-            UpdateFBO(FramebufferTarget.Framebuffer, depthStencilBuffer, renderTargets, renderTargetCount);
-
-            var framebufferStatus = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-            if (framebufferStatus != FramebufferErrorCode.FramebufferComplete)
-            {
-                throw new InvalidOperationException(string.Format("FBO is incomplete: {0} RTs: [RT0: {1}]; Depth {2} (error: {3})",
-                                                                  renderTargetCount,
-                                                                  renderTargets != null && renderTargets.Length > 0 && renderTargets[0].Texture != null ? renderTargets[0].Texture.TextureId : 0,
-                                                                  depthStencilBuffer.Texture != null ? depthStencilBuffer.Texture.TextureId : 0,
-                                                                  framebufferStatus));
-            }
-
-            FBOTexture[] newFBOTextures = null;
-            if (renderTargets != null)
-            {
-                newFBOTextures = (FBOTexture[])renderTargets.Clone();
-            }
-
-            FBOKey newFBOKey = new FBOKey(depthStencilBuffer, newFBOTextures, renderTargetCount);
-            existingFBOs.Add(newFBOKey, fboID);
-
-            return fboID;
-        }
-
-        internal int FindOrCreateFBO(FBOTexture depthStencilBuffer, FBOTexture[] renderTargets, int renderTargetCount)  // TODO: What's the point of passing an array that has reduntant elements? This could probably be reduced to only the "renderTargets" parameter.
-        {
             // Check for existing FBO matching this configuration
-            lock (existingFBOs) // TODO: PERFORMANCE: Why is this lock here? Do we ever run this from multiple threads? If so, why?
+            lock (existingFBOs)
             {
-                // Check if the default-provided render target was requested:
+                var fboKey = new FBOKey(depthStencilBuffer, renderTargets, renderTargetCount);
+
+                // Is it the default provided render target?
                 // TODO: Need to disable some part of rendering if either is null
-                var isProvidedRenderTarget = (renderTargetCount == 1 && renderTargets[0] == WindowProvidedRenderTexture);
+                var isProvidedRenderTarget = (fboKey.RenderTargetCount == 1 && renderTargets[0] == WindowProvidedRenderTexture);
                 if (isProvidedRenderTarget && depthStencilBuffer.Texture != null)
                 {
                     throw new InvalidOperationException("It is impossible to bind device provided and user created buffers with OpenGL");
                 }
-                if (depthStencilBuffer.Texture == null && (isProvidedRenderTarget || renderTargetCount == 0)) // device provided framebuffer
+                if (depthStencilBuffer.Texture == null && (isProvidedRenderTarget || fboKey.RenderTargetCount == 0)) // device provided framebuffer
                 {
-                    return WindowProvidedFrameBuffer;
+                    return new FBOValue(FramebufferTarget.Framebuffer, WindowProvidedFrameBuffer);
                 }
 
-                // Check if there is an already existing FBO:
-                var fboKey = new FBOKey(depthStencilBuffer, renderTargets, renderTargetCount);
+                if (existingFBOs.TryGetValue(fboKey, out value))
+                    return value;
 
-                int fboID;
-                if (existingFBOs.TryGetValue(fboKey, out fboID))
-                    return fboID;
+                int framebufferId;
+                GL.GenFramebuffers(1, out framebufferId);
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
+                UpdateFBO(FramebufferTarget.Framebuffer, depthStencilBuffer, renderTargets, renderTargetCount);
 
-                // Since the desired FBO doesn't already exist, we generate it:
-                return GenerateFBO(depthStencilBuffer, renderTargets, renderTargetCount);
+                var framebufferStatus = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+                if (framebufferStatus != FramebufferErrorCode.FramebufferComplete)
+                {
+                    throw new InvalidOperationException(string.Format("FBO is incomplete: {0} RTs: [RT0: {1}]; Depth {2} (error: {3})", renderTargetCount, renderTargets != null && renderTargets.Length > 0 && renderTargets[0].Texture != null ? renderTargets[0].Texture.TextureId : 0, depthStencilBuffer.Texture != null ? depthStencilBuffer.Texture.TextureId : 0, framebufferStatus));
+                }
+
+                value = new FBOValue(FramebufferTarget.Framebuffer, framebufferId);
+                existingFBOs.Add(new FBOKey(depthStencilBuffer, renderTargets != null ? renderTargets.ToArray() : null, renderTargetCount), value);
             }
+
+            return value;
         }
 
         internal FramebufferAttachment UpdateFBO(FramebufferTarget framebufferTarget, FBOTexture renderTarget)
@@ -576,20 +565,20 @@ namespace Xenko.Graphics
             var isDepthBuffer = Texture.InternalIsDepthStencilFormat(texture.Format);
             if (isDepthBuffer)
             {
-                return UpdateFBODepthStencilAttachment(framebufferTarget, renderTarget);
+                return UpdateFBODepthStencil(framebufferTarget, renderTarget);
             }
             else
             {
-                UpdateFBOColorAttachment(framebufferTarget, 0, renderTarget);
+                UpdateFBORenderTarget(framebufferTarget, 0, renderTarget);
                 return FramebufferAttachment.ColorAttachment0;
             }
         }
 
-        internal void UpdateFBO(FramebufferTarget framebufferTarget, FBOTexture depthStencilBuffer, FBOTexture[] renderTargets, int renderTargetCount)  // TODO: What's the point of passing an array that has reduntant elements? This could probably be reduced to only the "renderTargets" parameter.
+        internal void UpdateFBO(FramebufferTarget framebufferTarget, FBOTexture depthStencilBuffer, FBOTexture[] renderTargets, int renderTargetCount)
         {
             for (int i = 0; i < renderTargetCount; ++i)
             {
-                UpdateFBOColorAttachment(framebufferTarget, i, renderTargets[i]);
+                UpdateFBORenderTarget(framebufferTarget, i, renderTargets[i]);
             }
 
 #if XENKO_GRAPHICS_API_OPENGLES
@@ -604,7 +593,6 @@ namespace Xenko.Graphics
                 else
 #endif
                 {
-                    // Specify which attachments to render to (all of them in our case):
                     var drawBuffers = new DrawBuffersEnum[renderTargetCount];
                     for (var i = 0; i < renderTargetCount; ++i)
                         drawBuffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
@@ -614,37 +602,11 @@ namespace Xenko.Graphics
 
             if (depthStencilBuffer.Texture != null)
             {
-                UpdateFBODepthStencilAttachment(framebufferTarget, depthStencilBuffer);
+                UpdateFBODepthStencil(framebufferTarget, depthStencilBuffer);
             }
         }
 
-        void BindColorAttachment(FramebufferTarget framebufferTarget, int i, FBOTexture renderTarget)
-        {
-            FramebufferAttachment attachment = FramebufferAttachment.ColorAttachment0 + i;
-
-            if (renderTarget.Texture.IsMultisample)
-            {
-                if (renderTarget.Texture.IsRenderbuffer)
-                {
-                    GL.FramebufferRenderbuffer(framebufferTarget, attachment, RenderbufferTarget.Renderbuffer, renderTarget.Texture.TextureId);
-                }
-                else
-                {
-#if XENKO_GRAPHICS_API_OPENGLES
-                    throw new NotSupportedException("Multisample textures are not supported on OpenGL ES.");
-#else
-                    GL.FramebufferTexture2D(framebufferTarget, attachment, renderTarget.Texture.TextureTarget, renderTarget.Texture.TextureId, renderTarget.MipLevel);
-#endif
-                }
-            }
-            else
-            {
-                TextureTarget2d textureTarget = Texture.GetTextureTargetForDataSet2D(renderTarget.Texture.TextureTarget, renderTarget.ArraySlice % 6);
-                GL.FramebufferTexture2D(framebufferTarget, attachment, textureTarget, renderTarget.Texture.TextureId, renderTarget.MipLevel);
-            }
-        }
-
-        internal void UpdateFBOColorAttachment(FramebufferTarget framebufferTarget, int i, FBOTexture renderTarget)
+        internal void UpdateFBORenderTarget(FramebufferTarget framebufferTarget, int i, FBOTexture renderTarget)
         {
 #if XENKO_GRAPHICS_API_OPENGLES
             if (IsOpenGLES2 && renderTarget.MipLevel != 0)
@@ -660,17 +622,23 @@ namespace Xenko.Graphics
 #endif
                 case TextureTarget.Texture2D:
                 case TextureTarget.TextureCubeMap:
-                    // We don't make use of the "TextureTarget.Texture2DMultisample" enum value on purpose, because it
-                    // allows for better code sharing between OpenGL ES and OpenGL. We simply use "TextureTarget.Texture2D"
-                    // and check the value of "IsMultisample" instead. This is because OpenGL ES doesn't support
-                    // multisample textures, but only multisample renderbuffers.
-                    BindColorAttachment(framebufferTarget, i, renderTarget);
+                    // GG: Added support for MSAA on Android
+                    if (renderTarget.Texture.MultisampleCount > MultisampleCount.None)
+                    {
+                        GL.Ext.FramebufferTexture2DMultisample((All)framebufferTarget, FramebufferAttachmentObjectType.ColorAttachment0 + i,
+                            (All)Texture.GetTextureTargetForDataSet2D(renderTarget.Texture.TextureTarget, renderTarget.ArraySlice % 6), renderTarget.Texture.TextureId, renderTarget.MipLevel, (int)renderTarget.Texture.MultisampleCount);
+                    }
+                    else
+                    {
+                        GL.FramebufferTexture2D(framebufferTarget, FramebufferAttachment.ColorAttachment0 + i,
+                            Texture.GetTextureTargetForDataSet2D(renderTarget.Texture.TextureTarget, renderTarget.ArraySlice % 6), renderTarget.Texture.TextureId, renderTarget.MipLevel);
+                    }
                     break;
                 case TextureTarget.Texture2DArray:
                 case TextureTarget.Texture3D:
 #if XENKO_GRAPHICS_API_OPENGLES
                     if (IsOpenGLES2)
-                        throw new PlatformNotSupportedException($"Can't bind FBO with target [{renderTarget.Texture.TextureTarget}]. Reason: 3D textures are not supported on OpenGL ES 2.");   // TODO: If not supported on OpenGL ES, why is the texture even allocated? This should be catched earlier.
+                        goto default; // not supported
 #endif
                     GL.FramebufferTextureLayer(framebufferTarget, FramebufferAttachment.ColorAttachment0 + i, renderTarget.Texture.TextureId, renderTarget.MipLevel, renderTarget.ArraySlice);
                     break;
@@ -679,7 +647,7 @@ namespace Xenko.Graphics
             }
         }
 
-        internal FramebufferAttachment UpdateFBODepthStencilAttachment(FramebufferTarget framebufferTarget, FBOTexture depthStencilBuffer)
+        internal FramebufferAttachment UpdateFBODepthStencil(FramebufferTarget framebufferTarget, FBOTexture depthStencilBuffer)
         {
 #if XENKO_GRAPHICS_API_OPENGLES
             if (IsOpenGLES2 && depthStencilBuffer.MipLevel != 0)
@@ -688,36 +656,29 @@ namespace Xenko.Graphics
 
             bool useSharedAttachment = depthStencilBuffer.Texture.StencilId == depthStencilBuffer.Texture.TextureId;
 #if XENKO_GRAPHICS_API_OPENGLES
-            if (IsOpenGLES2)  // FramebufferAttachment.DepthStencilAttachment is not supported in ES 2  // TODO: Wouldn't it make more sense to check the value of "depthStencilBuffer.Texture.StencilId" instead?
+            if (IsOpenGLES2)  // FramebufferAttachment.DepthStencilAttachment is not supported in ES 2
                 useSharedAttachment = false;
 #endif
             var attachmentType = useSharedAttachment ? FramebufferAttachment.DepthStencilAttachment : FramebufferAttachment.DepthAttachment;
 
-            if (depthStencilBuffer.Texture.IsRenderbuffer)
+            var texture = depthStencilBuffer.Texture;
+            if (texture.IsRenderbuffer)
             {
                 // Bind depth-only or packed depth-stencil buffer
-                GL.FramebufferRenderbuffer(framebufferTarget, attachmentType, RenderbufferTarget.Renderbuffer, depthStencilBuffer.Texture.TextureId);
+                GL.FramebufferRenderbuffer(framebufferTarget, attachmentType, RenderbufferTarget.Renderbuffer, texture.TextureId);
 
-                // If stencil buffer is separate, it's resource id might be stored in depthStencilBuffer.Texture.StencilId
-                if (depthStencilBuffer.Texture.HasStencil && !useSharedAttachment)
-                {
-                    GL.FramebufferRenderbuffer(framebufferTarget, FramebufferAttachment.StencilAttachment, RenderbufferTarget.Renderbuffer, depthStencilBuffer.Texture.StencilId);
-                }
+                // If stencil buffer is separate, it's resource id might be stored in depthStencilBuffer.Texture.ResouceIdStencil
+                if (texture.HasStencil && !useSharedAttachment)
+                    GL.FramebufferRenderbuffer(framebufferTarget, FramebufferAttachment.StencilAttachment, RenderbufferTarget.Renderbuffer, texture.StencilId);
             }
             else
             {
-                TextureTarget2d textureTarget2d = TextureTarget2d.Texture2D;
-                if (depthStencilBuffer.Texture.IsMultisample)
-                {
-#if XENKO_GRAPHICS_API_OPENGLES
-                    throw new NotSupportedException("Multisample textures are not supported on OpenGL ES.");
-#else
-                    textureTarget2d = TextureTarget2d.Texture2DMultisample;
-#endif
-                }
+                // Bind depth-only or packed depth-stencil buffer
+                GL.FramebufferTexture2D(framebufferTarget, attachmentType, TextureTarget2d.Texture2D, texture.TextureId, depthStencilBuffer.MipLevel);
 
-                // Bind depth-only or packed depth-stencil buffer   // TODO: What about separate depth and stencil?
-                GL.FramebufferTexture2D(framebufferTarget, attachmentType, textureTarget2d, depthStencilBuffer.Texture.TextureId, depthStencilBuffer.MipLevel);
+                // If stencil buffer is separate, it's resource id might be stored in depthStencilBuffer.Texture.ResouceIdStencil
+                if (texture.HasStencil && !useSharedAttachment)
+                    GL.FramebufferTexture2D(framebufferTarget, FramebufferAttachment.StencilAttachment, TextureTarget2d.Texture2D, depthStencilBuffer.Texture.StencilId, depthStencilBuffer.MipLevel);
             }
 
             return attachmentType;
@@ -1014,7 +975,7 @@ namespace Xenko.Graphics
             lock (existingFBOs)
             {
                 existingFBOs.Clear();
-                existingFBOs[new FBOKey(null, new FBOTexture[] { WindowProvidedRenderTexture }, 1)] = WindowProvidedFrameBuffer;
+                existingFBOs[new FBOKey(null, new FBOTexture[] { WindowProvidedRenderTexture }, 1)] = new FBOValue(FramebufferTarget.Framebuffer, WindowProvidedFrameBuffer);
             }
 
             //// Clear bound states
@@ -1093,7 +1054,7 @@ namespace Xenko.Graphics
                 }
             }
 
-            existingFBOs[new FBOKey(null, new FBOTexture[] { WindowProvidedRenderTexture }, 1)] = WindowProvidedFrameBuffer;
+            existingFBOs[new FBOKey(null, new FBOTexture[] { WindowProvidedRenderTexture }, 1)] = new FBOValue(FramebufferTarget.Framebuffer, WindowProvidedFrameBuffer);
         }
 
         private class SwapChainBackend
@@ -1284,6 +1245,22 @@ namespace Xenko.Graphics
                 }
                 return result;
             }
+        }
+
+        internal struct FBOValue
+        {
+            #region Constructor
+            public FBOValue(FramebufferTarget target, int id)
+            {
+                Target = target;
+                Id = id;
+            }
+            #endregion
+
+            #region Properties
+            public FramebufferTarget Target;
+            public int Id;
+            #endregion
         }
     }
 }
