@@ -37,6 +37,8 @@ Thank you everybody for your generous contributions!
 * Szymon Kobalczyk
 * Philippe Monteil
 * Cobalt
+* Matthias Hölzl
+* Ryan Galkowski
 
 ## Mini Backers
 

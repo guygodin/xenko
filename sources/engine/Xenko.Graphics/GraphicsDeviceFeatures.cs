@@ -137,9 +137,9 @@ namespace Xenko.Graphics
             /// </summary>
             public readonly MultisampleCount MultisampleCountMax;
 
-            /// <summary>	
-            /// Gets the unordered resource support options for a compute shader resource.	
-            /// </summary>	
+            /// <summary>
+            /// Gets the unordered resource support options for a compute shader resource.
+            /// </summary>
             //public readonly ComputeShaderFormatSupport ComputeShaderFormatSupport;
 
             /// <summary>

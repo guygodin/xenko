@@ -395,7 +395,6 @@ namespace Xenko.Core.Assets
             return folder?.Path ?? ("Assets/" + PackageProfile.SharedName);
         }
 
-
         /// <summary>
         /// Deep clone this package.
         /// </summary>
@@ -557,7 +556,6 @@ namespace Xenko.Core.Assets
 
                 foreach (var asset in Assets)
                 {
-                    var assetSaved = false;
                     if (asset.IsDirty)
                     {
                         if (saveParameters.AssetFilter?.Invoke(asset) ?? true)
@@ -1348,7 +1346,8 @@ namespace Xenko.Core.Assets
                             continue;
                         }
 
-                        if (!AssetRegistry.IsAssetFileExtension(ext) || AssetRegistry.IsProjectAssetFileExtension(ext)) //project source code assets follow the csproj pipeline
+                        //project source code assets follow the csproj pipeline
+                        if (!AssetRegistry.IsAssetFileExtension(ext) || AssetRegistry.IsProjectAssetFileExtension(ext))
                         {
                             continue;
                         }
@@ -1373,8 +1372,9 @@ namespace Xenko.Core.Assets
             var project = VSProjectHelper.LoadProject(realFullPath);
             var dir = new UDirectory(realFullPath.GetFullDirectory());
 
-            var nameSpaceProp = project.AllEvaluatedProperties.FirstOrDefault(x => x.Name == "RootNamespace");
-            nameSpace = nameSpaceProp?.EvaluatedValue ?? string.Empty;
+            nameSpace = project.GetPropertyValue("RootNamespace");
+            if (nameSpace == string.Empty)
+                nameSpace = null;
 
             var result = project.Items.Where(x => (x.ItemType == "Compile" || x.ItemType == "None") && string.IsNullOrEmpty(x.GetMetadataValue("AutoGen")))
                 .Select(x => new UFile(x.EvaluatedInclude)).Where(x => AssetRegistry.IsProjectAssetFileExtension(x.GetFileExtension()))
