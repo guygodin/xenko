@@ -28,10 +28,6 @@
     <StartupObject>Xenko.Engine.NextGen.NextGenTest1</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj">
-      <Project>{0E916AB7-5A6C-4820-8AB1-AA492FE66D68}</Project>
-      <Name>Xenko.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\core\Xenko.Core.IO\Xenko.Core.IO.csproj">
       <Project>{1DE01410-22C9-489B-9796-1ADDAB1F64E5}</Project>
       <Name>Xenko.Core.IO</Name>

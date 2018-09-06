@@ -1,5 +1,6 @@
 !Package
 Id: 889FEA71-A58F-4415-98C6-92DE24737BE4
+SerializedVersion: {Assets: 0.0.4}
 Meta:
     Name: Xenko.Graphics
     Version: 1.0.0
@@ -13,6 +14,6 @@ Profiles:
     -   Name: Windows-OpenGL
         Platform: Windows
     -   Name: Windows-OpenGLES
-        Platform: Windows
+        Platform: Android
     -   Name: Windows-Vulkan
         Platform: Windows

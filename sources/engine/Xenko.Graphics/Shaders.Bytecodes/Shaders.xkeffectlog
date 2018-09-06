@@ -35,3 +35,10 @@ UsedParameters:
     EffectSourceCode.Namespace: Xenko.Graphics
     EffectSourceCode.ClassDeclaration: internal partial
     EffectSourceCode.FieldName: binaryBytecodeSRgb
+---
+!EffectCompileRequest
+EffectName: SpriteEffectExtTexture
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode

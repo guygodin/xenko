@@ -43,14 +43,14 @@ namespace Xenko.Video
 
             // Allocate the effect for copying decoder output texture to our normal render texture
             effectDecoderTextureCopy = new EffectInstance(effectSystem.LoadEffect("SpriteEffectExtTexture").WaitForResult());
-            effectDecoderTextureCopy.Parameters.Set(SpriteEffectExtTextureKeys.Gamma, 2.2f);
-            effectDecoderTextureCopy.Parameters.Set(SpriteEffectExtTextureKeys.MipLevel, 0.0f);
+            //effectDecoderTextureCopy.Parameters.Set(SpriteEffectExtTextureKeys.Gamma, 2.2f);
+            //effectDecoderTextureCopy.Parameters.Set(SpriteEffectExtTextureKeys.MipLevel, 0.0f);
             effectDecoderTextureCopy.Parameters.Set(SpriteEffectExtTextureKeys.Sampler, minMagLinearMipPointSampler);
             effectDecoderTextureCopy.UpdateEffect(graphicsDevice);
 
             // Allocate the effect for copying regular 2d textures:
             effectTexture2DCopy = new EffectInstance(effectSystem.LoadEffect("SpriteEffectExtTextureRegular").WaitForResult());
-            effectTexture2DCopy.Parameters.Set(SpriteEffectExtTextureKeys.MipLevel, 0.0f);
+            //effectTexture2DCopy.Parameters.Set(SpriteEffectExtTextureKeys.MipLevel, 0.0f);
             effectTexture2DCopy.Parameters.Set(SpriteEffectExtTextureRegularKeys.Sampler, minMagLinearMipPointSampler);
             effectTexture2DCopy.UpdateEffect(graphicsDevice);
 
@@ -125,8 +125,7 @@ namespace Xenko.Video
                         effectDecoderTextureCopy,
                         decoderOutputTexture, // Use the inputTexture as the input texture.
                         renderTargetMipMaps[0], // Set the highest mip map level as the render target.
-                        SpriteEffectExtTextureKeys.XenkoInternal_TextureExt0,
-                        SpriteEffectExtTextureKeys.MipLevel);
+                        SpriteEffectExtTextureKeys.XenkoInternal_TextureExt0);
 
             // Restore the original framebuffer configuration:
             context.CommandList.SetRenderTargetAndViewport(previousDepthStencilBuffer, previousRenderTarget); // TODO: STABILITY: This wont work if we're using MRT!
@@ -151,8 +150,7 @@ namespace Xenko.Video
                                 effectTexture2DCopy,
                                 renderTargetMipMaps[i - 1], // Use the parent mip map level as the input texture.
                                 renderTargetMipMaps[i], // Set the child mip map level as the render target.
-                                SpriteEffectExtTextureRegularKeys.TextureRegular,
-                                SpriteEffectExtTextureRegularKeys.MipLevel);
+                                SpriteEffectExtTextureRegularKeys.TextureRegular);
                 }
 
                 // Restore the original framebuffer configuration:
@@ -179,13 +177,13 @@ namespace Xenko.Video
         }
 
         private static void CopyTexture(GraphicsContext graphicsContext, EffectInstance effectInstance, Texture input, Texture output,
-                                 ObjectParameterKey<Texture> inputTextureKey, ValueParameterKey<float> mipLevelKey)
+                                 ObjectParameterKey<Texture> inputTextureKey)
         {
             // Set the "input" texture as the texture that we will copy to "output":
             effectInstance.Parameters.Set(inputTextureKey, input); // TODO: STABILITY: Supply the parent texture instead? I mean here we're using SampleLOD in the shader because texture views are basically being ignored during sampling on OpenGL/ES.
 
             // Set the mipmap level of the input texture we want to sample:
-            effectInstance.Parameters.Set(mipLevelKey, input.MipLevel);  // TODO: STABILITY: Manually pass the mip level?
+            //effectInstance.Parameters.Set(mipLevelKey, input.MipLevel);  // TODO: STABILITY: Manually pass the mip level?
 
             // Set the "output" texture as the render target (the copy destination):
             graphicsContext.CommandList.SetRenderTargetAndViewport(null, output);
