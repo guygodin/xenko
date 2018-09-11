@@ -663,6 +663,12 @@ namespace Xenko.UI
         public UIElementCollection VisualChildrenCollection { get; }
 
         /// <summary>
+        /// Gets or sets the object that contains data about the UIElement.
+        /// </summary>
+        [DataMemberIgnore]
+        public object Tag { get; set; }
+
+        /// <summary>
         /// Invalidates the arrange state (layout) for the element.
         /// </summary>
         protected internal void InvalidateArrange()
