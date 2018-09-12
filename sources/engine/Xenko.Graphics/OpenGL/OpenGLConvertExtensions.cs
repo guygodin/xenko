@@ -4,11 +4,11 @@
 using System;
 using OpenTK.Graphics;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using ES30 = OpenTK.Graphics.ES30;
-using PixelFormatGl = OpenTK.Graphics.ES30.PixelFormat;
-using PixelInternalFormat = OpenTK.Graphics.ES30.TextureComponentCount;
-using PrimitiveTypeGl = OpenTK.Graphics.ES30.PrimitiveType;
+using OpenTK.Graphics.ES31;
+using ES30 = OpenTK.Graphics.ES31;
+using PixelFormatGl = OpenTK.Graphics.ES31.PixelFormat;
+using PixelInternalFormat = OpenTK.Graphics.ES31.TextureComponentCount;
+using PrimitiveTypeGl = OpenTK.Graphics.ES31.PrimitiveType;
 #else
 using OpenTK.Graphics.OpenGL;
 using PixelFormatGl = OpenTK.Graphics.OpenGL.PixelFormat;
@@ -283,6 +283,9 @@ namespace Xenko.Graphics
                         break;
                     case PixelFormat.ETC2_RGBA_SRgb:
                         inputFormat = PixelFormat.ETC2_RGBA;
+                        break;
+                    case PixelFormat.ASTC_RGBA_4X4_SRgb:
+                        inputFormat = PixelFormat.ASTC_RGBA_4X4;
                         break;
                     case PixelFormat.R8G8B8A8_UNorm_SRgb:
                         inputFormat = PixelFormat.R8G8B8A8_UNorm;
@@ -645,6 +648,20 @@ namespace Xenko.Graphics
                 case PixelFormat.ETC2_RGBA_SRgb:
                     internalFormat = (PixelInternalFormat)CompressedInternalFormat.CompressedSrgb8Alpha8Etc2Eac;
                     format = (PixelFormatGl)CompressedInternalFormat.CompressedSrgb8Alpha8Etc2Eac;
+                    compressed = true;
+                    pixelSize = 2;
+                    type = PixelType.UnsignedByte;
+                    break;
+                case PixelFormat.ASTC_RGBA_4X4:
+                    internalFormat = (PixelInternalFormat)All.CompressedRgbaAstc4X4Khr;
+                    format = (PixelFormatGl)All.CompressedRgbaAstc4X4Khr;
+                    compressed = true;
+                    pixelSize = 2;
+                    type = PixelType.UnsignedByte;
+                    break;
+                case PixelFormat.ASTC_RGBA_4X4_SRgb:
+                    internalFormat = (PixelInternalFormat)All.CompressedSrgb8Alpha8Astc4X4Khr;
+                    format = (PixelFormatGl)All.CompressedSrgb8Alpha8Astc4X4Khr;
                     compressed = true;
                     pixelSize = 2;
                     type = PixelType.UnsignedByte;

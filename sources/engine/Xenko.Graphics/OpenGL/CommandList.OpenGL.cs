@@ -12,11 +12,11 @@ using Xenko.Shaders;
 using Color4 = Xenko.Core.Mathematics.Color4;
 using static Xenko.Graphics.GraphicsDevice;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using PixelFormatGl = OpenTK.Graphics.ES30.PixelFormat;
-using PrimitiveTypeGl = OpenTK.Graphics.ES30.PrimitiveType;
-using DebugSourceExternal = OpenTK.Graphics.ES30.All;
-using QueryCounterTarget = OpenTK.Graphics.ES30.All;
+using OpenTK.Graphics.ES31;
+using PixelFormatGl = OpenTK.Graphics.ES31.PixelFormat;
+using PrimitiveTypeGl = OpenTK.Graphics.ES31.PrimitiveType;
+using DebugSourceExternal = OpenTK.Graphics.ES31.All;
+using QueryCounterTarget = OpenTK.Graphics.ES31.All;
 #else
 using OpenTK.Graphics.OpenGL;
 using PrimitiveTypeGl = OpenTK.Graphics.OpenGL.PrimitiveType;

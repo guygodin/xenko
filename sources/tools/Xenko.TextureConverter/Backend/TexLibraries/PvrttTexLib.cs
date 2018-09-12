@@ -776,6 +776,8 @@ namespace Xenko.TextureConverter.TexLibraries
                 case Xenko.Graphics.PixelFormat.EAC_R11_Signed:
                 case Xenko.Graphics.PixelFormat.EAC_RG11_Unsigned:
                 case Xenko.Graphics.PixelFormat.EAC_RG11_Signed:
+                case Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4:
+                case Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4_SRgb:
                     return true;
                 default:
                     return false;
@@ -819,13 +821,14 @@ namespace Xenko.TextureConverter.TexLibraries
                 case Xenko.Graphics.PixelFormat.ETC2_RGB_A1:
                     return 24;
                 case Xenko.Graphics.PixelFormat.EAC_R11_Unsigned:
-                    return 25;
                 case Xenko.Graphics.PixelFormat.EAC_R11_Signed:
-                    return 26;
+                    return 25;
                 case Xenko.Graphics.PixelFormat.EAC_RG11_Unsigned:
-                    return 27;
                 case Xenko.Graphics.PixelFormat.EAC_RG11_Signed:
-                    return 28;
+                    return 26;
+                case Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4:
+                case Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4_SRgb:
+                    return 27;
                 case Xenko.Graphics.PixelFormat.R32G32B32A32_Float:
                 case Xenko.Graphics.PixelFormat.R32G32B32_Float:
                 case Xenko.Graphics.PixelFormat.R32G32B32A32_UInt:

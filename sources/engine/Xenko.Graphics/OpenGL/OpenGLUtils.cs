@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using OpenTK.Graphics;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
+using OpenTK.Graphics.ES31;
 #else
 using OpenTK.Graphics.OpenGL;
 #endif

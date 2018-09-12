@@ -561,5 +561,8 @@ namespace Xenko.Graphics
         ATC_RGB = unchecked((int)1120),
         ATC_RGBA_Explicit = unchecked((int)1121),
         ATC_RGBA_Interpolated = unchecked((int)1122),
+
+        ASTC_RGBA_4X4 = unchecked((int)1130),
+        ASTC_RGBA_4X4_SRgb = unchecked((int)1131),
     }
 }

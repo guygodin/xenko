@@ -8,8 +8,8 @@ using Xenko.Core.Storage;
 using Xenko.Shaders;
 using Xenko.Core.Extensions;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using PrimitiveTypeGl = OpenTK.Graphics.ES30.PrimitiveType;
+using OpenTK.Graphics.ES31;
+using PrimitiveTypeGl = OpenTK.Graphics.ES31.PrimitiveType;
 #else
 using OpenTK.Graphics.OpenGL;
 using PrimitiveTypeGl = OpenTK.Graphics.OpenGL.PrimitiveType;

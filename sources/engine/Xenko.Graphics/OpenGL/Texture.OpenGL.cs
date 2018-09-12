@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 using Xenko.Core;
 using Xenko.Core.Mathematics;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using RenderbufferStorage = OpenTK.Graphics.ES30.RenderbufferInternalFormat;
-using PixelFormatGl = OpenTK.Graphics.ES30.PixelFormat;
-using PixelInternalFormat = OpenTK.Graphics.ES30.TextureComponentCount;
+using OpenTK.Graphics.ES31;
+using RenderbufferStorage = OpenTK.Graphics.ES31.RenderbufferInternalFormat;
+using PixelFormatGl = OpenTK.Graphics.ES31.PixelFormat;
+using PixelInternalFormat = OpenTK.Graphics.ES31.TextureComponentCount;
 #else
 using OpenTK.Graphics.OpenGL;
 using PixelFormatGl = OpenTK.Graphics.OpenGL.PixelFormat;
@@ -17,10 +17,10 @@ using PixelFormatGl = OpenTK.Graphics.OpenGL.PixelFormat;
 
 // TODO: remove these when OpenTK API is consistent between OpenGL, mobile OpenGL ES and desktop OpenGL ES
 #if XENKO_GRAPHICS_API_OPENGLES
-using CompressedInternalFormat2D = OpenTK.Graphics.ES30.CompressedInternalFormat;
-using CompressedInternalFormat3D = OpenTK.Graphics.ES30.CompressedInternalFormat;
-using TextureComponentCount2D = OpenTK.Graphics.ES30.TextureComponentCount;
-using TextureComponentCount3D = OpenTK.Graphics.ES30.TextureComponentCount;
+using CompressedInternalFormat2D = OpenTK.Graphics.ES31.CompressedInternalFormat;
+using CompressedInternalFormat3D = OpenTK.Graphics.ES31.CompressedInternalFormat;
+using TextureComponentCount2D = OpenTK.Graphics.ES31.TextureComponentCount;
+using TextureComponentCount3D = OpenTK.Graphics.ES31.TextureComponentCount;
 #else
 using CompressedInternalFormat2D = OpenTK.Graphics.OpenGL.PixelInternalFormat;
 using CompressedInternalFormat3D = OpenTK.Graphics.OpenGL.PixelInternalFormat;
@@ -424,6 +424,65 @@ namespace Xenko.Graphics
 
                 GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);
             }
+        }
+
+        internal Texture InitializeFrom(int textureId, TextureDescription description)
+        {
+            textureDescription = description;
+            textureViewDescription = new TextureViewDescription();
+            IsBlockCompressed = description.Format.IsCompressed();
+            RowStride = ComputeRowPitch(0);
+            mipmapDescriptions = Image.CalculateMipMapDescription(description);
+            SizeInBytes = ArraySize * mipmapDescriptions?.Sum(desc => desc.MipmapSize) ?? 0;
+
+            ViewWidth = Math.Max(1, Width >> MipLevel);
+            ViewHeight = Math.Max(1, Height >> MipLevel);
+            ViewDepth = Math.Max(1, Depth >> MipLevel);
+            if (ViewFormat == PixelFormat.None)
+            {
+                textureViewDescription.Format = description.Format;
+            }
+            if (ViewFlags == TextureFlags.None)
+            {
+                textureViewDescription.Flags = description.Flags;
+            }
+
+            // Check that the view is compatible with the parent texture
+            var filterViewFlags = (TextureFlags)((int)ViewFlags & (~DepthStencilReadOnlyFlags));
+            if ((Flags & filterViewFlags) != filterViewFlags)
+            {
+                throw new NotSupportedException("Cannot create a texture view with flags [{0}] from the parent texture [{1}] as the parent texture must include all flags defined by the view".ToFormat(ViewFlags, Flags));
+            }
+
+            if (IsMultisample)
+            {
+                var maxCount = GraphicsDevice.Features[Format].MultisampleCountMax;
+                if (maxCount < MultisampleCount)
+                    throw new NotSupportedException($"Cannot create a texture with format {Format} and multisample level {MultisampleCount}. Maximum supported level is {maxCount}");
+            }
+
+            TextureId = textureId;
+            TextureTarget = GetTextureTarget(Dimension);
+
+            bool compressed;
+            OpenGLConvertExtensions.ConvertPixelFormat(GraphicsDevice, ref textureDescription.Format, out TextureInternalFormat, out TextureFormat, out TextureType, out TexturePixelSize, out compressed);
+
+            DepthPitch = Description.Width * Description.Height * TexturePixelSize;
+            RowPitch = Description.Width * TexturePixelSize;
+
+            IsDepthBuffer = ((Description.Flags & TextureFlags.DepthStencil) != 0);
+            if (IsDepthBuffer)
+            {
+                HasStencil = InternalHasStencil(Format);
+            }
+            else
+            {
+                HasStencil = false;
+            }
+
+            TextureTotalSize = ComputeBufferTotalSize();
+
+            return this;
         }
 
         /// <inheritdoc/>

@@ -4,8 +4,8 @@
 using System;
 using Xenko.Core.Mathematics;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using TextureCompareMode = OpenTK.Graphics.ES30.All;
+using OpenTK.Graphics.ES31;
+using TextureCompareMode = OpenTK.Graphics.ES31.All;
 #else
 using OpenTK.Graphics.OpenGL;
 #endif

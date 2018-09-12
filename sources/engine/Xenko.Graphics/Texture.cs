@@ -1100,6 +1100,17 @@ namespace Xenko.Graphics
         }
 #endif
 
+#if XENKO_GRAPHICS_API_OPENGLES
+        public static Texture New2D(GraphicsDevice graphicsDevice, int textureId, TextureDescription description)
+        {
+            if (graphicsDevice == null)
+            {
+                throw new ArgumentNullException("graphicsDevice");
+            }
+            return new Texture(graphicsDevice).InitializeFrom(textureId, description);
+        }
+#endif
+
         /// <summary>
         /// Saves this texture to a stream with a specified format.
         /// </summary>

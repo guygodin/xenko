@@ -22,9 +22,9 @@ using OpenTK.Platform.Android;
 using OpenTK.Platform.iPhoneOS;
 #endif
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using DrawBuffersEnum = OpenTK.Graphics.ES30.DrawBufferMode;
-using FramebufferAttachmentObjectType = OpenTK.Graphics.ES30.All;
+using OpenTK.Graphics.ES31;
+using DrawBuffersEnum = OpenTK.Graphics.ES31.DrawBufferMode;
+using FramebufferAttachmentObjectType = OpenTK.Graphics.ES31.All;
 #else
 using OpenTK.Graphics.OpenGL;
 using TextureTarget2d = OpenTK.Graphics.OpenGL.TextureTarget;

@@ -7,7 +7,7 @@ using Xenko.Graphics.OpenGL;
 using Android.Content;
 using OpenTK.Graphics;
 using OpenTK.Platform.Android;
-using OpenTK.Graphics.ES30;
+using OpenTK.Graphics.ES31;
 using Xenko.Data;
 using PixelFormat = Xenko.Graphics.PixelFormat;
 

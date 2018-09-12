@@ -228,12 +228,15 @@ namespace Xenko.Assets.Textures
                                         outputFormat = alphaMode == AlphaFormat.None && !parameters.IsSRgb ? PixelFormat.ETC1 : parameters.IsSRgb ? PixelFormat.R8G8B8A8_UNorm_SRgb : PixelFormat.R8G8B8A8_UNorm;
                                         break;
                                     case GraphicsProfile.Level_10_0:
-                                    case GraphicsProfile.Level_10_1:
+                                    case GraphicsProfile.Level_10_1:                                    
+                                        // GLES3.0 starting from Level_10_0, this profile enables ETC2 compression on Android
+                                        outputFormat = alphaMode == AlphaFormat.None && !parameters.IsSRgb ? PixelFormat.ETC1 : parameters.IsSRgb ? PixelFormat.ETC2_RGBA_SRgb : PixelFormat.ETC2_RGBA;
+                                        break;
                                     case GraphicsProfile.Level_11_0:
                                     case GraphicsProfile.Level_11_1:
                                     case GraphicsProfile.Level_11_2:
-                                        // GLES3.0 starting from Level_10_0, this profile enables ETC2 compression on Android
-                                        outputFormat = alphaMode == AlphaFormat.None && !parameters.IsSRgb ? PixelFormat.ETC1 : parameters.IsSRgb ? PixelFormat.ETC2_RGBA_SRgb : PixelFormat.ETC2_RGBA;
+                                        // GLES3.1 starting from Level_11_0, this profile enables ASTC compression on Android
+                                        outputFormat = parameters.IsSRgb ? PixelFormat.ASTC_RGBA_4X4_SRgb : PixelFormat.ASTC_RGBA_4X4;
                                         break;
                                     default:
                                         throw new ArgumentOutOfRangeException("GraphicsProfile");
@@ -357,11 +360,14 @@ namespace Xenko.Assets.Textures
                                                 break;
                                             case GraphicsProfile.Level_10_0:
                                             case GraphicsProfile.Level_10_1:
+                                                // GLES3.0 starting from Level_10_0, this profile enables ETC2 compression on Android
+                                                outputFormat = alphaMode == AlphaFormat.None ? PixelFormat.ETC1 : PixelFormat.ETC2_RGBA;
+                                                break;
                                             case GraphicsProfile.Level_11_0:
                                             case GraphicsProfile.Level_11_1:
                                             case GraphicsProfile.Level_11_2:
-                                                // GLES3.0 starting from Level_10_0, this profile enables ETC2 compression on Android
-                                                outputFormat = alphaMode == AlphaFormat.None ? PixelFormat.ETC1 : PixelFormat.ETC2_RGBA;
+                                                // GLES3.1 starting from Level_11_0, this profile enables ASTC compression on Android
+                                                outputFormat = PixelFormat.ASTC_RGBA_4X4;
                                                 break;
                                             default:
                                                 throw new ArgumentOutOfRangeException("GraphicsProfile");

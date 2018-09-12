@@ -150,6 +150,8 @@ namespace Xenko.Graphics
 
                 case PixelFormat.ETC2_RGBA:
                 case PixelFormat.ETC2_RGBA_SRgb:
+                case PixelFormat.ASTC_RGBA_4X4:
+                case PixelFormat.ASTC_RGBA_4X4_SRgb:
                     return 8;
 
                 case PixelFormat.ETC2_RGB_A1:
@@ -174,7 +176,8 @@ namespace Xenko.Graphics
             return ((int)(format) >= 1 && (int)(format) <= 115) // DirectX formats
                 || ((int)(format) >= 1024 && (int)(format) <= 1033) // PVRTC formats
                 || ((int)(format) >= 1088 && (int)(format) <= 1097) // ETC formats
-                || ((int)(format) >= 1120 && (int)(format) <= 1122); // ATITC formats
+                || ((int)(format) >= 1120 && (int)(format) <= 1122) // ATITC formats
+                || ((int)(format) >= 1130 && (int)(format) <= 1131); // ASTC formats
         }
 
         /// <summary>
@@ -341,6 +344,8 @@ namespace Xenko.Graphics
                 case PixelFormat.ATC_RGB:
                 case PixelFormat.ATC_RGBA_Explicit:
                 case PixelFormat.ATC_RGBA_Interpolated:
+                case PixelFormat.ASTC_RGBA_4X4:
+                case PixelFormat.ASTC_RGBA_4X4_SRgb:
                     return Math.Max(1, (height + 3) / 4);
 
                 default:
@@ -652,6 +657,8 @@ namespace Xenko.Graphics
                     PixelFormat.ATC_RGB,
                     PixelFormat.ATC_RGBA_Explicit,
                     PixelFormat.ATC_RGBA_Interpolated,
+                    PixelFormat.ASTC_RGBA_4X4,
+                    PixelFormat.ASTC_RGBA_4X4_SRgb,
                 }, compressedFormats);
 
             // Init srgb formats
@@ -670,6 +677,7 @@ namespace Xenko.Graphics
                     PixelFormat.PVRTC_4bpp_RGBA_SRgb,
                     PixelFormat.ETC2_RGBA_SRgb,
                     PixelFormat.ETC2_RGB_SRgb,
+                    PixelFormat.ASTC_RGBA_4X4_SRgb,
                 }, srgbFormats);
 
             // Init srgb formats
@@ -751,6 +759,8 @@ namespace Xenko.Graphics
                 { PixelFormat.ETC2_RGBA, PixelFormat.ETC2_RGBA_SRgb },
                 { PixelFormat.ETC2_RGB_SRgb, PixelFormat.ETC2_RGB },
                 { PixelFormat.ETC2_RGB, PixelFormat.ETC2_RGB_SRgb },
+                { PixelFormat.ASTC_RGBA_4X4_SRgb, PixelFormat.ASTC_RGBA_4X4 },
+                { PixelFormat.ASTC_RGBA_4X4, PixelFormat.ASTC_RGBA_4X4_SRgb },
             };
         }
 

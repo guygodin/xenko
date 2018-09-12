@@ -15,7 +15,7 @@ using Xenko.Core.Extensions;
 using Xenko.Core.Serialization;
 using Xenko.Shaders;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
+using OpenTK.Graphics.ES31;
 #else
 using OpenTK.Graphics.OpenGL;
 #endif

@@ -4,9 +4,9 @@
 #if XENKO_GRAPHICS_API_OPENGL 
 
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
-using PixelFormatGl = OpenTK.Graphics.ES30.PixelFormat;
-using PixelInternalFormat = OpenTK.Graphics.ES30.TextureComponentCount;
+using OpenTK.Graphics.ES31;
+using PixelFormatGl = OpenTK.Graphics.ES31.PixelFormat;
+using PixelInternalFormat = OpenTK.Graphics.ES31.TextureComponentCount;
 #else
 using OpenTK.Graphics.OpenGL;
 using PixelFormatGl = OpenTK.Graphics.OpenGL.PixelFormat;
@@ -33,6 +33,12 @@ namespace Xenko.Graphics
         public int GetTextureId()
         {
             return TextureId;
+        }
+
+        // GG: This is needed when creating TextureSwapChains with the Oculus Mobile SDK
+        public int GetInternalPixelFormat()
+        {
+            return (int)TextureInternalFormat;
         }
     }
 }

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using Xenko.Graphics.OpenGL;
 using Xenko.Core.Diagnostics;
 #if XENKO_GRAPHICS_API_OPENGLES
-using OpenTK.Graphics.ES30;
+using OpenTK.Graphics.ES31;
 #else
 using OpenTK.Graphics.OpenGL;
 #endif
