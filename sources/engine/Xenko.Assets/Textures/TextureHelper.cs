@@ -228,7 +228,7 @@ namespace Xenko.Assets.Textures
                                         outputFormat = alphaMode == AlphaFormat.None && !parameters.IsSRgb ? PixelFormat.ETC1 : parameters.IsSRgb ? PixelFormat.R8G8B8A8_UNorm_SRgb : PixelFormat.R8G8B8A8_UNorm;
                                         break;
                                     case GraphicsProfile.Level_10_0:
-                                    case GraphicsProfile.Level_10_1:                                    
+                                    case GraphicsProfile.Level_10_1:
                                         // GLES3.0 starting from Level_10_0, this profile enables ETC2 compression on Android
                                         outputFormat = alphaMode == AlphaFormat.None && !parameters.IsSRgb ? PixelFormat.ETC1 : parameters.IsSRgb ? PixelFormat.ETC2_RGBA_SRgb : PixelFormat.ETC2_RGBA;
                                         break;
