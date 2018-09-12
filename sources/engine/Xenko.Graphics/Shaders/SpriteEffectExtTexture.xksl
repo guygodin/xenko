@@ -6,6 +6,8 @@ shader SpriteEffectExtTexture : ShaderBase
     [Color]
     stage float4 Color = float4(1,1,1,1);
 
+	stage bool HasSRgb = true;
+
     stage Texture2D XenkoInternal_TextureExt0;    // DO NOT RENAME THIS VARIABLE! The ShaderCompiler specifically looks for "TextureExt0".
 
     stage SamplerState Sampler;
@@ -26,6 +28,10 @@ shader SpriteEffectExtTexture : ShaderBase
     stage float4 Shading()
     {
         float4 textureColor = XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord);
-		return ColorUtility.ToLinear(textureColor) * Color;
+		if (HasSRgb)
+		{
+			textureColor = ColorUtility.ToLinear(textureColor);
+		}
+		return textureColor * Color;
     }
 };
