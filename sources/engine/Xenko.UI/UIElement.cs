@@ -563,6 +563,9 @@ namespace Xenko.UI
             }
         }
 
+        [DataMemberIgnore]
+        public bool IsDirty { get; set; }
+
         /// <summary>
         /// Gets the size that this element computed during the measure pass of the layout process.
         /// </summary>
