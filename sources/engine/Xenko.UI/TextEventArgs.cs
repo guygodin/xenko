@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using Xenko.Input;
@@ -9,7 +9,7 @@ namespace Xenko.UI
     /// <summary>
     /// The arguments associated with a <see cref="TextInputEvent"/>
     /// </summary>
-    internal class TextEventArgs : RoutedEventArgs
+    public class TextEventArgs : RoutedEventArgs
     {
         /// <summary>
         /// The text that was entered

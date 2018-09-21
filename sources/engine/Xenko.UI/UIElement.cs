@@ -803,7 +803,8 @@ namespace Xenko.UI
         /// <summary>
         /// The list of the children of the element that can be hit by the user.
         /// </summary>
-        protected internal virtual FastCollection<UIElement> HitableChildren => VisualChildrenCollection;
+        [DataMemberIgnore]
+        public virtual FastCollection<UIElement> HitableChildren => VisualChildrenCollection;
 
         /// <summary>
         /// The opacity used to render element.
@@ -1137,7 +1138,7 @@ namespace Xenko.UI
         /// <param name="ray">The ray in world space coordinate</param>
         /// <param name="intersectionPoint">The intersection point in world space coordinate</param>
         /// <returns><value>true</value> if the two elements intersects, <value>false</value> otherwise</returns>
-        protected internal virtual bool Intersects(ref Ray ray, out Vector3 intersectionPoint)
+        public virtual bool Intersects(ref Ray ray, out Vector3 intersectionPoint)
         {
             // does ray intersect element Oxy face?
             var intersects = CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref RenderSizeInternal, 2, out intersectionPoint);

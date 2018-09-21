@@ -793,6 +793,6 @@ namespace Xenko.UI.Panels
             return child.RenderSize[dimension] + child.Margin[dimension] + child.Margin[dimension + 3];
         }
 
-        protected internal override FastCollection<UIElement> HitableChildren => visibleChildren;
+        public override FastCollection<UIElement> HitableChildren => visibleChildren;
     }
 }

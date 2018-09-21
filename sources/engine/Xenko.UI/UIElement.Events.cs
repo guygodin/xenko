@@ -86,7 +86,7 @@ namespace Xenko.UI
         public MouseOverState MouseOverState
         {
             get { return mouseOverState; }
-            internal set
+            set
             {
                 var oldValue = mouseOverState;
                 if (oldValue == value)
@@ -346,7 +346,7 @@ namespace Xenko.UI
 
         #region Internal Event Raiser
 
-        internal void RaiseTouchDownEvent(TouchEventArgs touchArgs)
+        public void RaiseTouchDownEvent(TouchEventArgs touchArgs)
         {
             touchArgs.RoutedEvent = PreviewTouchDownEvent;
             RaiseEvent(touchArgs);
@@ -355,19 +355,19 @@ namespace Xenko.UI
             RaiseEvent(touchArgs);
         }
 
-        internal void RaiseTouchEnterEvent(TouchEventArgs touchArgs)
+        public void RaiseTouchEnterEvent(TouchEventArgs touchArgs)
         {
             touchArgs.RoutedEvent = TouchEnterEvent;
             RaiseEvent(touchArgs);
         }
 
-        internal void RaiseTouchLeaveEvent(TouchEventArgs touchArgs)
+        public void RaiseTouchLeaveEvent(TouchEventArgs touchArgs)
         {
             touchArgs.RoutedEvent = TouchLeaveEvent;
             RaiseEvent(touchArgs);
         }
 
-        internal void RaiseTouchMoveEvent(TouchEventArgs touchArgs)
+        public void RaiseTouchMoveEvent(TouchEventArgs touchArgs)
         {
             touchArgs.RoutedEvent = PreviewTouchMoveEvent;
             RaiseEvent(touchArgs);
@@ -376,7 +376,7 @@ namespace Xenko.UI
             RaiseEvent(touchArgs);
         }
 
-        internal void RaiseTouchUpEvent(TouchEventArgs touchArgs)
+        public void RaiseTouchUpEvent(TouchEventArgs touchArgs)
         {
             touchArgs.RoutedEvent = PreviewTouchUpEvent;
             RaiseEvent(touchArgs);
@@ -385,25 +385,25 @@ namespace Xenko.UI
             RaiseEvent(touchArgs);
         }
 
-        internal void RaiseKeyPressedEvent(KeyEventArgs keyEventArgs)
+        public void RaiseKeyPressedEvent(KeyEventArgs keyEventArgs)
         {
             keyEventArgs.RoutedEvent = KeyPressedEvent;
             RaiseEvent(keyEventArgs);
         }
 
-        internal void RaiseKeyDownEvent(KeyEventArgs keyEventArgs)
+        public void RaiseKeyDownEvent(KeyEventArgs keyEventArgs)
         {
             keyEventArgs.RoutedEvent = KeyDownEvent;
             RaiseEvent(keyEventArgs);
         }
 
-        internal void RaiseKeyReleasedEvent(KeyEventArgs keyEventArgs)
+        public void RaiseKeyReleasedEvent(KeyEventArgs keyEventArgs)
         {
             keyEventArgs.RoutedEvent = KeyReleasedEvent;
             RaiseEvent(keyEventArgs);
         }
 
-        internal void RaiseTextInputEvent(TextEventArgs textInputEventArgs)
+        public void RaiseTextInputEvent(TextEventArgs textInputEventArgs)
         {
             textInputEventArgs.RoutedEvent = TextInputEvent;
             RaiseEvent(textInputEventArgs);
