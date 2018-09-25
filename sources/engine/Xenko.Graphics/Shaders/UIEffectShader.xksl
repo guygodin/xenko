@@ -15,10 +15,6 @@ shader UIEffectShader<bool TSRgb> : ShaderBase, Texturing
     stage override void VSMain()
     {
         streams.ShadingPosition = streams.Position;
-        if (TSRgb)
-        {
-            streams.Color = ColorUtility.ToLinear(streams.Color);
-        }
     }
         
     // Shading of the sprite
@@ -29,9 +25,14 @@ shader UIEffectShader<bool TSRgb> : ShaderBase, Texturing
 
     stage float4 Shading()
     {
-        float4 sampledColor = Texture0.Sample(Sampler, streams.TexCoord);
+		float4 sampledColor = Texture0.Sample(Sampler, streams.TexCoord);
+		if (TSRgb)
+        {
+			sampledColor = ColorUtility.ToLinear(sampledColor);
+            streams.Color = ColorUtility.ToLinear(streams.Color);
+        }
+        
         float4 swizzledColor = streams.Swizzle == 0? sampledColor: sampledColor.rrrr;
-
         return swizzledColor * streams.Color;
     }
 };

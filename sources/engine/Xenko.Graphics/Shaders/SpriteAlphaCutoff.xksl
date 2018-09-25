@@ -10,25 +10,20 @@ shader SpriteAlphaCutoff<bool TSRgb> : SpriteBase
     stage stream float4 ColorAdd : COLOR1;
     stage stream float Swizzle : BATCH_SWIZZLE;
 
-    // -------------------------------------
-    // VertexShader
-    // -------------------------------------
-    stage override void VSMain()
-    {
-        base.VSMain();
-        if (TSRgb)
-        {
-            streams.Color = ColorUtility.ToLinear(streams.Color);
-        }
-    }
-
     // Shading of the sprite
     stage override float4 Shading()
     {
+		float4 baseColor = base.Shading();
+		if (TSRgb)
+        {
+			baseColor = ColorUtility.ToLinear(baseColor);
+            streams.Color = ColorUtility.ToLinear(streams.Color);			
+        }
+
         // Because we use float input values we should allow certain threshold - lets fix it at 0.1
 
         // Alpha grayscale
-        float4 swizzleColor = (abs(streams.Swizzle - 1) <= 0.1) ? base.Shading().rrrr : base.Shading();
+        float4 swizzleColor = (abs(streams.Swizzle - 1) <= 0.1) ? baseColor.rrrr : baseColor;
 
         // Normal maps
         if (abs(streams.Swizzle - 2) <= 0.1)
