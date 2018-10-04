@@ -6,6 +6,7 @@ Design:
     Resolution: {X: 128.0, Y: 72.0, Z: 100.0}
 PublicUIElements:
     1dfd7e9f-ab5a-4849-b6e3-1c50b0974f5f: ToggleButton
+    51ba6738-85d2-4b7b-937c-b55de3814a1e: CheckBox
     4266a97c-9ff2-45fb-8afd-5bd88a04c101: ModalElement
     606486b0-61b1-498a-beed-5425893fc384: Border
     6a778e64-1d79-44c8-b209-be1779349abb: TextBlock
@@ -27,6 +28,7 @@ Hierarchy:
         - !EditText ref!! eef44bd6-bd2d-4abe-8335-0971d5d83b10
         - !Slider ref!! fcd540ef-6f9e-4cab-b24d-ba1533b0fdb9
         - !ToggleButton ref!! 1dfd7e9f-ab5a-4849-b6e3-1c50b0974f5f
+        - !CheckBox ref!! 51ba6738-85d2-4b7b-937c-b55de3814a1e
         - !Border ref!! 606486b0-61b1-498a-beed-5425893fc384
         - !ContentDecorator ref!! a35da784-9d42-4fe0-bd28-3eb547bc2812
         - !ImageElement ref!! d44fc541-dd44-4a50-897d-c406966fac51
@@ -59,6 +61,28 @@ Hierarchy:
                 IndeterminateImage: !SpriteFromSheet
                     Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
                     CurrentFrame: 12
+        -   UIElement: !CheckBox
+                Id: 51ba6738-85d2-4b7b-937c-b55de3814a1e
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                DrawLayerNumber: 2
+                CanBeHitByUser: true
+                Margin: {}
+                Name: CheckBox
+                Padding: {Left: 32.0, Top: 5.0, Right: 10.0, Bottom: 7.0}
+                Content: !TextBlock ref!! d64d94fa-947e-4329-b286-edad2874bcd1
+                UncheckedImage: !SpriteFromSheet
+                    CurrentFrame: 0
+                UncheckedMouseOverImage: !SpriteFromSheet
+                    CurrentFrame: 1
+                UncheckedMouseDownImage: !SpriteFromSheet
+                    CurrentFrame: 2
+                CheckedImage: !SpriteFromSheet
+                    CurrentFrame: 3
+                CheckedMouseOverImage: !SpriteFromSheet
+                    CurrentFrame: 4
+                CheckedMouseDownImage: !SpriteFromSheet
+                    CurrentFrame: 5
         -   UIElement: !ModalElement
                 Id: 4266a97c-9ff2-45fb-8afd-5bd88a04c101
                 DependencyProperties: {}
@@ -164,6 +188,17 @@ Hierarchy:
                 DependencyProperties: {}
                 BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
                 HorizontalAlignment: Center
+                VerticalAlignment: Center
+                Margin: {}
+                Text: Click me!
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:XenkoDefaultFont
+                TextSize: 20.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+        -   UIElement: !TextBlock
+                Id: d64d94fa-947e-4329-b286-edad2874bcd1
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                HorizontalAlignment: Left
                 VerticalAlignment: Center
                 Margin: {}
                 Text: Click me!

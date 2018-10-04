@@ -53,8 +53,15 @@ namespace Xenko.TextureConverter.PvrttWrapper
 		eETCFastPerceptual,
 		eETCSlow,
 		eETCSlowPerceptual,
-		eNumETCModes
-	};
+		eNumETCModes,
+
+        eASTCVeryFast = 0,
+        eASTCFast,
+        eASTCMedium,
+        eASTCThorough,
+        eASTCExhaustive,
+        eNumASTCModes
+    };
 
     internal enum EResizeMode
     {
@@ -122,6 +129,7 @@ namespace Xenko.TextureConverter.PvrttWrapper
         ePVRTPF_ETC2_RGB_A1,
         ePVRTPF_EAC_R11,
         ePVRTPF_EAC_RG11,
+        ePVRTPF_ASTC_4X4,
 
         //Invalid value
         ePVRTPF_NumCompressedPFs
@@ -567,11 +575,9 @@ namespace Xenko.TextureConverter.PvrttWrapper
                 case 25:
                     return Xenko.Graphics.PixelFormat.EAC_R11_Unsigned;
                 case 26:
-                    return Xenko.Graphics.PixelFormat.EAC_R11_Signed;
-                case 27:
                     return Xenko.Graphics.PixelFormat.EAC_RG11_Unsigned;
-                case 28:
-                    return Xenko.Graphics.PixelFormat.EAC_RG11_Signed;
+                case 27:
+                    return Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4;
                 /*default:
                     throw new TexLibraryException("Unknown format by PowerVC Texture Tool.");*/
             }

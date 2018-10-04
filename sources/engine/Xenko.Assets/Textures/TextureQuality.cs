@@ -15,5 +15,6 @@ namespace Xenko.Assets.Textures
         Normal,
         High,
         Best,
+        Exhaustive, // Used with ASTC
     }
 }

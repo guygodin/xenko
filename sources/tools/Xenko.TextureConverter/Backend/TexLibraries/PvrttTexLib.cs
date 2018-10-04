@@ -890,6 +890,10 @@ namespace Xenko.TextureConverter.TexLibraries
                 case Xenko.Graphics.PixelFormat.R8G8B8A8_SInt:
                     return EPVRTVariableType.ePVRTVarTypeSignedByte;
 
+                case PixelFormat.ASTC_RGBA_4X4:
+                case PixelFormat.ASTC_RGBA_4X4_SRgb:
+                    return EPVRTVariableType.ePVRTVarTypeFloat;
+
                 default:
                     return EPVRTVariableType.ePVRTVarTypeUnsignedByteNorm;
             }
@@ -942,7 +946,31 @@ namespace Xenko.TextureConverter.TexLibraries
                         return Xenko.Graphics.PixelFormat.R8G8B8A8_SNorm;
                     case EPVRTVariableType.ePVRTVarTypeSignedByte:
                         return Xenko.Graphics.PixelFormat.R8G8B8A8_SInt;
+                }                
+            }
+            else if (format == Xenko.Graphics.PixelFormat.EAC_R11_Unsigned)
+            {
+                switch (header.GetChannelType())
+                {
+                    case EPVRTVariableType.ePVRTVarTypeUnsignedFloat:
+                        return Xenko.Graphics.PixelFormat.EAC_R11_Unsigned;
+                    case EPVRTVariableType.ePVRTVarTypeSignedFloat:
+                        return Xenko.Graphics.PixelFormat.EAC_R11_Signed;
                 }
+            }
+            else if (format == Xenko.Graphics.PixelFormat.EAC_RG11_Unsigned)
+            {
+                switch (header.GetChannelType())
+                {
+                    case EPVRTVariableType.ePVRTVarTypeUnsignedFloat:
+                        return Xenko.Graphics.PixelFormat.EAC_RG11_Unsigned;
+                    case EPVRTVariableType.ePVRTVarTypeSignedFloat:
+                        return Xenko.Graphics.PixelFormat.EAC_RG11_Signed;
+                }
+            }
+            else if (format == Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4)
+            {
+                return header.GetColourSpace() == EPVRTColourSpace.ePVRTCSpacelRGB ? Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4 : Xenko.Graphics.PixelFormat.ASTC_RGBA_4X4_SRgb;
             }
 
             return format;

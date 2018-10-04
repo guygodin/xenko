@@ -11,5 +11,6 @@ namespace Xenko.TextureConverter.Requests
         Normal,
         High,
         Best,
+        Exhaustive, // Used with ASTC
     }
 }

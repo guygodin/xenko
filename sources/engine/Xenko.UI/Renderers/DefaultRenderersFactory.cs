@@ -32,6 +32,7 @@ namespace Xenko.UI.Renderers
             typeToRenderers[typeof(Slider)] = new DefaultSliderRenderer(services);
             typeToRenderers[typeof(TextBlock)] = new DefaultTextBlockRenderer(services);
             typeToRenderers[typeof(ToggleButton)] = new DefaultToggleButtonRenderer(services);
+            typeToRenderers[typeof(CheckBox)] = new DefaultCheckBoxRenderer(services);
         }
 
         public ElementRenderer TryCreateRenderer(UIElement element)
