@@ -1,0 +1,30 @@
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+shader EmissiveSpriteEffect : SpriteBase
+{
+    // Texture used to tint the sprite
+    stage Texture2D IntensityTexture;
+
+    // Color used to tint the sprite
+    [Color]
+    stage float4 Color = float4(1,1,1,1);
+
+    stage bool UseIntensity = false;
+
+    // Shading of the sprite
+    stage override float4 Shading()
+    {
+        float4 shading = base.Shading() * Color;
+        if (UseIntensity)
+        {
+            // Use the average color of the texture (from the last mip) as the intensity
+            float3 intensity = IntensityTexture.SampleLevel(Sampler, float2(0.5f, 0.5f), 16.0f).xyz;
+
+            // Add a small amount of light so result isn't completely black
+            intensity += float3(0.05f, 0.05f, 0.05f);
+
+            shading = shading * float4(intensity, 1.0f);
+        }
+        return shading;
+    }
+};

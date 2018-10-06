@@ -6,6 +6,12 @@ UsedParameters:
     EffectSourceCode.Namespace: Xenko.Graphics
 ---
 !EffectCompileRequest
+EffectName: EmissiveSpriteEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+---
+!EffectCompileRequest
 EffectName: SpriteBatch
 UsedParameters:
     SpriteBase.ColorIsSRgb: false

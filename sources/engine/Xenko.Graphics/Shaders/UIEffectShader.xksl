@@ -25,10 +25,9 @@ shader UIEffectShader<bool TSRgb> : ShaderBase, Texturing
 
     stage float4 Shading()
     {
-		float4 sampledColor = Texture0.Sample(Sampler, streams.TexCoord);
+		float4 sampledColor = ColorUtility.ToLinear(Texture0.Sample(Sampler, streams.TexCoord));
 		if (TSRgb)
-        {
-			sampledColor = ColorUtility.ToLinear(sampledColor);
+        {			
             streams.Color = ColorUtility.ToLinear(streams.Color);
         }
         

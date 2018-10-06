@@ -101,6 +101,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteAlphaCutoff.xksl</DependentUpon>
     </Compile>
+    <Compile Update="Shaders\EmissiveSpriteEffect.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>EmissiveSpriteEffect.xksl</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Shaders\SpriteEffectExtTexture.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -294,6 +300,12 @@
     <None Include="Shaders\UIEffectShader.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>UIEffectShader.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Shaders\EmissiveSpriteEffect.xksl">
+      <Generator>XenkoShaderKeyGenerator</Generator>
+      <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <Import Project="..\Xenko.Shared\Refactor\Xenko.Refactor.projitems" Label="Shared" />

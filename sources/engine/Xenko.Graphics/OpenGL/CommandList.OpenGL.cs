@@ -1339,11 +1339,17 @@ namespace Xenko.Graphics
                         // Lazy update for sampler state
                         if (samplerStateChanged && texture != null)
                         {
-                            // TODO: Include hasMipmap in samplerStateChanged
-                            bool hasMipmap = texture.Description.MipLevels > 1;
+                            GL.GetTexParameter(TextureTarget.Texture2D, GetTextureParameter.TextureWrapS, out int wrapS);
 
-                            samplerState.Apply(hasMipmap, boundSamplerState, texture.TextureTarget);
-                            texture.BoundSamplerState = samplerState;
+                            // GG Hack: if texture is clamp to border, it's likely a TextureSwapChain so don't mess with its parameters
+                            if (wrapS != (int)TextureWrapMode.ClampToBorder)
+                            {
+                                // TODO: Include hasMipmap in samplerStateChanged
+                                bool hasMipmap = texture.Description.MipLevels > 1;
+
+                                samplerState.Apply(hasMipmap, boundSamplerState, texture.TextureTarget);
+                                texture.BoundSamplerState = samplerState;
+                            }
                         }
                     }
                 }

@@ -755,6 +755,8 @@ namespace Xenko.TextureConverter.TexLibraries
                 case Xenko.Graphics.PixelFormat.R8G8B8A8_SInt:
                 case Xenko.Graphics.PixelFormat.B8G8R8A8_UNorm_SRgb:
                 case Xenko.Graphics.PixelFormat.B8G8R8A8_UNorm:
+                case Xenko.Graphics.PixelFormat.B8G8R8X8_UNorm_SRgb:
+                case Xenko.Graphics.PixelFormat.B8G8R8X8_UNorm:
 
                 case Xenko.Graphics.PixelFormat.PVRTC_2bpp_RGB:
                 case Xenko.Graphics.PixelFormat.PVRTC_2bpp_RGBA:
