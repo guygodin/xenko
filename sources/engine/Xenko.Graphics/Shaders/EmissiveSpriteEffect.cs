@@ -18,8 +18,10 @@ namespace Xenko.Rendering
 {
     public static partial class EmissiveSpriteEffectKeys
     {
+        public static readonly ValueParameterKey<bool> UseIntensity = ParameterKeys.NewValue<bool>(false);
+        public static readonly ValueParameterKey<float> BaseIntensity = ParameterKeys.NewValue<float>(0);
+        public static readonly ValueParameterKey<float> IntensityMultiplier = ParameterKeys.NewValue<float>(1.0f);
         public static readonly ObjectParameterKey<Texture> IntensityTexture = ParameterKeys.NewObject<Texture>();
         public static readonly ValueParameterKey<Color4> Color = ParameterKeys.NewValue<Color4>(new Color4(1,1,1,1));
-        public static readonly ValueParameterKey<bool> UseIntensity = ParameterKeys.NewValue<bool>(false);
     }
 }

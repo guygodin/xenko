@@ -2,6 +2,14 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 shader EmissiveSpriteEffect : SpriteBase
 {
+    stage stream float4 Intensity;
+
+    stage bool UseIntensity = false;
+
+    stage float BaseIntensity = 0;
+
+    stage float IntensityMultiplier = 1.0f;
+
     // Texture used to tint the sprite
     stage Texture2D IntensityTexture;
 
@@ -9,22 +17,29 @@ shader EmissiveSpriteEffect : SpriteBase
     [Color]
     stage float4 Color = float4(1,1,1,1);
 
-    stage bool UseIntensity = false;
+    stage override void VSMain()
+    {
+        base.VSMain();
+        if (UseIntensity)
+        {
+            // Use the average color of the texture (from the last mip) as the intensity
+            float3 avg = IntensityTexture.SampleLevel(Sampler, float2(0.0f, 0.0f), 16.0f).rgb * IntensityMultiplier;
+
+            // Add a small amount of light so result isn't completely black
+            streams.Intensity = float4(min(1.0f, avg.r + BaseIntensity), min(1.0f, avg.g + BaseIntensity), min(1.0f, avg.b + BaseIntensity), 1.0f);
+        }
+    }
 
     // Shading of the sprite
     stage override float4 Shading()
     {
-        float4 shading = base.Shading() * Color;
         if (UseIntensity)
         {
-            // Use the average color of the texture (from the last mip) as the intensity
-            float3 intensity = IntensityTexture.SampleLevel(Sampler, float2(0.5f, 0.5f), 16.0f).xyz;
-
-            // Add a small amount of light so result isn't completely black
-            intensity += float3(0.05f, 0.05f, 0.05f);
-
-            shading = shading * float4(intensity, 1.0f);
+           return base.Shading() * streams.Intensity * Color;
         }
-        return shading;
+        else
+        {
+            return base.Shading() * Color;
+        }
     }
 };
