@@ -30,9 +30,8 @@ namespace Xenko.Core.Storage
                     var hasId = stream.ReadBoolean();
                     if (hasId)
                     {
-                        var id = new byte[HashSize];
-                        stream.Serialize(id, 0, HashSize);
-                        obj = new ObjectId(id);
+                        stream.Serialize(_idBuffer.Value, 0, HashSize);
+                        obj = new ObjectId(_idBuffer.Value);
                     }
                     else
                     {

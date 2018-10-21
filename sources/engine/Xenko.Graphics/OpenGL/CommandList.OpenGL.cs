@@ -1623,6 +1623,16 @@ namespace Xenko.Graphics
             GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
         }
 
+        internal void UnbindFBO(FBOValue fbo)
+        {
+            if (fbo.Id == boundFBO.Id)
+            {
+                GL.BindFramebuffer(boundFBO.Target, 0);
+                boundFBO = default(FBOValue);
+                needUpdateFBO = true;
+            }
+        }
+
         public void SetPipelineState(PipelineState pipelineState)
         {
             newPipelineState = pipelineState ?? GraphicsDevice.DefaultPipelineState;

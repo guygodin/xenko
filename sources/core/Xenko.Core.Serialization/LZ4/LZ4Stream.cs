@@ -56,9 +56,11 @@ namespace Xenko.Core.LZ4
 			Passes = 0x04 | 0x08 | 0x10, // not used currently
 		}
 
-		#endregion
+        #endregion
 
-		#region fields
+        #region fields
+
+        private readonly byte[] _singleByte = new byte[1];
 
 		/// <summary>The inner stream.</summary>
 		private readonly Stream innerStream;
@@ -166,19 +168,18 @@ namespace Xenko.Core.LZ4
 		/// <see cref="EndOfStreamException"/> is thrown.</returns>
 		private bool TryReadVarInt(out ulong result)
 		{
-			var buffer = new byte[1];
 			var count = 0;
 			result = 0;
 
 			while (true)
 			{
-				if ((compressedSize != -1 && innerStreamPosition >= compressedSize) || innerStream.Read(buffer, 0, 1) == 0)
+				if ((compressedSize != -1 && innerStreamPosition >= compressedSize) || innerStream.Read(_singleByte, 0, 1) == 0)
 				{
 					if (count == 0) return false;
 					throw EndOfStream();
 				}
 			    innerStreamPosition += 1;
-				var b = buffer[0];
+				var b = _singleByte[0];
 				result = result + ((ulong)(b & 0x7F) << count);
 				count += 7;
 				if ((b & 0x80) == 0 || count >= 64) break;
@@ -226,13 +227,12 @@ namespace Xenko.Core.LZ4
 		/// <param name="value">The value.</param>
 		private void WriteVarInt(ulong value)
 		{
-			var buffer = new byte[1];
 			while (true)
 			{
 				var b = (byte)(value & 0x7F);
 				value >>= 7;
-				buffer[0] = (byte)(b | (value == 0 ? 0 : 0x80));
-                innerStream.Write(buffer, 0, 1);
+                _singleByte[0] = (byte)(b | (value == 0 ? 0 : 0x80));
+                innerStream.Write(_singleByte, 0, 1);
                 innerStreamPosition += 1;
 				if (value == 0) break;
 			}

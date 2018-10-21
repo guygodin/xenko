@@ -478,13 +478,6 @@ namespace Xenko.Graphics
             throw new NotImplementedException();
         }
 
-        public void RegisterFBO(Texture depthStencilBuffer, Texture renderTarget, FramebufferTarget framebufferTarget, int framebufferId)
-        {
-            var fboTextures = new FBOTexture[] { renderTarget };
-            UpdateFBO(framebufferTarget, depthStencilBuffer, fboTextures, 1);
-            existingFBOs.Add(new FBOKey(depthStencilBuffer, fboTextures, 1), new FBOValue(framebufferTarget, framebufferId));
-        }
-
         internal FBOValue FindOrCreateFBO(GraphicsResourceBase graphicsResource, int subresource)
         {
             if (graphicsResource == WindowProvidedRenderTexture)
@@ -682,6 +675,41 @@ namespace Xenko.Graphics
             }
 
             return attachmentType;
+        }
+
+        internal void ReleaseFBOs(CommandList commandList, Texture texture)
+        {
+            lock (existingFBOs)
+            {
+                var toRemove = new List<FBOKey>();
+                foreach (var pair in existingFBOs)
+                {
+                    var key = pair.Key;
+                    if (key.DepthStencilBuffer.Texture == texture)
+                    {
+                        toRemove.Add(key);
+                        commandList.UnbindFBO(pair.Value);
+                        GL.DeleteFramebuffer(pair.Value.Id);
+                    }
+                    else
+                    {
+                        for (var i = 0; i < key.RenderTargetCount; i++)
+                        {
+                            if (key.RenderTargets[i].Texture == texture)
+                            {
+                                toRemove.Add(key);
+                                commandList.UnbindFBO(pair.Value);
+                                GL.DeleteFramebuffer(pair.Value.Id);
+                                break;
+                            }
+                        }
+                    }
+                }
+                foreach (var key in toRemove)
+                {
+                    existingFBOs.Remove(key);
+                }
+            }
         }
 
         internal int TryCompileShader(ShaderType shaderType, string sourceCode)

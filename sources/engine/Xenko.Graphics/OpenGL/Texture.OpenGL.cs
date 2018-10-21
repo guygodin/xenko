@@ -48,6 +48,7 @@ namespace Xenko.Graphics
         internal int TextureTotalSize;
         private int pixelBufferObjectId;
         private int stencilId;
+        private bool isExternal;
 
         internal int DepthPitch { get; set; }
         internal int RowPitch { get; set; }
@@ -271,6 +272,9 @@ namespace Xenko.Graphics
                         GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
 
                         IsRenderbuffer = true;
+
+                        GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);
+
                         return;
                     }
 
@@ -429,6 +433,7 @@ namespace Xenko.Graphics
 
         internal Texture InitializeFrom(int textureId, TextureDescription description)
         {
+            isExternal = true;
             textureDescription = description;
             textureViewDescription = new TextureViewDescription();
             IsBlockCompressed = description.Format.IsCompressed();
@@ -483,6 +488,8 @@ namespace Xenko.Graphics
 
             TextureTotalSize = ComputeBufferTotalSize();
 
+            GraphicsDevice.RegisterTextureMemoryUsage(SizeInBytes);
+
             return this;
         }
 
@@ -496,16 +503,19 @@ namespace Xenko.Graphics
                 StagingData = IntPtr.Zero;
             }
 #endif
-            using (GraphicsDevice.UseOpenGLCreationContext())
+            using (var context = GraphicsDevice.UseOpenGLCreationContext())
             {
                 if (TextureId != 0 && ParentTexture == null)
                 {
-                    if (IsRenderbuffer)
-                        GL.DeleteRenderbuffers(1, ref TextureId);
-                    else
-                        GL.DeleteTextures(1, ref TextureId);
-
-                GraphicsDevice.RegisterTextureMemoryUsage(-SizeInBytes);
+                    GraphicsDevice.ReleaseFBOs(context.CommandList, this);
+                    if (!isExternal)
+                    {
+                        if (IsRenderbuffer)
+                            GL.DeleteRenderbuffers(1, ref TextureId);
+                        else
+                            GL.DeleteTextures(1, ref TextureId);
+                    }
+                    GraphicsDevice.RegisterTextureMemoryUsage(-SizeInBytes);
                 }
 
                 if (stencilId != 0)

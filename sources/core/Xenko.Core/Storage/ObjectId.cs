@@ -2,6 +2,7 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Xenko.Core.Annotations;
 
 namespace Xenko.Core.Storage
@@ -28,6 +29,7 @@ namespace Xenko.Core.Storage
         private const string HexDigits = "0123456789abcdef";
 
         public static readonly ObjectId Empty = new ObjectId();
+        private static readonly ThreadLocal<byte[]> _idBuffer = new ThreadLocal<byte[]>(() => new byte[HashSize]);
 
         private uint hash1;
         private uint hash2;
@@ -145,7 +147,6 @@ namespace Xenko.Core.Storage
                 return false;
             }
 
-            var hash = new byte[HashSize];
             for (var i = 0; i < HashStringLength; i += 2)
             {
                 var c1 = input[i];
@@ -159,10 +160,10 @@ namespace Xenko.Core.Storage
                     return false;
                 }
 
-                hash[i >> 1] = (byte)((digit1 << 4) | digit2);
+                _idBuffer.Value[i >> 1] = (byte)((digit1 << 4) | digit2);
             }
 
-            result = new ObjectId(hash);
+            result = new ObjectId(_idBuffer.Value);
             return true;
         }
 
