@@ -507,7 +507,11 @@ namespace Xenko.Graphics
             {
                 if (TextureId != 0 && ParentTexture == null)
                 {
-                    GraphicsDevice.ReleaseFBOs(context.CommandList, this);
+                    var commandList = context.CommandList;
+                    if (commandList != null)
+                    {
+                        GraphicsDevice.ReleaseFBOs(commandList, this);
+                    }
                     if (!isExternal)
                     {
                         if (IsRenderbuffer)
