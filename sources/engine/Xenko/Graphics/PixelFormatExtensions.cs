@@ -506,6 +506,8 @@ namespace Xenko.Graphics
 #if DIRECTX11_1
                 PixelFormat.B4G4R4A4_UNorm,
 #endif
+                PixelFormat.ASTC_RGBA_4X4,
+                PixelFormat.ASTC_RGBA_4X4_SRgb,
             }, 16);
 
             InitFormat(new[]
