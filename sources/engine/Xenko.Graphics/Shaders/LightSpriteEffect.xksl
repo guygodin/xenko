@@ -1,0 +1,61 @@
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+shader LightSpriteEffect : SpriteBase
+{
+    // The normal attribute from the mesh
+    stage stream float3 meshNormal : NORMAL;
+
+    // Output of shading a material surface
+    stage stream float3 shadingColor;
+
+    cbuffer PerDraw
+    {
+        stage float4x4 View;
+        stage float4x4 WorldView;
+    }
+
+    cbuffer PerView.Lighting
+    {
+        float3 LightDirectionWS = float3(0,-1,0);
+        [Color]
+        float3 LightColor = float3(1,1,1);
+    }
+
+    // Color used to tint the sprite
+    [Color]
+    stage float4 Color = float4(1,1,1,1);
+
+    [Color]
+    stage float3 AmbientColor = float3(0,0,0);
+
+    stage float SpecularPower = 20;
+
+    stage override void VSMain()
+    {
+        base.VSMain();
+
+        float3 color = AmbientColor;
+        float3 colorSpec = 0;
+
+        float3 N = mul(streams.meshNormal, (float3x3)WorldView); // normal in view space
+        float3 L = mul(-LightDirectionWS, (float3x3)View);
+        float NdotL = dot(N, L);
+        if (NdotL > 0)
+        {
+            float3 P = (float3)mul(streams.Position, WorldView); // position in view space
+            float3 V = -normalize(P); // to viewer
+            float3 H = normalize(L + V); // half vector
+
+            color += NdotL * LightColor;
+            colorSpec = pow(max(0, dot(H, N)), SpecularPower) * LightColor;
+        }
+
+        streams.shadingColor = color + colorSpec;
+    }
+
+    // Shading of the sprite
+    stage override float4 Shading()
+    {
+        return base.Shading() * float4(streams.shadingColor, 1.0f) * Color;
+    }
+};

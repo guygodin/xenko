@@ -107,6 +107,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Shaders\LightSpriteEffect.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LightSpriteEffect.xksl</DependentUpon>
+    </Compile>
     <Compile Update="Shaders\SpriteEffectExtTexture.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -306,6 +311,10 @@
     <None Update="Shaders\EmissiveSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\LightSpriteEffect.xksl">
+      <Generator>XenkoShaderKeyGenerator</Generator>
+      <LastGenOutput>LightSpriteEffect.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <Import Project="..\Xenko.Shared\Refactor\Xenko.Refactor.projitems" Label="Shared" />
