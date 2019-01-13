@@ -29,7 +29,7 @@ namespace Xenko.UI.Renderers
             
             var drawCommand = new SpriteFont.InternalUIDrawCommand
             {
-                Color = textBlock.RenderOpacity * textBlock.TextColor,
+                Color = textBlock.RenderOpacity * (textBlock.IsEnabled ? textBlock.TextColor : Color.FromBgra(0xFF555555)),
                 DepthBias = context.DepthBias,
                 RealVirtualResolutionRatio = element.LayoutingContext.RealVirtualResolutionRatio,
                 RequestedFontSize = textBlock.ActualTextSize,

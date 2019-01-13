@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoAssemblySign>true</XenkoAssemblySign>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
@@ -111,12 +111,24 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>LightSpriteEffect.xksl</DependentUpon>
-    </Compile>
+    </Compile>    
     <Compile Update="Shaders\SpriteEffectExtTexture.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTexture.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\SpriteEffectExtTextureSBS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SpriteEffectExtTextureSBS.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\SpriteEffectExtTextureOU.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SpriteEffectExtTextureOU.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SpriteEffectExtTextureRegular.cs">
       <AutoGen>True</AutoGen>

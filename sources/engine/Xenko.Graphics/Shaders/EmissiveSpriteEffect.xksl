@@ -10,8 +10,9 @@ shader EmissiveSpriteEffect : SpriteBase
 
     stage float IntensityMultiplier = 1.0f;
 
-    // Texture used to tint the sprite
-    stage Texture2D IntensityTexture;
+    // Textures used to tint the sprite
+    stage Texture2D IntensityTexture1;
+	stage Texture2D IntensityTexture2;
 
     // Color used to tint the sprite
     [Color]
@@ -22,8 +23,8 @@ shader EmissiveSpriteEffect : SpriteBase
         base.VSMain();
         if (UseIntensity)
         {
-            // Use the average color of the texture (from the last mip) as the intensity
-            float3 avg = IntensityTexture.SampleLevel(Sampler, float2(0.0f, 0.0f), 16.0f).rgb * IntensityMultiplier;
+            // Use the average color of the textures (from the last mip) as the intensity
+            float3 avg = (IntensityTexture1.SampleLevel(Sampler, float2(0.0f, 0.0f), 16.0f).rgb + IntensityTexture2.SampleLevel(Sampler, float2(0.0f, 0.0f), 16.0f).rgb) * IntensityMultiplier;
 
             // Add a small amount of light so result isn't completely black
             streams.Intensity = float4(min(1.0f, avg.r + BaseIntensity), min(1.0f, avg.g + BaseIntensity), min(1.0f, avg.b + BaseIntensity), 1.0f);

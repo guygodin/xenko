@@ -4,7 +4,7 @@
 //     Xenko Effect Compiler File Generated:
 //     Effect [LightSpriteEffect]
 //
-//     Command Line: C:\Users\paulr\source\repos\xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\..\..\..\..\Bin\Windows\Xenko.Core.Assets.CompilerApp.exe --profile=Windows-Vulkan --platform=Windows --output-path=C:\Users\paulr\source\repos\xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\obj\app_data --build-path=C:\Users\paulr\source\repos\xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\obj\build_app_data --package-file=Graphics.xkpkg
+//     Command Line: D:\Xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\..\..\..\..\Bin\Windows\Xenko.Core.Assets.CompilerApp.exe --profile=Windows-Vulkan --platform=Windows --output-path=D:\Xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\obj\app_data --build-path=D:\Xenko\sources\engine\Xenko.Graphics\Shaders.Bytecodes\obj\build_app_data --package-file=Graphics.xkpkg
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>

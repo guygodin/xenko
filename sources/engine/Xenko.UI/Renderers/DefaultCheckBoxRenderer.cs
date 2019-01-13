@@ -30,7 +30,7 @@ namespace Xenko.UI.Renderers
             if (texture == null)
                 return;
 
-            var color = checkBox.RenderOpacity * Color.White;
+            var color = checkBox.RenderOpacity * (element.IsEnabled ? Color.White : Color.Gray);
             var size = new Vector3(sprite.SizeInPixels, 0f);
             var translation = Matrix.Translation(-element.RenderSize.X / 2 + size.X / 2, 0f, 0f);
             Matrix.Multiply(ref element.WorldMatrixInternal, ref translation, out Matrix matrix);
@@ -46,7 +46,7 @@ namespace Xenko.UI.Renderers
                     {
                         return checkBox.CheckedMouseDownImage?.GetSprite();
                     }
-                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone)
+                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone && checkBox.IsEnabled)
                     {
                         return checkBox.CheckedMouseOverImage?.GetSprite();
                     }
@@ -56,7 +56,7 @@ namespace Xenko.UI.Renderers
                     {
                         return checkBox.IndeterminateMouseDownImage?.GetSprite();
                     }
-                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone)
+                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone && checkBox.IsEnabled)
                     {
                         return checkBox.IndeterminateMouseOverImage?.GetSprite();
                     }
@@ -66,7 +66,7 @@ namespace Xenko.UI.Renderers
                     {
                         return checkBox.UncheckedMouseDownImage?.GetSprite();
                     }
-                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone)
+                    if (checkBox.MouseOverState != MouseOverState.MouseOverNone && checkBox.IsEnabled)
                     {
                         return checkBox.UncheckedMouseOverImage?.GetSprite();
                     }
