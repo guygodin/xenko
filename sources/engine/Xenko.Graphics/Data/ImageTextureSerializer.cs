@@ -8,7 +8,7 @@ using Xenko.Core.Streaming;
 
 namespace Xenko.Graphics.Data
 {
-    internal class ImageTextureSerializer : ContentSerializerBase<Image>
+    public class ImageTextureSerializer : ContentSerializerBase<Image>
     {
         /// <inheritdoc/>
         public override Type SerializationType => typeof(Texture);
