@@ -17,8 +17,10 @@ using Buffer = Xenko.Graphics.Buffer;
 namespace Xenko.Rendering
 {
     public static partial class SpriteEffectExtTextureOUKeys
-    {   
+    {
+        public static readonly ValueParameterKey<uint> FrameWidth = ParameterKeys.NewValue<uint>(0);
         public static readonly ValueParameterKey<uint> FrameHeight = ParameterKeys.NewValue<uint>(0);
-        public static readonly ValueParameterKey<uint> TextureHeight = ParameterKeys.NewValue<uint>(0);
+        public static readonly ValueParameterKey<uint> TextureWidth = ParameterKeys.NewValue<uint>(0);
+        public static readonly ValueParameterKey<uint> TextureHeight = ParameterKeys.NewValue<uint>(0);        
     }
 }

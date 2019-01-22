@@ -2,15 +2,26 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 shader SpriteEffectExtTextureOU : SpriteEffectExtTexture
 {
+	stage uint FrameWidth = 0;
 	stage uint FrameHeight = 0;
+	stage uint TextureWidth = 0;
 	stage uint TextureHeight = 0;
 
     stage override float4 Shading()
     {
 		float4 color = base.Shading();
 
+		uint x = streams.TexCoord.x * TextureWidth;
 		uint y = streams.TexCoord.y * TextureHeight;
 		uint middle = FrameHeight / 2;
+		if (x < 4)
+		{
+			color = smoothstep(0, 3, x) * color;
+		}
+		else if (x >= FrameWidth - 4)
+		{
+			color = smoothstep(FrameWidth - 1, FrameWidth - 4, x) * color;
+		}
 		if (y < middle)
 		{
 			if (y < 4)
