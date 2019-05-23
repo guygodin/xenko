@@ -56,7 +56,14 @@ UsedParameters:
     EffectSourceCode.FieldName: binaryBytecode
 ---
 !EffectCompileRequest
-EffectName: SpriteEffectExtTextureSBS
+EffectName: SpriteEffectExtTextureHalfSBS
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: SpriteEffectExtTextureFullSBS
 UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics

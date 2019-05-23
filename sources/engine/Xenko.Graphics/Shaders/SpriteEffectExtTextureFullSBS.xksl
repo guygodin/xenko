@@ -1,6 +1,6 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
-shader SpriteEffectExtTextureSBS : SpriteEffectExtTexture
+shader SpriteEffectExtTextureFullSBS : SpriteEffectExtTexture
 {
 	stage uint FrameWidth = 0;
 	stage uint FrameHeight = 0;
@@ -10,17 +10,19 @@ shader SpriteEffectExtTextureSBS : SpriteEffectExtTexture
     stage override float4 Shading()
     {
 		float4 color = base.Shading();
+		uint startHeight = FrameHeight * 0.25f;
+		uint endHeight = FrameHeight * 0.75f;
 
 		uint x = streams.TexCoord.x * TextureWidth;
 		uint y = streams.TexCoord.y * TextureHeight;
 		uint middle = FrameWidth / 2;
-		if (y < 4)
+		if (y < startHeight + 4)
 		{
-			color = smoothstep(0, 3, y) * color;
+			color = smoothstep(startHeight, startHeight + 3, y) * color;
 		}
-		else if (y >= FrameHeight - 4)
+		else if (y >= endHeight - 4)
 		{
-			color = smoothstep(FrameHeight - 1, FrameHeight - 4, y) * color;
+			color = smoothstep(endHeight - 1, endHeight - 4, y) * color;
 		}
 		if (x < middle)
 		{

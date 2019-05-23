@@ -5,7 +5,7 @@ using Xenko.Shaders;
 
 namespace Xenko.Graphics
 {
-    public partial class SpriteEffectExtTextureSBS
+    public partial class SpriteEffectExtTextureFullSBS
     {
         private static EffectBytecode bytecode = null;
 
