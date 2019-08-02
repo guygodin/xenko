@@ -68,6 +68,9 @@ namespace Xenko.UI.Controls
         {
             base.OnTouchDown(args);
 
+            if (!IsEnabled)
+                return;
+
             IsPressed = true;
 
             if (ClickMode == ClickMode.Press)

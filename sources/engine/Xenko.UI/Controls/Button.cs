@@ -163,7 +163,7 @@ namespace Xenko.UI.Controls
             }
         }
 
-        internal ISpriteProvider ButtonImageProvider => IsPressed ? PressedImage : (MouseOverState == MouseOverState.MouseOverElement && MouseOverImage != null ? MouseOverImage : NotPressedImage);
+        internal ISpriteProvider ButtonImageProvider => IsEnabled ? (IsPressed ? PressedImage : (MouseOverState == MouseOverState.MouseOverElement && MouseOverImage != null ? MouseOverImage : NotPressedImage)) : NotPressedImage;
 
         internal Sprite ButtonImage => ButtonImageProvider?.GetSprite();
 
