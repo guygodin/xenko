@@ -506,6 +506,8 @@ namespace Xenko.Graphics
 #if DIRECTX11_1
                 PixelFormat.B4G4R4A4_UNorm,
 #endif
+                PixelFormat.ASTC_RGBA_4X4,
+                PixelFormat.ASTC_RGBA_4X4_SRgb,
             }, 16);
 
             InitFormat(new[]
@@ -607,9 +609,7 @@ namespace Xenko.Graphics
                 PixelFormat.BC6H_Uf16,
                 PixelFormat.BC7_Typeless,
                 PixelFormat.BC7_UNorm,
-                PixelFormat.BC7_UNorm_SRgb,
-                PixelFormat.ASTC_RGBA_4X4,
-                PixelFormat.ASTC_RGBA_4X4_SRgb,
+                PixelFormat.BC7_UNorm_SRgb,                
             }, 8);
 
             // Init compressed formats
