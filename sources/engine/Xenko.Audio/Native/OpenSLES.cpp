@@ -268,11 +268,6 @@ extern "C" {
 				else
 				{
 					(*source->player)->SetPlayState(source->player, SL_PLAYSTATE_STOPPED);
-
-					//re-enqueue ready to play again
-					source->streamPositionDiff = 0.0;
-					(*source->queue)->Clear(source->queue);
-					(*source->queue)->Enqueue(source->queue, (void*)source->subDataPtr, source->subLength);
 				}
 			}
 			else
