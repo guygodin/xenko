@@ -75,3 +75,10 @@ UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics
     EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: SpriteEffectExtTextureVR
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
