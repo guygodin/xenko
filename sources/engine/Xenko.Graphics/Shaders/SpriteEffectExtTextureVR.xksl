@@ -2,10 +2,10 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 shader SpriteEffectExtTextureVR : SpriteEffectExtTexture
 {
-	stage float BorderSize = 0.25f;
-	stage float CompressedBorderSize = 0.125f;
-	stage float DefoveationRatio = 2.0f; // CompressedBordersize / (BorderSize * BorderSize)
-	stage float DecompressionRatio = 1.5f; // EyeResolutionWidth / FrameWidth
+	stage float BorderSize;
+	stage float CompressedBorderSize;
+	stage float DefoveationRatio;
+	stage float DecompressionRatio;
 
     stage override float4 Shading()
     {

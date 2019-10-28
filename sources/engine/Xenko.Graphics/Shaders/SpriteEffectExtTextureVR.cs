@@ -20,7 +20,7 @@ namespace Xenko.Rendering
     {
         public static readonly ValueParameterKey<float> BorderSize = ParameterKeys.NewValue<float>(0.25f);
         public static readonly ValueParameterKey<float> CompressedBorderSize = ParameterKeys.NewValue<float>(0.125f);
-        public static readonly ValueParameterKey<float> DefoveationRatio = ParameterKeys.NewValue<float>(2.0f);
-        public static readonly ValueParameterKey<float> CompressionRatio = ParameterKeys.NewValue<float>(1.5f);
+        public static readonly ValueParameterKey<float> DefoveationRatio = ParameterKeys.NewValue<float>(2.0f); // CompressedBordersize / (BorderSize * BorderSize)
+        public static readonly ValueParameterKey<float> DecompressionRatio = ParameterKeys.NewValue<float>(1.5f); // (0.5 - CompressedBorderSize) / (0.5 - BorderSize)
     }
 }
