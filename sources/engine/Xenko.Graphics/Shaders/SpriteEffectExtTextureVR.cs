@@ -16,11 +16,19 @@ using Buffer = Xenko.Graphics.Buffer;
 
 namespace Xenko.Rendering
 {
+    public enum StereoMode
+    {
+        None,
+        LeftEye,
+        RightEye,
+    }
+
     public static partial class SpriteEffectExtTextureVRKeys
     {
         public static readonly ValueParameterKey<float> BorderSize = ParameterKeys.NewValue<float>(0.25f);
         public static readonly ValueParameterKey<float> CompressedBorderSize = ParameterKeys.NewValue<float>(0.125f);
         public static readonly ValueParameterKey<float> DefoveationRatio = ParameterKeys.NewValue<float>(2.0f); // CompressedBordersize / (BorderSize * BorderSize)
         public static readonly ValueParameterKey<float> DecompressionRatio = ParameterKeys.NewValue<float>(1.5f); // (0.5 - CompressedBorderSize) / (0.5 - BorderSize)
+        public static readonly ValueParameterKey<StereoMode> StereoMode = ParameterKeys.NewValue(Xenko.Rendering.StereoMode.None);
     }
 }

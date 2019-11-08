@@ -6,39 +6,34 @@ shader SpriteEffectExtTextureVR : SpriteEffectExtTexture
 	stage float CompressedBorderSize;
 	stage float DefoveationRatio;
 	stage float DecompressionRatio;
+	stage int StereoMode;
 
     stage override float4 Shading()
     {
 		float2 tex = streams.TexCoord;
+		float2 nearBorder = 1.0f - step(BorderSize, tex);
+		float2 farBorder = step((1.0f - BorderSize), tex);
+		float2 center = 1.0f - nearBorder - farBorder;
 
-		if (tex.x < BorderSize)
+		float2 inverseTex = 1.0f - tex;
+		float2 uv = (nearBorder * tex * tex * DefoveationRatio) + (farBorder * (1.0f - (inverseTex * inverseTex * DefoveationRatio))) + (center * ((tex - BorderSize) * DecompressionRatio + CompressedBorderSize));
+
+		if (StereoMode == 1)
 		{
-			tex.x = tex.x * tex.x * DefoveationRatio;
+			// Left eye
+			uv.x = uv.x / 2;
+			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
-		else if (tex.x > (1.0f - BorderSize))
+		else if (StereoMode == 2)
 		{
-			float x = 1.0f - tex.x;
-			tex.x = 1.0f - (x * x * DefoveationRatio);
+			// Right eye
+			uv.x = (uv.x / 2) + 0.5f;
+			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
 		else
 		{
-			tex.x = (tex.x - BorderSize) * DecompressionRatio + CompressedBorderSize;
+			// None
+			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
-
-		if (tex.y < BorderSize)
-		{
-			tex.y = tex.y * tex.y * DefoveationRatio;
-		}
-		else if (tex.y > (1.0f - BorderSize))
-		{
-			float y = 1.0f - tex.y;
-			tex.y = 1.0f - (y * y * DefoveationRatio);
-		}
-		else
-		{
-			tex.y = (tex.y - BorderSize) * DecompressionRatio + CompressedBorderSize;
-		}
-
-		return XenkoInternal_TextureExt0.Sample(Sampler, tex);
     }
 };
