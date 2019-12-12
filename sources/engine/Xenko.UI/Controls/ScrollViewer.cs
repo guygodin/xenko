@@ -55,7 +55,19 @@ namespace Xenko.UI.Controls
         /// <summary>
         /// Indicate if the user is currently touching the scroll viewer and performing a scroll gesture with its finger.
         /// </summary>
-        protected bool IsUserScrollingViewer { get; private set; }
+        public bool IsUserScrollingViewer
+        {
+            get { return isUserScrollingViewer; }
+            private set
+            {
+                if (value != isUserScrollingViewer)
+                {
+                    isUserScrollingViewer = value;
+                    OnIsUserScrollingViewerChanged();
+                }
+            }
+        }
+        public event EventHandler IsUserScrollingViewerChanged;
 
         /// <summary>
         /// The viewport of the <see cref="ScrollViewer"/> in virtual pixels.
@@ -78,6 +90,15 @@ namespace Xenko.UI.Controls
         [Display(category: AppearanceCategory)]
         [DefaultValue(6.0f)]
         public float ScrollBarThickness { get; set; } = 6.0f;
+
+        /// <summary>
+        /// Indicate if the scrollbar fades out after scrolling stops.
+        /// </summary>
+        /// <userdoc>True if scrollbar fades out after scrolling stops.</userdoc>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        [DefaultValue(true)]
+        public bool ScrollBarHidesNoActivity { get; set; } = true;
 
         /// <summary>
         /// The viewer allowed scrolling mode.
@@ -259,6 +280,7 @@ namespace Xenko.UI.Controls
         }
         private static readonly ScrollBarSorter scrollBarSorter = new ScrollBarSorter();
 
+        private bool isUserScrollingViewer;
         private bool userManuallyScrolled;
         private ScrollingMode scrollMode = ScrollingMode.Horizontal;
         private bool touchScrollingEnabled = true;
@@ -301,13 +323,11 @@ namespace Xenko.UI.Controls
 
         protected internal void HideScrollBars()
         {
-            SetScrollBarsColor(ref transparent);
-        }
-
-        private void SetScrollBarsColor(ref Color color)
-        {
-            foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
-                scrollBars[index].BarColor = color;
+            if (ScrollBarHidesNoActivity)
+            {
+                foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
+                    scrollBars[index].BarColor = transparent;
+            }
         }
 
         /// <summary>
@@ -335,6 +355,11 @@ namespace Xenko.UI.Controls
         protected virtual void OnTouchScrollingEnabledChanged()
         {
             CanBeHitByUser = TouchScrollingEnabled;
+        }
+
+        protected virtual void OnIsUserScrollingViewerChanged()
+        {
+            IsUserScrollingViewerChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -426,15 +451,33 @@ namespace Xenko.UI.Controls
             if (lastFrameTranslation != Vector3.Zero)
                 ScrollOfInternal(ref lastFrameTranslation, false);
 
-            // Smoothly hide the scroll bars if the no movements
-            for (var dim = 0; dim < 3; dim++)
+            if (ScrollBarHidesNoActivity)
             {
-                var shouldFadeOutScrollingBar = Math.Abs(CurrentScrollingSpeed[dim]) < MathUtil.ZeroTolerance && (!TouchScrollingEnabled || !IsUserScrollingViewer);
-                if (shouldFadeOutScrollingBar)
-                    for (var i = 0; i < 4; i++)
-                        scrollBars[dim].BarColorInternal[i] = (byte)Math.Max(0, scrollBars[dim].BarColorInternal[i] - ScrollBarColor[i] * ScrollBarHidingSpeed * elapsedSeconds);
-                else
-                    scrollBars[dim].BarColor = ScrollBarColor;
+                // Smoothly hide the scroll bars if the no movements
+                foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
+                {
+                    var shouldFadeOutScrollingBar = Math.Abs(CurrentScrollingSpeed[index]) < MathUtil.ZeroTolerance && (!TouchScrollingEnabled || !IsUserScrollingViewer);
+                    var sb = scrollBars[index];
+                    if (shouldFadeOutScrollingBar)
+                    {
+                        if (sb.BarColorInternal != Color.Zero)
+                        {
+                            for (var i = 0; i < 4; i++)
+                                sb.BarColorInternal[i] = (byte)Math.Max(0, sb.BarColorInternal[i] - ScrollBarColor[i] * ScrollBarHidingSpeed * elapsedSeconds);
+                            // redraw needed
+                            IsDirty = true;
+                        }
+                    }
+                    else
+                    {
+                        if (sb.BarColorInternal != ScrollBarColor)
+                        {
+                            sb.BarColorInternal = ScrollBarColor;
+                            // redraw needed
+                            IsDirty = true;
+                        }
+                    }
+                }
             }
 
             lastFrameTranslation = Vector3.Zero;
@@ -723,7 +766,13 @@ namespace Xenko.UI.Controls
                 for (var dim = 0; dim < 3; dim++)
                     barSize[dim] = dim == index ? barLength : Math.Min(ScrollBarThickness, ViewPort[dim]);
 
-                scrollBars[index].Arrange(barSize, IsCollapsed);
+                var sb = scrollBars[index];
+                sb.Arrange(barSize, IsCollapsed);
+
+                if (!ScrollBarHidesNoActivity)
+                {
+                    sb.BarColor = barLength < ViewPort[index] ? ScrollBarColor : transparent;
+                }
             }
         }
 
@@ -745,6 +794,9 @@ namespace Xenko.UI.Controls
 
             // force re-calculation of main element and scroll bars world matrices
             ArrangeChanged = true;
+
+            // redraw needed
+            IsDirty = true;
         }
 
         protected override void UpdateWorldMatrix(ref Matrix parentWorldMatrix, bool parentWorldChanged)
