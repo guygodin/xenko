@@ -53,6 +53,11 @@ namespace Xenko.UI.Controls
         protected Vector3 CurrentScrollingSpeed;
 
         /// <summary>
+        /// True if any direction of the content can be scrolled.
+        /// </summary>
+        protected bool CanScrollContent;
+
+        /// <summary>
         /// Indicate if the user is currently touching the scroll viewer and performing a scroll gesture with its finger.
         /// </summary>
         public bool IsUserScrollingViewer
@@ -713,8 +718,10 @@ namespace Xenko.UI.Controls
                 var childSizeWithoutPadding = CalculateSizeWithoutThickness(ref finalSizeWithoutMargins, ref padding);
                 foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
                 {
-                    if (ContentAsScrollInfo == null || !ContentAsScrollInfo.CanScroll((Orientation)index))
-                        childSizeWithoutPadding[index] = Math.Max(VisualContent.DesiredSizeWithMargins[index], childSizeWithoutPadding[index]);
+                    if (ContentAsScrollInfo != null && ContentAsScrollInfo.CanScroll((Orientation)index))
+                        continue;
+
+                    childSizeWithoutPadding[index] = Math.Max(VisualContent.DesiredSizeWithMargins[index], childSizeWithoutPadding[index]);
                 }
 
                 // arrange the child
@@ -753,12 +760,17 @@ namespace Xenko.UI.Controls
             foreach (var scrollBar in scrollBars)
                 scrollBar.Arrange(Vector3.Zero, false);
 
+            CanScrollContent = false;
+
             // set the size of the bar we want to show
             foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
             {
                 var sizeChildren = (ContentAsScrollInfo != null) ?
                     ContentAsScrollInfo.Extent[index] :
                     VisualContent.RenderSize[index] + VisualContent.MarginInternal[index] + VisualContent.MarginInternal[3 + index];
+
+                if (sizeChildren > ViewPort[index])
+                    CanScrollContent = true;
 
                 var barLength = Math.Min(1f, ViewPort[index] / sizeChildren) * ViewPort[index];
 
@@ -780,10 +792,13 @@ namespace Xenko.UI.Controls
         {
             // calculate the offsets to move the element of
             var offsets = ScrollOffsets;
-            for (var i = 0; i < 3; i++)
+            if (ContentAsScrollInfo != null)
             {
-                if (ContentAsScrollInfo != null && ContentAsScrollInfo.CanScroll((Orientation)i))
-                    offsets[i] = ContentAsScrollInfo.Offset[i];
+                for (var i = 0; i < 3; i++)
+                {
+                    if (ContentAsScrollInfo.CanScroll((Orientation)i))
+                        offsets[i] = ContentAsScrollInfo.Offset[i];
+                }
             }
 
             // compute the rendering offsets of the child element wrt the parent origin (0,0,0)
@@ -840,6 +855,9 @@ namespace Xenko.UI.Controls
         {
             base.OnPreviewTouchDown(args);
 
+            if (!CanScrollContent)
+                return;
+
             StopCurrentScrolling();
             accumulatedTranslation = Vector3.Zero;
             IsTouchedDown = true;
@@ -851,11 +869,12 @@ namespace Xenko.UI.Controls
 
             if (IsUserScrollingViewer)
             {
-                args.Handled = true;
                 RaiseLeaveTouchEventToHierarchyChildren(this, args);
+                args.Handled = true;
+
+                IsUserScrollingViewer = false;
             }
 
-            IsUserScrollingViewer = false;
             IsTouchedDown = false;
         }
 
@@ -879,7 +898,7 @@ namespace Xenko.UI.Controls
         {
             base.OnPreviewTouchMove(args);
 
-            if (ScrollMode == ScrollingMode.None || !TouchScrollingEnabled || !IsTouchedDown)
+            if (!IsTouchedDown || ScrollMode == ScrollingMode.None || !TouchScrollingEnabled)
                 return;
 
             // accumulate all the touch moves of the frame
@@ -903,19 +922,12 @@ namespace Xenko.UI.Controls
             if (parent == null)
                 return;
 
-            var argsCopy = new TouchEventArgs
-            {
-                Action = args.Action,
-                ScreenPosition = args.ScreenPosition,
-                ScreenTranslation = args.ScreenTranslation,
-                Timestamp = args.Timestamp
-            };
-
             foreach (var child in parent.VisualChildrenCollection)
             {
                 if (child.IsTouched)
                 {
-                    child.RaiseTouchLeaveEvent(argsCopy);
+                    args.Handled = false; // reset 'handled'
+                    child.RaiseTouchLeaveEvent(args);
                     RaiseLeaveTouchEventToHierarchyChildren(child, args);
                 }
             }
