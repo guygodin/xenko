@@ -52,10 +52,10 @@ namespace Xenko.UI
         private float depth = float.NaN;
         private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Stretch;
         private VerticalAlignment verticalAlignment = VerticalAlignment.Stretch;
-        private DepthAlignment depthAlignment = DepthAlignment.Center;
-        private float maximumWidth = float.PositiveInfinity;
-        private float maximumHeight = float.PositiveInfinity;
-        private float maximumDepth = float.PositiveInfinity;
+        private DepthAlignment depthAlignment = DepthAlignment.Front;
+        private float maximumWidth = float.MaxValue;
+        private float maximumHeight = float.MaxValue;
+        private float maximumDepth = float.MaxValue;
         private float minimumWidth;
         private float minimumHeight;
         private float minimumDepth;
@@ -160,8 +160,13 @@ namespace Xenko.UI
                 if (value == visibility)
                     return;
 
+                // not all changes need to invalidate measure
+                var invalidateMeasure = IsCollapsed || value == Visibility.Collapsed;
+
                 visibility = value;
-                InvalidateMeasure();
+
+                if (invalidateMeasure)
+                    InvalidateMeasure();
             }
         }
 
@@ -174,7 +179,7 @@ namespace Xenko.UI
         [DataMember]
         [Display(category: AppearanceCategory)]
         [DefaultValue(false)]
-        public bool ClipToBounds { get; set; } = false;
+        public bool ClipToBounds { get; set; }
 
         /// <summary>
         /// The number of layers used to draw this element.
@@ -327,7 +332,7 @@ namespace Xenko.UI
         /// <userdoc>Depth alignment of this element.</userdoc>
         [DataMember]
         [Display(category: LayoutCategory)]
-        [DefaultValue(DepthAlignment.Center)]
+        [DefaultValue(DepthAlignment.Front)]
         public DepthAlignment DepthAlignment
         {
             get => depthAlignment;
@@ -370,7 +375,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                minimumWidth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == minimumWidth)
+                    return;
+                minimumWidth = value;
                 InvalidateMeasure();
             }
         }
@@ -391,7 +399,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                minimumHeight = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == minimumHeight)
+                    return;
+                minimumHeight = value;
                 InvalidateMeasure();
             }
         }
@@ -412,7 +423,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                minimumDepth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == minimumDepth)
+                    return;
+                minimumDepth = value;
                 InvalidateMeasure();
             }
         }
@@ -425,7 +439,7 @@ namespace Xenko.UI
         [DataMember]
         [DataMemberRange(0.0f, 3)]
         [Display(category: LayoutCategory)]
-        [DefaultValue(float.PositiveInfinity)]
+        [DefaultValue(float.MaxValue)]
         public float MaximumWidth
         {
             get => maximumWidth;
@@ -433,7 +447,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                maximumWidth = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == maximumWidth)
+                    return;
+                maximumWidth = value;
                 InvalidateMeasure();
             }
         }
@@ -446,7 +463,7 @@ namespace Xenko.UI
         [DataMember]
         [DataMemberRange(0.0f, 3)]
         [Display(category: LayoutCategory)]
-        [DefaultValue(float.PositiveInfinity)]
+        [DefaultValue(float.MaxValue)]
         public float MaximumHeight
         {
             get => maximumHeight;
@@ -454,7 +471,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                maximumHeight = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == maximumHeight)
+                    return;
+                maximumHeight = value;
                 InvalidateMeasure();
             }
         }
@@ -467,7 +487,7 @@ namespace Xenko.UI
         [DataMember]
         [DataMemberRange(0.0f, 3)]
         [Display(category: LayoutCategory)]
-        [DefaultValue(float.PositiveInfinity)]
+        [DefaultValue(float.MaxValue)]
         public float MaximumDepth
         {
             get => maximumDepth;
@@ -475,7 +495,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                maximumDepth = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == maximumDepth)
+                    return;
+                maximumDepth = value;
                 InvalidateMeasure();
             }
         }
@@ -496,7 +519,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                defaultWidth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == defaultWidth)
+                    return;
+                defaultWidth = value;
                 InvalidateMeasure();
             }
         }
@@ -517,7 +543,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                defaultHeight = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == defaultHeight)
+                    return;
+                defaultHeight = value;
                 InvalidateMeasure();
             }
         }
@@ -538,7 +567,10 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
-                defaultDepth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                if (value == defaultDepth)
+                    return;
+                defaultDepth = value;
                 InvalidateMeasure();
             }
         }
@@ -565,6 +597,9 @@ namespace Xenko.UI
 
         [DataMemberIgnore]
         public bool IsDirty { get; set; }
+
+        [DataMemberIgnore]
+        public Rectangle Bounds { get; set; }
 
         /// <summary>
         /// Gets the size that this element computed during the measure pass of the layout process.
@@ -620,6 +655,7 @@ namespace Xenko.UI
         /// <summary>
         /// The ratio between the element real size on the screen and the element virtual size.
         /// </summary>
+        [DataMemberIgnore]
         public LayoutingContext LayoutingContext
         {
             get => layoutingContext;
@@ -640,6 +676,7 @@ namespace Xenko.UI
 
         private UIElementServices uiElementServices;
 
+        [DataMemberIgnore]
         public UIElementServices UIElementServices
         {
             get
@@ -898,7 +935,7 @@ namespace Xenko.UI
             }
 
             // variable containing the temporary desired size
-            var desiredSize = new Vector3(Width, Height, Depth);
+            var desiredSize = Size;
 
             // width, height or the depth of the UIElement might be undetermined
             // -> compute the desired size of the children to determine it
@@ -997,7 +1034,7 @@ namespace Xenko.UI
             }
 
             // initialize the element size with the user suggested size (maybe NaN if not set)
-            var elementSize = new Vector3(Width, Height, Depth);
+            var elementSize = Size;
 
             // stretch the element if the user size is unspecified and alignment constraints requires it
             var finalSizeWithoutMargins = CalculateSizeWithoutThickness(ref finalSizeWithMargins, ref MarginInternal);

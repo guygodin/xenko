@@ -44,4 +44,31 @@ namespace Xenko.UI
         /// <userdoc>Both in-depth and horizontal scrolling are allowed.</userdoc>
         InDepthHorizontal,
     }
+
+    /// <summary>
+    /// The different ways of scrolling in a <see cref="Controls.ScrollViewer"/>.
+    /// </summary>
+    public enum ScrollingMode2D
+    {
+        /// <summary>
+        /// No scrolling is allowed.
+        /// </summary>
+        /// <userdoc>No scrolling is allowed.</userdoc>
+        None,
+        /// <summary>
+        /// Only horizontal scrolling is allowed.
+        /// </summary>
+        /// <userdoc>Only horizontal scrolling is allowed.</userdoc>
+        Horizontal,
+        /// <summary>
+        /// Only vertical scrolling is allowed.
+        /// </summary>
+        /// <userdoc>Only vertical scrolling is allowed.</userdoc>
+        Vertical,
+        /// <summary>
+        /// Both horizontal and vertical scrolling are allowed.
+        /// </summary>
+        /// <userdoc>Both horizontal and vertical scrolling are allowed.</userdoc>
+        HorizontalVertical,
+    }
 }

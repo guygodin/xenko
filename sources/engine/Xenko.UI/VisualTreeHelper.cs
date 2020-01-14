@@ -83,27 +83,23 @@ namespace Xenko.UI
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (getParentFunc == null) throw new ArgumentNullException(nameof(getParentFunc));
 
-            while (true)
+            while (source != null)
             {
                 // try to get visual parent
                 var parent = getParentFunc(source);
 
-                if (parent != null)
+                if (parent is T t)
                 {
-                    if (parent is T)
-                    {
-                        // parent is of requested type, returned casted
-                        return parent as T;
-                    }
-
-                    // there is a parent but not of request type, let's keep traversing the tree up
-                    source = parent;
-                    continue;
+                    // parent is of requested type, returned casted
+                    return t;
                 }
 
-                // failed to find visual parent
-                return null;
+                // let's keep traversing the tree up
+                source = parent;
             }
+
+            // failed to find visual parent
+            return null;
         }
 
         /// <summary>
@@ -126,8 +122,8 @@ namespace Xenko.UI
                 var child = getChildFunc(source, i);
                 if (child != null)
                 {
-                    if (child is T)
-                        yield return child as T;
+                    if (child is T t)
+                        yield return t;
 
                     foreach (var subChild in FindChildrenOfType<T>(child, getChildrenCountFunc, getChildFunc).NotNull())
                     {

@@ -233,9 +233,18 @@ namespace Xenko.Graphics
             matrix.M21 *= elementSize.Y;
             matrix.M22 *= elementSize.Y;
             matrix.M23 *= elementSize.Y;
-            matrix.M31 *= elementSize.Z;
-            matrix.M32 *= elementSize.Z;
-            matrix.M33 *= elementSize.Z;
+            if (elementSize.Z != 0f)
+            {
+                matrix.M31 *= elementSize.Z;
+                matrix.M32 *= elementSize.Z;
+                matrix.M33 *= elementSize.Z;
+            }
+            else
+            {
+                matrix.M31 = 0f;
+                matrix.M32 = 0f;
+                matrix.M33 = 0f;
+            }
 
             Matrix worldViewProjection;
             Matrix.Multiply(ref matrix, ref viewProjectionMatrix, out worldViewProjection);
@@ -295,9 +304,18 @@ namespace Xenko.Graphics
             matrix.M21 *= elementSize.Y;
             matrix.M22 *= elementSize.Y;
             matrix.M23 *= elementSize.Y;
-            matrix.M31 *= elementSize.Z;
-            matrix.M32 *= elementSize.Z;
-            matrix.M33 *= elementSize.Z;
+            if (elementSize.Z != 0f)
+            {
+                matrix.M31 *= elementSize.Z;
+                matrix.M32 *= elementSize.Z;
+                matrix.M33 *= elementSize.Z;
+            }
+            else
+            {
+                matrix.M31 = 0f;
+                matrix.M32 = 0f;
+                matrix.M33 = 0f;
+            }
 
             Matrix worldViewProjection;
             Matrix.Multiply(ref matrix, ref viewProjectionMatrix, out worldViewProjection);
@@ -348,12 +366,27 @@ namespace Xenko.Graphics
                 ColorAdd = new Color(0, 0, 0, 0),
                 Swizzle = swizzle,
                 SnapImage = snapImage,
-                Primitive = borderSize == Vector4.Zero ? PrimitiveType.Rectangle : PrimitiveType.BorderRectangle,
-                BorderSize = new Vector4(borderSize.X / sourceRectangle.Width, borderSize.Y / sourceRectangle.Height, borderSize.Z / sourceRectangle.Width, borderSize.W / sourceRectangle.Height),
             };
 
-            var rotatedSize = imageOrientation == ImageOrientation.AsIs ? elementSize : new Vector3(elementSize.Y, elementSize.X, 0);
-            drawInfo.VertexShift = new Vector4(borderSize.X / rotatedSize.X, borderSize.Y / rotatedSize.Y, 1f - borderSize.Z / rotatedSize.X, 1f - borderSize.W / rotatedSize.Y);
+            int verticesPerElement, indicesPerElement;
+
+            if (borderSize != Vector4.Zero)
+            {
+                drawInfo.Primitive = PrimitiveType.BorderRectangle;
+                verticesPerElement = 16; // 4 rows x 4 columns points
+                indicesPerElement = 54; // 9 quads * 6 indeces/quad
+
+                drawInfo.BorderSize = new Vector4(borderSize.X / sourceRectangle.Width, borderSize.Y / sourceRectangle.Height, borderSize.Z / sourceRectangle.Width, borderSize.W / sourceRectangle.Height);
+
+                var rotatedSize = imageOrientation == ImageOrientation.AsIs ? elementSize : new Vector3(elementSize.Y, elementSize.X, 0);
+                drawInfo.VertexShift = new Vector4(borderSize.X / rotatedSize.X, borderSize.Y / rotatedSize.Y, 1f - borderSize.Z / rotatedSize.X, 1f - borderSize.W / rotatedSize.Y);
+            }
+            else
+            {
+                drawInfo.Primitive = PrimitiveType.Rectangle;
+                verticesPerElement = 4;
+                indicesPerElement = 6;
+            }
 
             var matrix = worldMatrix;
             matrix.M11 *= elementSize.X;
@@ -362,9 +395,18 @@ namespace Xenko.Graphics
             matrix.M21 *= elementSize.Y;
             matrix.M22 *= elementSize.Y;
             matrix.M23 *= elementSize.Y;
-            matrix.M31 *= elementSize.Z;
-            matrix.M32 *= elementSize.Z;
-            matrix.M33 *= elementSize.Z;
+            if (elementSize.Z != 0f)
+            {
+                matrix.M31 *= elementSize.Z;
+                matrix.M32 *= elementSize.Z;
+                matrix.M33 *= elementSize.Z;
+            }
+            else
+            {
+                matrix.M31 = 0f;
+                matrix.M32 = 0f;
+                matrix.M33 = 0f;
+            }
 
             Matrix worldViewProjection;
             Matrix.Multiply(ref matrix, ref viewProjectionMatrix, out worldViewProjection);
@@ -381,14 +423,6 @@ namespace Xenko.Graphics
                 leftTopCorner = new Vector4(-0.5f, 0.5f, 0, 1);
             }
             Vector4.Transform(ref leftTopCorner, ref worldViewProjection, out drawInfo.LeftTopCornerWorld);
-
-            var verticesPerElement = 4;
-            var indicesPerElement = 6;
-            if (drawInfo.Primitive == PrimitiveType.BorderRectangle)
-            {
-                verticesPerElement = 16;
-                indicesPerElement = 54;
-            }
 
             var elementInfo = new ElementInfo(verticesPerElement, indicesPerElement, ref drawInfo, depthBias);
 
@@ -508,7 +542,8 @@ namespace Xenko.Graphics
         private static unsafe void CalculateCubeVertices(UIImageDrawInfo* drawInfo, VertexPositionColorTextureSwizzle* vertex)
         {
             var currentPosition = drawInfo->LeftTopCornerWorld;
-            
+            var depthBiasFactor = drawInfo->DepthBias * DepthBiasShiftOneUnit;
+
             // set the two first line of vertices
             for (var l = 0; l < 2; ++l)
             {
@@ -525,7 +560,7 @@ namespace Xenko.Graphics
 
                         vertex->Position.X = currentPosition.X;
                         vertex->Position.Y = currentPosition.Y;
-                        vertex->Position.Z = currentPosition.Z - currentPosition.W * drawInfo->DepthBias * DepthBiasShiftOneUnit;
+                        vertex->Position.Z = currentPosition.Z - currentPosition.W * depthBiasFactor;
                         vertex->Position.W = currentPosition.W;
 
                         vertex++;
@@ -549,27 +584,46 @@ namespace Xenko.Graphics
         private unsafe void CalculateBorderRectangleVertices(UIImageDrawInfo* drawInfo, VertexPositionColorTextureSwizzle* vertex)
         {
             // set the texture uv vectors
-            var uvX = new Vector4();
-            uvX[0] = drawInfo->Source.Left;
-            uvX[3] = drawInfo->Source.Right;
-            uvX[1] = uvX[0] + drawInfo->Source.Width * drawInfo->BorderSize.X;
-            uvX[2] = uvX[3] - drawInfo->Source.Width * drawInfo->BorderSize.Z;
-            var uvY = new Vector4();
-            uvY[0] = drawInfo->Source.Top;
-            uvY[3] = drawInfo->Source.Bottom;
-            uvY[1] = uvY[0] + drawInfo->Source.Height * drawInfo->BorderSize.Y;
-            uvY[2] = uvY[3] - drawInfo->Source.Height * drawInfo->BorderSize.W;
+            var left = drawInfo->Source.Left;
+            var right = drawInfo->Source.Right;
+            var uvX = new Vector4(left, left, right, right);
+            if (drawInfo->BorderSize.X != 0f)
+                uvX[1] = left + drawInfo->Source.Width * drawInfo->BorderSize.X;
+            if (drawInfo->BorderSize.Z != 0f)
+                uvX[2] = right - drawInfo->Source.Width * drawInfo->BorderSize.Z;
+
+            var top = drawInfo->Source.Top;
+            var bottom = drawInfo->Source.Bottom;
+            var uvY = new Vector4(top, top, bottom, bottom);
+            if (drawInfo->BorderSize.Y != 0f)
+                uvY[1] = top + drawInfo->Source.Height * drawInfo->BorderSize.Y;
+            if (drawInfo->BorderSize.W != 0f)
+                uvY[2] = bottom - drawInfo->Source.Height * drawInfo->BorderSize.W;
 
             // set the shift vectors
             shiftVectorX[0] = Vector4.Zero;
-            Vector4.Multiply(ref drawInfo->UnitXWorld, drawInfo->VertexShift.X, out shiftVectorX[1]);
-            Vector4.Multiply(ref drawInfo->UnitXWorld, drawInfo->VertexShift.Z, out shiftVectorX[2]);
+            if (drawInfo->VertexShift.X != 0f)
+                Vector4.Multiply(ref drawInfo->UnitXWorld, drawInfo->VertexShift.X, out shiftVectorX[1]);
+            else
+                shiftVectorX[1] = Vector4.Zero;
+            if (drawInfo->VertexShift.Z != 1f)
+                Vector4.Multiply(ref drawInfo->UnitXWorld, drawInfo->VertexShift.Z, out shiftVectorX[2]);
+            else
+                shiftVectorX[2] = drawInfo->UnitXWorld;
             shiftVectorX[3] = drawInfo->UnitXWorld;
 
             shiftVectorY[0] = Vector4.Zero;
-            Vector4.Multiply(ref drawInfo->UnitYWorld, drawInfo->VertexShift.Y, out shiftVectorY[1]);
-            Vector4.Multiply(ref drawInfo->UnitYWorld, drawInfo->VertexShift.W, out shiftVectorY[2]);
+            if (drawInfo->VertexShift.Y != 0f)
+                Vector4.Multiply(ref drawInfo->UnitYWorld, drawInfo->VertexShift.Y, out shiftVectorY[1]);
+            else
+                shiftVectorY[1] = Vector4.Zero;
+            if (drawInfo->VertexShift.W != 1f)
+                Vector4.Multiply(ref drawInfo->UnitYWorld, drawInfo->VertexShift.W, out shiftVectorY[2]);
+            else
+                shiftVectorY[2] = drawInfo->UnitYWorld;
             shiftVectorY[3] = drawInfo->UnitYWorld;
+
+            var depthBiasFactor = drawInfo->DepthBias * DepthBiasShiftOneUnit;
 
             for (var r = 0; r < 4; r++)
             {
@@ -583,7 +637,7 @@ namespace Xenko.Graphics
 
                     vertex->Position.X = currentPosition.X;
                     vertex->Position.Y = currentPosition.Y;
-                    vertex->Position.Z = currentPosition.Z - currentPosition.W * drawInfo->DepthBias * DepthBiasShiftOneUnit;
+                    vertex->Position.Z = currentPosition.Z - currentPosition.W * depthBiasFactor;
                     vertex->Position.W = currentPosition.W;
 
                     vertex->ColorScale = drawInfo->ColorScale;
@@ -621,6 +675,8 @@ namespace Xenko.Graphics
             var textureCoordX = new Vector2(drawInfo->Source.Left, drawInfo->Source.Right);
             var textureCoordY = new Vector2(drawInfo->Source.Top, drawInfo->Source.Bottom);
 
+            var depthBiasFactor = drawInfo->DepthBias * DepthBiasShiftOneUnit;
+
             // set the two first line of vertices
             for (var r = 0; r < 2; r++)
             {
@@ -634,7 +690,7 @@ namespace Xenko.Graphics
 
                     vertex->Position.X = currentPosition.X;
                     vertex->Position.Y = currentPosition.Y;
-                    vertex->Position.Z = currentPosition.Z - currentPosition.W * drawInfo->DepthBias * DepthBiasShiftOneUnit;
+                    vertex->Position.Z = currentPosition.Z - currentPosition.W * depthBiasFactor;
                     vertex->Position.W = currentPosition.W;
 
                     if (drawInfo->SnapImage)

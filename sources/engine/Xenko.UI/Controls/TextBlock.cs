@@ -1,6 +1,7 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
@@ -27,6 +28,8 @@ namespace Xenko.UI.Controls
 
         private string wrappedText;
 
+        public event EventHandler TextChanged;
+
         /// <summary>
         /// Returns the actual size of the text in virtual pixels unit.
         /// </summary>
@@ -51,6 +54,9 @@ namespace Xenko.UI.Controls
             get { return text; }
             set
             {
+                if (text == value)
+                    return;
+
                 text = value;
                 OnTextChanged();
             }
@@ -186,8 +192,8 @@ namespace Xenko.UI.Controls
         /// <inheritdoc/>
         protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
         {
-            if (WrapText)
-                UpdateWrappedText(finalSizeWithoutMargins);
+            if (WrapText && !string.IsNullOrEmpty(text))
+                UpdateWrappedText(finalSizeWithoutMargins.X);
 
             return base.ArrangeOverride(finalSizeWithoutMargins);
         }
@@ -199,7 +205,7 @@ namespace Xenko.UI.Controls
         /// <returns>The size of the text in virtual pixels</returns>
         protected Vector2 CalculateTextSize(string textToMeasure)
         {
-            if (textToMeasure == null)
+            if (string.IsNullOrEmpty(textToMeasure))
                 return Vector2.Zero;
 
             return CalculateTextSize(new SpriteFont.StringProxy(textToMeasure));
@@ -208,10 +214,17 @@ namespace Xenko.UI.Controls
         /// <inheritdoc/>
         protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
         {
-            if (WrapText)
-                UpdateWrappedText(availableSizeWithoutMargins);
+            if (string.IsNullOrEmpty(text))
+            {
+                wrappedText = null;
+                return Vector3.Zero;
+            }
 
-            return new Vector3(CalculateTextSize(), 0);
+            if (WrapText)
+                UpdateWrappedText(availableSizeWithoutMargins.X);
+
+            var size = CalculateTextSize(new SpriteFont.StringProxy(TextToDisplay));
+            return new Vector3(size, 0);
         }
 
         /// <summary>
@@ -220,7 +233,15 @@ namespace Xenko.UI.Controls
         /// </summary>
         protected virtual void OnTextChanged()
         {
-            InvalidateMeasure();
+            TextChanged?.Invoke(this, EventArgs.Empty);
+
+            IsDirty = true;
+
+            // no need to re-measure if element is fixed size
+            if (float.IsNaN(Width) || float.IsNaN(Height))
+            {
+                InvalidateMeasure();
+            }
         }
 
         private Vector2 CalculateTextSize(StringBuilder textToMeasure)
@@ -247,8 +268,7 @@ namespace Xenko.UI.Controls
                 realSize.X /= sizeRatio.X;
                 realSize.Y /= sizeRatio.Y;
             }
-
-            if (Font.FontType == SpriteFontType.SDF)
+            else if (Font.FontType == SpriteFontType.SDF)
             {
                 var scaleRatio = ActualTextSize / Font.Size;
                 realSize.X *= scaleRatio;
@@ -258,16 +278,8 @@ namespace Xenko.UI.Controls
             return realSize;
         }
 
-        private void UpdateWrappedText(Vector3 availableSpace)
+        private void UpdateWrappedText(float availableWidth)
         {
-            if (string.IsNullOrEmpty(text))
-            {
-                wrappedText = string.Empty;
-
-                return;
-            }
-
-            var availableWidth = availableSpace.X;
             var currentLine = new StringBuilder(text.Length);
             var currentText = new StringBuilder(2 * text.Length);
 

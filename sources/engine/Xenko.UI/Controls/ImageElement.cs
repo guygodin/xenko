@@ -23,6 +23,8 @@ namespace Xenko.UI.Controls
         private StretchType stretchType = StretchType.Uniform;
         private StretchDirection stretchDirection = StretchDirection.Both;
 
+        public event EventHandler SpriteChanged;
+
         /// <summary>
         /// Gets or sets the <see cref="ISpriteProvider"/> for the image.
         /// </summary>
@@ -39,7 +41,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 source = value;
-                OnSpriteChanged(source?.GetSprite());
+                UpdateSprite();
             }
         }
 
@@ -98,11 +100,7 @@ namespace Xenko.UI.Controls
 
         protected override void Update(GameTime time)
         {
-            var currentSprite = source?.GetSprite();
-            if (sprite != currentSprite)
-            {
-                OnSpriteChanged(currentSprite);
-            }
+            UpdateSprite();
         }
 
         private void InvalidateMeasure(object sender, EventArgs eventArgs)
@@ -110,20 +108,36 @@ namespace Xenko.UI.Controls
             InvalidateMeasure();
         }
 
-        private void OnSpriteChanged(Sprite currentSprite)
+        private void UpdateSprite()
         {
+            var currentSprite = source?.GetSprite();
+            if (sprite == currentSprite)
+                return;
+
             if (sprite != null)
             {
                 sprite.SizeChanged -= InvalidateMeasure;
                 sprite.BorderChanged -= InvalidateMeasure;
             }
+
+            bool sizeChanged = sprite == null || currentSprite == null || currentSprite.SizeInPixels != sprite.SizeInPixels;
             sprite = currentSprite;
-            InvalidateMeasure();
+
             if (sprite != null)
             {
                 sprite.SizeChanged += InvalidateMeasure;
                 sprite.BorderChanged += InvalidateMeasure;
             }
+
+            // no need to re-measure if sprite size the same as before
+            if (sizeChanged)
+            {
+                InvalidateMeasure();
+            }
+
+            SpriteChanged?.Invoke(this, EventArgs.Empty);
+
+            IsDirty = true;
         }
     }
 }

@@ -16,6 +16,7 @@ PublicUIElements:
     9b996723-bbd3-44c3-9406-fdc49875d2a2: Canvas
     a35da784-9d42-4fe0-bd28-3eb547bc2812: ContentDecorator
     a7e881dd-2f09-49b3-a87e-08a54bbc0cee: ScrollViewer
+    b4bf1526-34a4-45a3-acb2-f690463aca0a: ScrollViewerRubberBand
     a89f94fa-840f-48d4-9b26-418e9e4a2358: UniformGrid
     d44fc541-dd44-4a50-897d-c406966fac51: ImageElement
     e8985e3a-8d82-40a6-adb1-76619eb19cd8: Button
@@ -36,6 +37,7 @@ Hierarchy:
         - !ScrollBar ref!! f23d4157-8437-4285-845d-5cab68bca82a
         - !ScrollingText ref!! 7d51286a-f844-48de-afe1-cb6b00e2dcb8
         - !ScrollViewer ref!! a7e881dd-2f09-49b3-a87e-08a54bbc0cee
+        - !ScrollViewerRubberBand ref!! b4bf1526-34a4-45a3-acb2-f690463aca0a
         - !TextBlock ref!! 6a778e64-1d79-44c8-b209-be1779349abb
         - !Canvas ref!! 9b996723-bbd3-44c3-9406-fdc49875d2a2
         - !Grid ref!! 72d195ac-472a-4f9b-8540-9f4f7d5fc53e
@@ -174,6 +176,16 @@ Hierarchy:
                 CanBeHitByUser: true
                 Margin: {}
                 Name: ScrollViewer
+                Padding: {}
+                ScrollBarColor: {R: 25, G: 25, B: 25, A: 255}
+        -   UIElement: !ScrollViewerRubberBand
+                Id: b4bf1526-34a4-45a3-acb2-f690463aca0a
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                ClipToBounds: true
+                CanBeHitByUser: true
+                Margin: {}
+                Name: ScrollViewerRubberBand
                 Padding: {}
                 ScrollBarColor: {R: 25, G: 25, B: 25, A: 255}
         -   UIElement: !UniformGrid

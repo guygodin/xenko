@@ -1,9 +1,11 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+using System.ComponentModel;
 using System.Diagnostics;
 using Xenko.Core;
 using Xenko.Core.Mathematics;
+using Xenko.Engine;
 
 namespace Xenko.UI.Controls
 {
@@ -14,12 +16,8 @@ namespace Xenko.UI.Controls
     [DebuggerDisplay("ScrollBar - Name={Name}")]
     public class ScrollBar : UIElement
     {
-        public ScrollBar()
-        {
-            BarColorInternal = new Color(0, 0, 0, 0);
-        }
-
-        internal Color BarColorInternal;
+        internal Color BarColorInternal = Color.Transparent;
+        internal bool RotateThumbImage;
 
         /// <summary>
         /// The color of the bar.
@@ -32,5 +30,14 @@ namespace Xenko.UI.Controls
             get { return BarColorInternal; }
             set { BarColorInternal = value; }
         }
+
+        /// <summary>
+        /// Gets or sets the image to display as slider thumb.
+        /// </summary>
+        /// <userdoc>The image to display as slider thumb.</userdoc>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        [DefaultValue(null)]
+        public ISpriteProvider ThumbImage { get; set; }
     }
 }

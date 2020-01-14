@@ -22,6 +22,7 @@ namespace Xenko.Rendering.Sprites
         /// </summary>
         /// <userdoc>The sheet that provides the sprites</userdoc>
         [DataMember]
+        [DefaultValue(null)]
         [InlineProperty(Expand = ExpandRule.Always)]
         public SpriteSheet Sheet { get; set; }
 

@@ -24,7 +24,11 @@ namespace Xenko.UI.Renderers
 
             var textBlock = (TextBlock)element;
 
-            if (textBlock.Font == null || textBlock.TextToDisplay == null)
+            if (textBlock.Font == null)
+                return;
+
+            var text = textBlock.TextToDisplay;
+            if (string.IsNullOrEmpty(text))
                 return;
             
             var drawCommand = new SpriteFont.InternalUIDrawCommand
@@ -43,17 +47,14 @@ namespace Xenko.UI.Renderers
             if (textBlock.Font.FontType == SpriteFontType.SDF)
             {
                 Batch.End();
-
-                Batch.BeginCustom(context.GraphicsContext, 1);                
-            }
-
-            Batch.DrawString(textBlock.Font, textBlock.TextToDisplay, ref drawCommand);
-
-            if (textBlock.Font.FontType == SpriteFontType.SDF)
-            {
+                Batch.BeginCustom(context.GraphicsContext, 1);
+                Batch.DrawString(textBlock.Font, text, ref drawCommand);
                 Batch.End();
-
                 Batch.BeginCustom(context.GraphicsContext, 0);
+            }
+            else
+            {
+                Batch.DrawString(textBlock.Font, text, ref drawCommand);
             }
         }
     }

@@ -135,6 +135,8 @@ namespace Xenko.UI.Controls
                     return;
 
                 state = value;
+                StateChanged?.Invoke(this, EventArgs.Empty);
+                IsDirty = true;
 
                 switch (value)
                 {
@@ -153,6 +155,8 @@ namespace Xenko.UI.Controls
                 }
             }
         }
+
+        public event EventHandler StateChanged;
 
         /// <summary>
         /// Occurs when a <see cref="ToggleButton"/> is checked.
