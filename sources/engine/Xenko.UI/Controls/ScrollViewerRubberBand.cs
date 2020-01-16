@@ -69,8 +69,8 @@ namespace Xenko.UI.Controls
 
         private readonly ScrollBar[] _scrollBars =
         {
-            new ScrollBar { Name = "Left/Right SB", Visibility = Visibility.Collapsed, RotateThumbImage = true },
-            new ScrollBar { Name = "Top/Bottom SB", Visibility = Visibility.Collapsed },
+            new ScrollBar { Name = "Left/Right SB", Margin = new Thickness(0, 0, 0, 2), Visibility = Visibility.Collapsed, RotateThumbImage = true },
+            new ScrollBar { Name = "Top/Bottom SB", Margin = new Thickness(0, 0, 2, 0), Visibility = Visibility.Collapsed },
         };
 
         private struct ScrollRequest
@@ -919,7 +919,7 @@ namespace Xenko.UI.Controls
                     }
                     else
                     {
-                        size = Math.Min(ScrollBarThickness, ViewPort[dim]);
+                        size = Math.Min(ScrollBarThickness + scrollBar.Margin[dim + 3], ViewPort[dim]);
                     }
                     barSize[dim] = size;
                 }
@@ -962,7 +962,8 @@ namespace Xenko.UI.Controls
                 foreach (var index in _scrollModeToDirectionIndices)
                 {
                     var scrollBar = _scrollBars[index];
-                    var barPosition = RenderSize / 2 - scrollBar.RenderSize;
+                    var barSize = CalculateSizeWithThickness(ref scrollBar.RenderSizeInternal, ref scrollBar.MarginInternal);
+                    var barPosition = RenderSize / 2 - barSize;
 
                     // adjust the position of the scroll bar
                     var renderSize = RenderSize[index];
@@ -978,7 +979,7 @@ namespace Xenko.UI.Controls
                             if (childMinusParent > MathUtil.ZeroTolerance)
                             {
                                 var scrollBarPositionRatio = _actualScrollOffsets.X / childMinusParent;
-                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize[index]);
+                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize.X);
                             }
                         }
                         else
@@ -987,7 +988,7 @@ namespace Xenko.UI.Controls
                             if (childMinusParent > MathUtil.ZeroTolerance)
                             {
                                 var scrollBarPositionRatio = _actualScrollOffsets.Y / childMinusParent;
-                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize[index]);
+                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize.Y);
                             }
                         }
                     }
