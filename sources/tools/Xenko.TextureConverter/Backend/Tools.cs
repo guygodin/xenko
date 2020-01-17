@@ -22,16 +22,51 @@ namespace Xenko.TextureConverter
         /// <param name="slicePitch">output slice pitch.</param>
         public static void ComputePitch(PixelFormat fmt, int width, int height, out int rowPitch, out int slicePitch)
         {
-            int widthCount = width;
-            int heightCount = height;
-
-            int bpp = fmt.SizeInBits();
+            var widthCount = width;
+            var heightCount = height;
 
             if (fmt.IsCompressed())
             {
-                widthCount = Math.Max(1, (width + 3) / 4);
-                heightCount = Math.Max(1, (height + 3) / 4);
-                rowPitch = widthCount * bpp;
+                int minWidth = 1;
+                int minHeight = 1;
+                int bpb = 8;
+
+                switch (fmt)
+                {
+                    case PixelFormat.BC1_Typeless:
+                    case PixelFormat.BC1_UNorm:
+                    case PixelFormat.BC1_UNorm_SRgb:
+                    case PixelFormat.BC4_Typeless:
+                    case PixelFormat.BC4_UNorm:
+                    case PixelFormat.BC4_SNorm:
+                    case PixelFormat.ETC1:
+                        bpb = 8;
+                        break;
+                    case PixelFormat.PVRTC_4bpp_RGB:
+                    case PixelFormat.PVRTC_4bpp_RGB_SRgb:
+                    case PixelFormat.PVRTC_4bpp_RGBA:
+                    case PixelFormat.PVRTC_4bpp_RGBA_SRgb:
+                    case PixelFormat.PVRTC_II_4bpp:
+                        minWidth = 8;
+                        minHeight = 8;
+                        break;
+                    case PixelFormat.PVRTC_2bpp_RGB:
+                    case PixelFormat.PVRTC_2bpp_RGB_SRgb:
+                    case PixelFormat.PVRTC_2bpp_RGBA:
+                    case PixelFormat.PVRTC_2bpp_RGBA_SRgb:
+                    case PixelFormat.PVRTC_II_2bpp:
+                        minWidth = 16;
+                        minHeight = 8;
+                        bpb = 4;
+                        break;
+                    default:
+                        bpb = 16;
+                        break;
+                }
+
+                widthCount = Math.Max(1, (Math.Max(minWidth, width) + 3)) / 4;
+                heightCount = Math.Max(1, (Math.Max(minHeight, height) + 3)) / 4;
+                rowPitch = widthCount * bpb;
 
                 slicePitch = rowPitch * heightCount;
             }
@@ -43,8 +78,7 @@ namespace Xenko.TextureConverter
             }
             else
             {
-                if (bpp == 0)
-                    bpp = fmt.SizeInBits();
+                var bpp = fmt.SizeInBits();
 
                 rowPitch = (width * bpp + 7) / 8;
                 slicePitch = rowPitch * height;
