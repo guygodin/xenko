@@ -26,6 +26,7 @@ namespace Xenko.UI.Renderers
             typeToRenderers[typeof(ContentDecorator)] = new DefaultContentDecoratorRenderer(services);
             typeToRenderers[typeof(EditText)] = new DefaultEditTextRenderer(services);
             typeToRenderers[typeof(ImageElement)] = new DefaultImageRenderer(services);
+            typeToRenderers[typeof(AnimatedImageElement)] = new DefaultAnimatedImageRenderer(services);
             typeToRenderers[typeof(ModalElement)] = new DefaultModalElementRenderer(services);
             typeToRenderers[typeof(ScrollBar)] = new DefaultScrollBarRenderer(services);
             typeToRenderers[typeof(ScrollingText)] = new DefaultScrollingTextRenderer(services);
