@@ -784,10 +784,30 @@ namespace Xenko.UI.Controls
                     minimumOffset = ViewPort.Y - _contentRenderSizeWithPadding.Y;
                 }
 
-                var canScrollContent = minimumOffset < 0f;
+                if (_rubberBandEntered)
+                {
+                    var endRubberBand = (_rubberBandUpSpace && offset <= 0f) || (!_rubberBandUpSpace && offset >= 0f);
+                    if (endRubberBand)
+                    {
+                        if (_rubberBandEasingOut)
+                        {
+                            _rubberBandEasingOut = false;
+                            offset = _rubberBandStartOffset;
+                            _currentScrollingSpeed[index] = 0f;
+                        }
+                        _rubberBandEntered = false;
+                        if (_refreshInitiated)
+                        {
+                            _refreshInitiated = false;
+                            EndRefresh();
+                        }
+                        UpdateScrollingBarsSize();
+                    }
+                }
 
                 if (!_rubberBandEntered)
                 {
+                    var canScrollContent = minimumOffset < 0f;
                     // reached the offset limit?
                     var aboveLeftLimit = offset > 0f;
                     if (!canScrollContent || aboveLeftLimit || offset < minimumOffset)
@@ -810,30 +830,6 @@ namespace Xenko.UI.Controls
                             offset = newOffset;
                             _currentScrollingSpeed[index] = 0f;
                         }
-                    }
-                }
-                else
-                {
-                    bool endRubberBand;
-                    if (!canScrollContent)
-                        endRubberBand = (_rubberBandUpSpace && offset <= 0f) || (!_rubberBandUpSpace && offset >= 0f);
-                    else
-                        endRubberBand = offset <= 0f && offset >= minimumOffset;
-                    if (endRubberBand)
-                    {
-                        if (_rubberBandEasingOut)
-                        {
-                            _rubberBandEasingOut = false;
-                            offset = _rubberBandStartOffset;
-                            _currentScrollingSpeed[index] = 0f;
-                        }
-                        _rubberBandEntered = false;
-                        if (_refreshInitiated)
-                        {
-                            _refreshInitiated = false;
-                            EndRefresh();
-                        }
-                        UpdateScrollingBarsSize();
                     }
                 }
 
