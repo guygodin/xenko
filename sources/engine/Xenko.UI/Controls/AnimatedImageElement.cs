@@ -4,106 +4,99 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using Xenko.Core;
-using Xenko.Core.Mathematics;
 using Xenko.Engine;
 using Xenko.Games;
-using Xenko.Graphics;
-using Xenko.Rendering.Sprites;
 
 namespace Xenko.UI.Controls
 {
-    /// <summary>
-    /// Represents a control that displays an image.
-    /// </summary>
     [DataContract(nameof(AnimatedImageElement))]
     [DebuggerDisplay("AnimatedImageElement - Name={Name}")]
-    public class AnimatedImageElement : UIElement
+    public class AnimatedImageElement : ImageElement
     {
-        private SpriteFromSheet source;
-        private Sprite sprite;
-        private Vector3 desiredSize;
+        private bool isAnimating = true;
+        private bool checkCanAnimate = true;
+        private bool restart;
         private int frames;
         private long frameTicks;
-        private bool visible;
         private long startTicks;
 
-        public event EventHandler SpriteChanged;
-
         /// <summary>
-        /// Gets or sets the <see cref="ISpriteProvider"/> for the image.
+        /// If true, the image element will automatically animate the frames when visible.
         /// </summary>
-        /// <userdoc>The provider for the image.</userdoc>
         [DataMember]
-        [Display(category: AppearanceCategory)]
-        [DefaultValue(null)]
-        public ISpriteProvider Source
+        [Display(category: BehaviorCategory)]
+        [DefaultValue(true)]
+        public bool IsAnimating
         {
-            get { return source; }
+            get { return isAnimating; }
             set
             {
-                if (source == value)
+                if (value == isAnimating)
                     return;
 
-                source = value as SpriteFromSheet;
-                sprite = source?.GetSprite();
-
-                if (sprite != null)
-                {
-                    desiredSize = new Vector3(sprite.SizeInPixels, 0f);
-                    frames = source.SpritesCount;
-                    frameTicks = TimeSpan.FromSeconds(1.0 / frames).Ticks;
-                }
-                else
-                {
-                    desiredSize = Vector3.Zero;
-                    frames = 0;
-                }
-                InvalidateMeasure();
+                isAnimating = value;
+                restart = true;
             }
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
-        {
-            return desiredSize;
-        }
+        [DataMemberIgnore]
+        public bool CanAnimate { get; private set; }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override void OnSourceChanged()
         {
-            return desiredSize;
+            base.OnSourceChanged();
+            checkCanAnimate = true;
         }
 
         protected override void Update(GameTime time)
         {
-            var isVisible = IsVisible && frames >= 2;
-            if (isVisible != visible)
+            // I have to wait until Update for the sprites to be loaded/populated in the sheet
+            if (checkCanAnimate)
             {
-                visible = isVisible;
-                if (visible)
+                checkCanAnimate = false;
+
+                CanAnimate = false;
+                if (Source is IAnimatableSpriteProvider spriteProvider)
                 {
-                    // start animation
-                    SetCurrentFrame(0);
-                    startTicks = time.Total.Ticks;
+                    frames = Source.SpritesCount;
+                    if (frames >= 2)
+                    {
+                        CanAnimate = true;
+                        frameTicks = TimeSpan.FromSeconds(1.0 / frames).Ticks;
+                        restart = true;
+                    }
                 }
             }
-            else if (visible)
+
+            var isVisible = IsVisible;
+            if (!isVisible)
             {
-                if ((time.Total.Ticks - startTicks) >= frameTicks)
+                restart = true;
+                return;
+            }
+
+            if (IsAnimating && CanAnimate)
+            {
+                if (restart)
                 {
-                    SetCurrentFrame((source.CurrentFrame + 1) % frames);
+                    restart = false;
+
+                    // start animation
+                    ((IAnimatableSpriteProvider)Source).CurrentFrame = 0;
+                    startTicks = time.Total.Ticks;
+                }
+                else
+                {
+                    if ((time.Total.Ticks - startTicks) < frameTicks)
+                        return;
+
+                    var spriteProvider = (IAnimatableSpriteProvider)Source;
+                    spriteProvider.CurrentFrame = (spriteProvider.CurrentFrame + 1) % frames;
                     startTicks += frameTicks;
                 }
             }
-        }
 
-        private void SetCurrentFrame(int index)
-        {
-            if (index != source.CurrentFrame)
-            {
-                source.CurrentFrame = index;
-                sprite = source.GetSprite();
-                IsDirty = true;
-                SpriteChanged?.Invoke(this, EventArgs.Empty);
-            }
+            base.Update(time);
         }
     }
 }

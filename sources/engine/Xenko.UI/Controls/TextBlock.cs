@@ -22,6 +22,7 @@ namespace Xenko.UI.Controls
     {
         private SpriteFont font;
         private string text;
+        private Color textColor = Color.FromAbgr(0xF0F0F0FF);
         private float textSize = float.NaN;
         private bool wrapText;
         private bool synchronousCharacterGeneration;
@@ -109,7 +110,17 @@ namespace Xenko.UI.Controls
         /// <userdoc>The color of the text.</userdoc>
         [DataMember]
         [Display(category: AppearanceCategory)]
-        public Color TextColor { get; set; } = Color.FromAbgr(0xF0F0F0FF);
+        public Color TextColor
+        {
+            get { return textColor; }
+            set
+            {
+                if (value == textColor)
+                    return;
+                textColor = value;
+                IsDirty = true;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the alignment of the text to display.
@@ -190,12 +201,12 @@ namespace Xenko.UI.Controls
         }
 
         /// <inheritdoc/>
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             if (WrapText && !string.IsNullOrEmpty(text))
                 UpdateWrappedText(finalSizeWithoutMargins.X);
 
-            return base.ArrangeOverride(finalSizeWithoutMargins);
+            return base.ArrangeOverride(ref finalSizeWithoutMargins);
         }
 
         /// <summary>
@@ -212,7 +223,7 @@ namespace Xenko.UI.Controls
         }
 
         /// <inheritdoc/>
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -235,13 +246,13 @@ namespace Xenko.UI.Controls
         {
             TextChanged?.Invoke(this, EventArgs.Empty);
 
-            IsDirty = true;
-
             // no need to re-measure if element is fixed size
             if (float.IsNaN(Width) || float.IsNaN(Height))
             {
                 InvalidateMeasure();
             }
+
+            IsDirty = true;
         }
 
         private Vector2 CalculateTextSize(StringBuilder textToMeasure)

@@ -25,8 +25,8 @@ namespace Xenko.UI.Events
             var currentType = ownerType;
             while (currentType != null)
             {
-                if (OwnerToEvents.ContainsKey(currentType) && OwnerToEvents[currentType].ContainsKey(eventName))
-                    return OwnerToEvents[currentType][eventName];
+                if (OwnerToEvents.TryGetValue(currentType, out var eventsMap) && eventsMap.TryGetValue(eventName, out var evnt))
+                    return evnt;
 
                 currentType = currentType.GetTypeInfo().BaseType;
             }
@@ -59,7 +59,15 @@ namespace Xenko.UI.Events
                 currentType = currentType.GetTypeInfo().BaseType;
             }
 
-            return types.Where(t => OwnerToEvents.ContainsKey(t)).SelectMany(t => OwnerToEvents[t].Values).ToArray();
+            var list = new List<RoutedEvent>();
+            foreach (var type in types)
+            {
+                if (OwnerToEvents.TryGetValue(type, out var eventsMap))
+                {
+                    list.AddRange(eventsMap.Values);
+                }
+            }
+            return list.ToArray();
         }
 
         /// <summary>
@@ -77,12 +85,15 @@ namespace Xenko.UI.Events
             if (routedEvent == null) throw new ArgumentNullException(nameof(routedEvent));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
-            lock(SyncRoot)
+            lock (SyncRoot)
             {
-                if (!ClassesToClassHandlers.ContainsKey(classType))
-                    ClassesToClassHandlers[classType] = new Dictionary<RoutedEvent, RoutedEventHandlerInfo>();
+                if (!ClassesToClassHandlers.TryGetValue(classType, out var infoMap))
+                {
+                    infoMap = new Dictionary<RoutedEvent, RoutedEventHandlerInfo>();
+                    ClassesToClassHandlers.Add(classType, infoMap);
+                }
 
-                ClassesToClassHandlers[classType][routedEvent] = new RoutedEventHandlerInfo<T>(handler, handledEventsToo); 
+                infoMap[routedEvent] = new RoutedEventHandlerInfo<T>(handler, handledEventsToo); 
             }
         }
 
@@ -101,8 +112,8 @@ namespace Xenko.UI.Events
             var currentType = classType;
             while (currentType != null)
             {
-                if (ClassesToClassHandlers.ContainsKey(currentType) && ClassesToClassHandlers[currentType].ContainsKey(routedEvent))
-                    return ClassesToClassHandlers[currentType][routedEvent];
+                if (ClassesToClassHandlers.TryGetValue(currentType, out var infoMap) && infoMap.TryGetValue(routedEvent, out var info))
+                    return info;
 
                 currentType = currentType.GetTypeInfo().BaseType;
             }
@@ -133,14 +144,17 @@ namespace Xenko.UI.Events
                 throw new InvalidOperationException("A routed event named '" + name + "' already exists in provided owner type '" + ownerType + "' or base classes.");
 
             var newRoutedEvent = new RoutedEvent<T> {  Name = name, OwnerType = ownerType, RoutingStrategy = routingStrategy, };
-            lock(SyncRoot)
+            lock (SyncRoot)
             {
                 RoutedEvents.Add(newRoutedEvent);
 
-                if (!OwnerToEvents.ContainsKey(ownerType))
-                    OwnerToEvents[ownerType] = new Dictionary<string, RoutedEvent>();
+                if (!OwnerToEvents.TryGetValue(ownerType, out var eventsMap))
+                {
+                    eventsMap = new Dictionary<string, RoutedEvent>();
+                    OwnerToEvents.Add(ownerType, eventsMap);
+                }
 
-                OwnerToEvents[ownerType][name] = newRoutedEvent; 
+                eventsMap[name] = newRoutedEvent; 
             }
 
             return newRoutedEvent;

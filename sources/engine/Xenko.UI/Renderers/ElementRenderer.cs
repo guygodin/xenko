@@ -78,10 +78,11 @@ namespace Xenko.UI.Renderers
         /// If the user wants to perform some intermediate rendering, it is his responsibility to bind them back correctly before the final rendering.</remarks>
         public virtual void RenderColor(UIElement element, UIRenderingContext context)
         {
-            var backgroundColor = element.RenderOpacity * element.BackgroundColor;
-
+            var backgroundColor = element.BackgroundColor;
+            if (element.RenderOpacity != 1f)
+                backgroundColor *= element.RenderOpacity;
             // optimization: don't draw the background if transparent
-            if (backgroundColor == new Color())
+            if (backgroundColor.A == 0)
                 return;
 
             // Default implementation: render an back-face cube with background color

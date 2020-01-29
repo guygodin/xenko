@@ -84,7 +84,7 @@ namespace Xenko.UI.Panels
             }
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // compute the size available for one cell
             var gridSize = new Vector3(Columns, Rows, Layers);
@@ -98,7 +98,7 @@ namespace Xenko.UI.Panels
                 var childSpans = GetElementSpanValuesAsFloat(child);
                 var availableForChildWithMargin = Vector3.Modulate(childSpans, availableForOneCell);
 
-                child.Measure(availableForChildWithMargin);
+                child.Measure(ref availableForChildWithMargin);
 
                 neededForOneCell = new Vector3(
                     Math.Max(neededForOneCell.X, child.DesiredSizeWithMargins.X / childSpans.X),
@@ -109,7 +109,7 @@ namespace Xenko.UI.Panels
             return Vector3.Modulate(gridSize, neededForOneCell);
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // compute the size available for one cell
             var gridSize = new Vector3(Columns, Rows, Layers);
@@ -127,7 +127,7 @@ namespace Xenko.UI.Panels
                 child.DependencyProperties.Set(PanelArrangeMatrixPropertyKey, Matrix.Translation(Vector3.Modulate(childOffsets, finalForOneCell) - finalSizeWithoutMargins / 2));
 
                 // arrange the child
-                child.Arrange(finalForChildWithMargin, IsCollapsed);
+                child.Arrange(ref finalForChildWithMargin, IsCollapsed);
             }
 
             return finalSizeWithoutMargins;

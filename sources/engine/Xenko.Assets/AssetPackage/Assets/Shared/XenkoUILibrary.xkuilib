@@ -3,7 +3,7 @@ Id: 79af0b55-a70f-4c7a-8f5b-967d55661736
 SerializedVersion: {Xenko: 2.1.0.1}
 Tags: []
 Design:
-    Resolution: {X: 128.0, Y: 72.0, Z: 100.0}
+    Resolution: {X: 128.0, Y: 72.0, Z: 1.0}
 PublicUIElements:
     1dfd7e9f-ab5a-4849-b6e3-1c50b0974f5f: ToggleButton
     51ba6738-85d2-4b7b-937c-b55de3814a1e: CheckBox
@@ -19,6 +19,7 @@ PublicUIElements:
     b4bf1526-34a4-45a3-acb2-f690463aca0a: ScrollViewerRubberBand
     a89f94fa-840f-48d4-9b26-418e9e4a2358: UniformGrid
     d44fc541-dd44-4a50-897d-c406966fac51: ImageElement
+    badca594-d4c6-4fc3-8f9b-2715c04f3297: AnimatedImageElement
     e8985e3a-8d82-40a6-adb1-76619eb19cd8: Button
     eef44bd6-bd2d-4abe-8335-0971d5d83b10: EditText
     f23d4157-8437-4285-845d-5cab68bca82a: ScrollBar
@@ -33,6 +34,7 @@ Hierarchy:
         - !Border ref!! 606486b0-61b1-498a-beed-5425893fc384
         - !ContentDecorator ref!! a35da784-9d42-4fe0-bd28-3eb547bc2812
         - !ImageElement ref!! d44fc541-dd44-4a50-897d-c406966fac51
+        - !AnimatedImageElement ref!! badca594-d4c6-4fc3-8f9b-2715c04f3297
         - !ModalElement ref!! 4266a97c-9ff2-45fb-8afd-5bd88a04c101
         - !ScrollBar ref!! f23d4157-8437-4285-845d-5cab68bca82a
         - !ScrollingText ref!! 7d51286a-f844-48de-afe1-cb6b00e2dcb8
@@ -223,6 +225,13 @@ Hierarchy:
                 BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
                 Margin: {}
                 Name: ImageElement
+                Color: {R: 255, G: 255, B: 255, A: 255}
+        -   UIElement: !AnimatedImageElement
+                Id: badca594-d4c6-4fc3-8f9b-2715c04f3297
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Margin: {}
+                Name: AnimatedImageElement
                 Color: {R: 255, G: 255, B: 255, A: 255}
         -   UIElement: !Button
                 Id: e8985e3a-8d82-40a6-adb1-76619eb19cd8

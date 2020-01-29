@@ -2838,6 +2838,30 @@ namespace Xenko.Core.Mathematics
         /// </summary>
         /// <param name="value">The offset for all three coordinate planes.</param>
         /// <param name="result">When the method completes, contains the created translation matrix.</param>
+        public static void Translation(ref Vector2 value, out Matrix result)
+        {
+            result = Matrix.Identity;
+            result.M41 = value.X;
+            result.M42 = value.Y;
+        }
+
+        /// <summary>
+        /// Creates a translation matrix using the specified offsets.
+        /// </summary>
+        /// <param name="value">The offset for all three coordinate planes.</param>
+        /// <returns>The created translation matrix.</returns>
+        public static Matrix Translation(Vector2 value)
+        {
+            Matrix result;
+            Translation(ref value, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a translation matrix using the specified offsets.
+        /// </summary>
+        /// <param name="value">The offset for all three coordinate planes.</param>
+        /// <param name="result">When the method completes, contains the created translation matrix.</param>
         public static void Translation(ref Vector3 value, out Matrix result)
         {
             Translation(value.X, value.Y, value.Z, out result);

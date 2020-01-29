@@ -189,7 +189,7 @@ namespace Xenko.UI.Panels
                 ++scrollPosition;
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             Viewport = availableSizeWithoutMargins;
 
@@ -215,7 +215,7 @@ namespace Xenko.UI.Panels
             // measure all the children
             var children = ItemVirtualizationEnabled ? visibleChildren : Children;
             foreach (var child in children)
-                child.Measure(childAvailableSizeWithMargins);
+                child.Measure(ref childAvailableSizeWithMargins);
 
             // calculate the stack panel desired size
             var desiredSize = Vector3.Zero;
@@ -229,7 +229,7 @@ namespace Xenko.UI.Panels
             return desiredSize;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             visibleChildren.Clear(); // children's children may have changed we need to force the rearrangement.
 
@@ -321,13 +321,13 @@ namespace Xenko.UI.Panels
                 childSizeWithMargins[maximizeIndex2] = Viewport[maximizeIndex2];
 
                 // arrange the child
-                child.Arrange(childSizeWithMargins, IsCollapsed);
+                child.Arrange(ref childSizeWithMargins, IsCollapsed);
 
                 // add the next element bound
                 if (child.IsCollapsed)
                     elementBounds.Add(startBound);
                 else
-                    elementBounds.Add(startBound + child.RenderSize[accumulatorIndex] + child.MarginInternal[accumulatorIndex] + child.MarginInternal[3 + accumulatorIndex]);
+                    elementBounds.Add(startBound + child.RenderSize[accumulatorIndex] + child.MarginInternal[accumulatorIndex] + child.MarginInternal[Thickness.DimOffset + accumulatorIndex]);
             }
         }
 
@@ -779,7 +779,7 @@ namespace Xenko.UI.Panels
                         childProvidedSize[i] = float.PositiveInfinity;
                 }
 
-                child.Measure(childProvidedSize);
+                child.Measure(ref childProvidedSize);
             }
 
             if (!child.IsArrangeValid)
@@ -787,10 +787,10 @@ namespace Xenko.UI.Panels
                 var childProvidedSize = Viewport;
                 childProvidedSize[(int)Orientation] = child.DesiredSizeWithMargins[(int)Orientation];
 
-                child.Arrange(childProvidedSize, Parent != null && Parent.IsCollapsed);
+                child.Arrange(ref childProvidedSize, Parent != null && Parent.IsCollapsed);
             }
 
-            return child.RenderSize[dimension] + child.Margin[dimension] + child.Margin[dimension + 3];
+            return child.RenderSize[dimension] + child.Margin[dimension] + child.Margin[dimension + Thickness.DimOffset];
         }
 
         public override FastCollection<UIElement> HitableChildren => visibleChildren;

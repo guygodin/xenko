@@ -76,7 +76,7 @@ namespace Xenko.UI.Panels
         }
 
         /// <inheritdoc/>
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // Measure all the children
             // Note: canvas does not take into account possible collisions between children
@@ -85,7 +85,7 @@ namespace Xenko.UI.Panels
                 var childAvailableSizeWithoutMargins = new Vector3(float.PositiveInfinity);
                 // override the available space if the child size is relative to its parent's.
                 var childRelativeSize = child.DependencyProperties.Get(RelativeSizePropertyKey);
-                for (var i = 0; i < 3; i++)
+                for (var i = 0; i < Dims; i++)
                 {
                     if (float.IsNaN(childRelativeSize[i])) // relative size is not set
                         continue;
@@ -93,14 +93,15 @@ namespace Xenko.UI.Panels
                     childAvailableSizeWithoutMargins[i] = childRelativeSize[i] > 0 ? childRelativeSize[i]*availableSizeWithoutMargins[i] : 0f; // avoid NaN due to 0 x Infinity
                 }
 
-                child.Measure(CalculateSizeWithThickness(ref childAvailableSizeWithoutMargins, ref child.MarginInternal));
+                var childAvailableSizeWithMargins = CalculateSizeWithThickness(ref childAvailableSizeWithoutMargins, ref child.MarginInternal);
+                child.Measure(ref childAvailableSizeWithMargins);
             }
 
             return Vector3.Zero;
         }
 
         /// <inheritdoc/>
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // Arrange all the children
             foreach (var child in VisualChildrenCollection)
@@ -120,7 +121,7 @@ namespace Xenko.UI.Panels
 
             }
 
-            return base.ArrangeOverride(finalSizeWithoutMargins);
+            return base.ArrangeOverride(ref finalSizeWithoutMargins);
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace Xenko.UI.Panels
             var absolutePosition = child.DependencyProperties.Get(AbsolutePositionPropertyKey);
             var useAbsolutePosition = child.DependencyProperties.Get(UseAbsolutePositionPropertyKey);
 
-            for (var dim = 0; dim < 3; ++dim)
+            for (var dim = 0; dim < Dims; ++dim)
             {
                 if (float.IsNaN(absolutePosition[dim]) || !useAbsolutePosition && !float.IsNaN(relativePosition[dim]))
                     absolutePosition[dim] = relativePosition[dim] == 0f ? 0f : relativePosition[dim] * parentSize[dim];

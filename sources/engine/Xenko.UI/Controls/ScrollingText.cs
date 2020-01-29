@@ -197,7 +197,7 @@ namespace Xenko.UI.Controls
                 textToDisplay = "";
 
             // remove characters at the beginning of TextToDisplay as long as possible
-            var fontSize = new Vector2(ActualTextSize, ActualTextSize);
+            var fontSize = new Vector2(ActualTextSize);
             while (textToDisplay.Length > 1 && Font.MeasureString(textToDisplay, ref fontSize, 1).X < nextOffsetShift)
             {
                 nextOffsetShift -= Font.MeasureString(textToDisplay, ref fontSize, 1).X;
@@ -208,12 +208,12 @@ namespace Xenko.UI.Controls
             ScrollingOffset = -nextOffsetShift;
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             return MeasureSize();
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             elementWidth = finalSizeWithoutMargins.X;
 
@@ -221,7 +221,7 @@ namespace Xenko.UI.Controls
 
             UpdateAndAdjustDisplayText();
 
-            return base.ArrangeOverride(finalSizeWithoutMargins);
+            return base.ArrangeOverride(ref finalSizeWithoutMargins);
         }
 
         /// <summary>

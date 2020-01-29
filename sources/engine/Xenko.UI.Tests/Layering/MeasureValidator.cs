@@ -12,7 +12,7 @@ namespace Xenko.UI.Tests.Layering
         public Vector3 ReturnedMeasuredValue;
         public Vector3 ExpectedMeasureValue;
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             for (int i = 0; i < 3; i++)
             {

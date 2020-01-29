@@ -207,8 +207,8 @@ namespace Xenko.Rendering.UI
                 updatableRootElement.Update(drawTime);
 
                 // update the UI element disposition
-                rootElement.Measure(virtualResolution);
-                rootElement.Arrange(virtualResolution, false);
+                rootElement.Measure(ref virtualResolution);
+                rootElement.Arrange(ref virtualResolution, false);
 
                 // update the UI element hierarchical properties
                 var rootMatrix = Matrix.Translation(-virtualResolution / 2); // UI world is translated by a half resolution compared to its quad, which is centered around the origin

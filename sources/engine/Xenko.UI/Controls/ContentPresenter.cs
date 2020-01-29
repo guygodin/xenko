@@ -60,23 +60,23 @@ namespace Xenko.UI.Controls
                 yield return Content;
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // measure size desired by the children
             var childDesiredSizeWithMargins = Vector3.Zero;
             if (Content != null)
             {
-                Content.Measure(availableSizeWithoutMargins);
+                Content.Measure(ref availableSizeWithoutMargins);
                 childDesiredSizeWithMargins = Content.DesiredSizeWithMargins;
             }
 
             return childDesiredSizeWithMargins;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // arrange child elements
-            Content?.Arrange(finalSizeWithoutMargins, IsCollapsed);
+            Content?.Arrange(ref finalSizeWithoutMargins, IsCollapsed);
 
             return finalSizeWithoutMargins;
         }

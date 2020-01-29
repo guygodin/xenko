@@ -24,7 +24,6 @@ namespace Xenko.UI.Controls
     public class ScrollViewerRubberBand : ContentControl
     {
         private const string ScrollBarCategory = "ScrollBar";
-        private const int RefreshImageMargin = 10;
 
         private static readonly Dictionary<ScrollingMode2D, int[]> ScrollModeToDirectionIndicesMap = new Dictionary<ScrollingMode2D, int[]>
         {
@@ -52,12 +51,14 @@ namespace Xenko.UI.Controls
 
         private ScrollingMode2D _scrollMode = ScrollingMode2D.Vertical;
         private int[] _scrollModeToDirectionIndices = ScrollModeToDirectionIndicesMap[ScrollingMode2D.Vertical];
-        private Color _scrollBarColor = Color.Gray;
+        private Color _scrollBarColor = new Color(96, 96, 96);
         private ISpriteProvider _scrollBarThumbImage;
+        private ISpriteProvider _refreshImage;
         private bool _touchScrollingEnabled = true;
+        private bool _isTouchedDown;
         private bool _isUserScrollingViewer;
         private bool _userManuallyScrolled;
-        private float _deceleration = 1500.0f;
+        private float _deceleration = 2500.0f;
         private Vector3 _accumulatedTouchTranslation;
         private Vector3 _contentRenderSizeWithPadding;
         private Vector3 _accumulatedDelayedTranslation;
@@ -68,8 +69,9 @@ namespace Xenko.UI.Controls
         private float _rubberBandStartOffset;
 
         private AnimatedImageElement _refreshElement;
-        private float _refreshRubberBandOffsetRequired;
-        private bool _refreshInitiated;
+        private float _refreshShowOffsetRequired;
+        private bool _refreshingInitiated;
+        private bool _refreshingCancelled;
 
         private readonly ScrollBar[] _scrollBars =
         {
@@ -87,6 +89,25 @@ namespace Xenko.UI.Controls
         /// The list of scrolling requests that need to be performed during the next <see cref="ArrangeOverride"/>
         /// </summary>
         private readonly List<ScrollRequest> _scrollingRequests = new List<ScrollRequest>();
+
+        public event EventHandler IsUserScrollingViewerChanged;
+
+        public event CancelEventHandler Refreshing;
+        public event EventHandler Refresh;
+
+        public ScrollViewerRubberBand()
+        {
+            // put the scroll bars above the presenter and add them to the grid canvas
+            foreach (var scrollBar in _scrollBars)
+            {
+                scrollBar.BarColorInternal = ScrollBarColor;
+                scrollBar.Measure(Vector3.Zero); // set is measure valid to true
+                SetVisualParent(scrollBar, this);
+            }
+
+            CanBeHitByUser = _touchScrollingEnabled;
+            ClipToBounds = true;
+        }
 
         /// <summary>
         /// Indicate if the user is currently touching the scroll viewer and performing a scroll gesture with its finger.
@@ -144,8 +165,8 @@ namespace Xenko.UI.Controls
         /// <userdoc>True if scrollbar fades out after scrolling stops.</userdoc>
         [DataMember]
         [Display(category: ScrollBarCategory)]
-        [DefaultValue(true)]
-        public bool ScrollBarHidesNoActivity { get; set; } = true;
+        [DefaultValue(false)]
+        public bool ScrollBarHidesNoActivity { get; set; }
 
         /// <summary>
         /// Gets or sets the image to display as slider thumb.
@@ -181,7 +202,10 @@ namespace Xenko.UI.Controls
                     return;
 
                 _scrollMode = value;
-                OnScrollModeChanged();
+
+                _scrollModeToDirectionIndices = ScrollModeToDirectionIndicesMap[_scrollMode];
+                _actualScrollOffsets = _scrollOffsets = Vector3.Zero;
+                InvalidateMeasure();
             }
         }
 
@@ -191,8 +215,8 @@ namespace Xenko.UI.Controls
         /// <userdoc>The threshold distance over which a touch move starts scrolling.</userdoc>
         [DataMember]
         [Display(category: BehaviorCategory)]
-        [DefaultValue(10.0f)]
-        public float ScrollStartThreshold { get; set; } = 10.0f;
+        [DefaultValue(25.0f)]
+        public float ScrollStartThreshold { get; set; } = 25.0f;
 
         /// <summary>
         /// The automatic deceleration of the scroll after the user remove its finger from the screen. The unit is in virtual pixels.
@@ -200,7 +224,7 @@ namespace Xenko.UI.Controls
         /// <userdoc>The automatic deceleration of the scroll after the user remove its finger from the screen. The unit is in virtual pixels.</userdoc>
         [DataMember]
         [Display(category: BehaviorCategory)]
-        [DefaultValue(1500.0f)]
+        [DefaultValue(2500.0f)]
         public float Deceleration
         {
             get { return _deceleration; }
@@ -236,7 +260,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 _touchScrollingEnabled = value;
-                OnTouchScrollingEnabledChanged();
+                CanBeHitByUser = value;
             }
         }
 
@@ -247,49 +271,27 @@ namespace Xenko.UI.Controls
         [DataMember]
         [Display(category: BehaviorCategory)]
         [DefaultValue(null)]
-        public ISpriteProvider RefreshImage { get; set; }
-
-        /// <summary>
-        /// Gets a value that indicates whether the is currently touched down.
-        /// </summary>
-        [DataMemberIgnore]
-        protected virtual bool IsTouchedDown { get; set; }
-
-        public event EventHandler IsUserScrollingViewerChanged;
-
-        public event CancelEventHandler Refreshed;
-
-        public ScrollViewerRubberBand()
+        public ISpriteProvider RefreshImage
         {
-            // put the scroll bars above the presenter and add them to the grid canvas
-            foreach (var scrollBar in _scrollBars)
+            get { return _refreshImage; }
+            set
             {
-                scrollBar.BarColorInternal = ScrollBarColor;
-                scrollBar.Measure(Vector3.Zero); // set is measure valid to true
-                SetVisualParent(scrollBar, this);
+                _refreshImage = value;
+
+                if (_refreshElement != null)
+                {
+                    UpdateRefreshElement();
+                }
             }
-
-            CanBeHitByUser = TouchScrollingEnabled;
-            ClipToBounds = true;
         }
 
         /// <summary>
-        /// Stops the scrolling at the current position.
+        /// The pull down offset required to raise the Refreshing event.
         /// </summary>
-        public void StopCurrentScrolling()
-        {
-            _currentScrollingSpeed = Vector3.Zero;
-        }
-
-        /// <summary>
-        /// Indicate if the scroll viewer can scroll in the given direction.
-        /// </summary>
-        /// <param name="direction">The direction to use for the test</param>
-        /// <returns><value>true</value> if the scroll viewer can scroll in the provided direction, or else <value>false</value></returns>
-        public bool CanScroll(Orientation2D direction)
-        {
-            return ((int)_scrollMode) - 1 == (int)direction || _scrollMode == ScrollingMode2D.HorizontalVertical;
-        }
+        [DataMember]
+        [Display(category: BehaviorCategory)]
+        [DefaultValue(60f)]
+        public float RefreshingOffsetRequired { get; set; } = 60f;
 
         public override UIElement Content
         {
@@ -322,55 +324,27 @@ namespace Xenko.UI.Controls
             }
         }
 
+        /// <summary>
+        /// Indicate if the scroll viewer can scroll in the given direction.
+        /// </summary>
+        /// <param name="direction">The direction to use for the test</param>
+        /// <returns><value>true</value> if the scroll viewer can scroll in the provided direction, or else <value>false</value></returns>
+        public bool CanScroll(Orientation2D direction)
+        {
+            return ((int)_scrollMode) - 1 == (int)direction || _scrollMode == ScrollingMode2D.HorizontalVertical;
+        }
+
         public void EndRefresh()
         {
             if (_refreshElement != null)
             {
-                _refreshElement.Visibility = Visibility.Collapsed;
+                ShowRefreshElement(false);
             }
-        }
-
-        protected internal void HideScrollBars()
-        {
-            if (ScrollBarHidesNoActivity)
-            {
-                foreach (var index in _scrollModeToDirectionIndices)
-                {
-                    _scrollBars[index].Visibility = Visibility.Collapsed;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Method triggered when <see cref="ScrollMode"/> changed.
-        /// Can be overridden in inherited class to change the default behavior.
-        /// </summary>
-        protected virtual void OnScrollModeChanged()
-        {
-            _scrollModeToDirectionIndices = ScrollModeToDirectionIndicesMap[_scrollMode];
-            _actualScrollOffsets = _scrollOffsets = Vector3.Zero;
-            InvalidateMeasure();
-        }
-
-        /// <summary>
-        /// Method triggered when <see cref="TouchScrollingEnabled"/> changed.
-        /// Can be overridden in inherited class to change the default behavior.
-        /// </summary>
-        protected virtual void OnTouchScrollingEnabledChanged()
-        {
-            CanBeHitByUser = TouchScrollingEnabled;
         }
 
         protected virtual void OnIsUserScrollingViewerChanged()
         {
             IsUserScrollingViewerChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnRefreshElementSpriteChanged(object sender, EventArgs e)
-        {
-            // TODO: It would be better not to have to mark the entire ScrollViewer as Dirty.
-            // Need a propagate IsDirty system to a parent that has IsTopLevelDirty property set to true
-            IsDirty = true;
         }
 
         protected override void Update(GameTime time)
@@ -472,6 +446,18 @@ namespace Xenko.UI.Controls
                         _rubberBandEasingOut = true;
                         _scrollOffsets = _actualScrollOffsets;
                         StopCurrentScrolling();
+
+                        // raise Refresh event if released and still beyond refreshing offset
+                        if (_refreshingInitiated && !_refreshingCancelled)
+                        {
+                            foreach (var index in _scrollModeToDirectionIndices)
+                            {
+                                if (_scrollOffsets[index] >= RefreshingOffsetRequired)
+                                {
+                                    Refresh?.Invoke(this, EventArgs.Empty);
+                                }
+                            }
+                        }
                     }
 
                     scrollTranslation = Vector3.Zero;
@@ -658,7 +644,7 @@ namespace Xenko.UI.Controls
             }
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // measure size desired by the children
             var childDesiredSizeWithMargins = Vector3.Zero;
@@ -676,7 +662,7 @@ namespace Xenko.UI.Controls
                         childAvailableSizeWithMargins.Y = float.PositiveInfinity;
                 }
 
-                VisualContent.Measure(childAvailableSizeWithMargins);
+                VisualContent.Measure(ref childAvailableSizeWithMargins);
                 childDesiredSizeWithMargins = VisualContent.DesiredSizeWithMargins;
             }
 
@@ -685,7 +671,7 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // calculate the remaining space for the child after having removed the padding space.
             ViewPort = finalSizeWithoutMargins;
@@ -704,7 +690,7 @@ namespace Xenko.UI.Controls
                 }
 
                 // arrange the child
-                VisualContent.Arrange(childSizeWithoutPadding, IsCollapsed);
+                VisualContent.Arrange(ref childSizeWithoutPadding, IsCollapsed);
 
                 // the space desired by the child + the padding of the viewer
                 var contentRenderSize = VisualContent.RenderSize;
@@ -743,10 +729,26 @@ namespace Xenko.UI.Controls
             return finalSizeWithoutMargins;
         }
 
+        private void StopCurrentScrolling()
+        {
+            _currentScrollingSpeed = Vector3.Zero;
+        }
+
         private void StopScrolling()
         {
             HideScrollBars();
             StopCurrentScrolling();
+        }
+
+        private void HideScrollBars()
+        {
+            if (ScrollBarHidesNoActivity)
+            {
+                foreach (var index in _scrollModeToDirectionIndices)
+                {
+                    _scrollBars[index].Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private void SetUserManuallyScrolled()
@@ -783,10 +785,23 @@ namespace Xenko.UI.Controls
                     offset = desiredScrollPosition.Y;
                     minimumOffset = ViewPort.Y - _contentRenderSizeWithPadding.Y;
                 }
+                var canScrollContent = minimumOffset < 0f;
 
                 if (_rubberBandEntered)
                 {
-                    var endRubberBand = (_rubberBandUpSpace && offset <= 0f) || (!_rubberBandUpSpace && offset >= 0f);
+                    bool endRubberBand = false;
+                    if (_rubberBandUpSpace)
+                    {
+                        if (offset <= 0f)
+                            endRubberBand = true;
+                        else if (_rubberBandEasingOut && _refreshElement != null && _refreshElement.IsVisible && offset < _refreshShowOffsetRequired)
+                            ShowRefreshElement(false);
+                    }
+                    else
+                    {
+                        if (offset >= _rubberBandStartOffset)
+                            endRubberBand = true;
+                    }
                     if (endRubberBand)
                     {
                         if (_rubberBandEasingOut)
@@ -796,18 +811,16 @@ namespace Xenko.UI.Controls
                             _currentScrollingSpeed[index] = 0f;
                         }
                         _rubberBandEntered = false;
-                        if (_refreshInitiated)
-                        {
-                            _refreshInitiated = false;
-                            EndRefresh();
-                        }
+
+                        _refreshingInitiated = false;
+                        _refreshingCancelled = false;
+
                         UpdateScrollingBarsSize();
                     }
                 }
 
                 if (!_rubberBandEntered)
                 {
-                    var canScrollContent = minimumOffset < 0f;
                     // reached the offset limit?
                     var aboveLeftLimit = offset > 0f;
                     if (!canScrollContent || aboveLeftLimit || offset < minimumOffset)
@@ -819,10 +832,9 @@ namespace Xenko.UI.Controls
                             _rubberBandStartOffset = newOffset;
                             _rubberBandUpSpace = aboveLeftLimit;
 
-                            if (_refreshRubberBandOffsetRequired == 0 && RefreshImage != null)
+                            if (aboveLeftLimit)
                             {
-                                var size = RefreshImage.GetSprite().SizeInPixels;
-                                _refreshRubberBandOffsetRequired = (_scrollMode == ScrollingMode2D.Horizontal ? size.X : size.Y) + RefreshImageMargin;
+                                InitializeRefresh(index);
                             }
                         }
                         else
@@ -866,11 +878,26 @@ namespace Xenko.UI.Controls
                         _actualScrollOffsets.Y = offset + _rubberBandStartOffset;
                     }
 
-                    // top-only event?
-                    if (!_refreshInitiated && offset > _refreshRubberBandOffsetRequired)
+                    if (_rubberBandUpSpace && _refreshElement != null && _refreshElement.CanAnimate)
                     {
-                        _refreshInitiated = true;
-                        HandleRefreshed();
+                        // so it doesn't clip
+                        bool show = offset >= _refreshShowOffsetRequired && !_refreshingCancelled;
+                        if (show && !_refreshingInitiated && offset >= RefreshingOffsetRequired)
+                        {
+                            _refreshingInitiated = true;
+                            if (Refreshing != null)
+                            {
+                                var args = new CancelEventArgs();
+                                Refreshing.Invoke(this, args);
+                                if (args.Cancel)
+                                {
+                                    _refreshingCancelled = true;
+                                    // hide the image on cancel
+                                    show = false;
+                                }
+                            }
+                        }
+                        ShowRefreshElement(show);
                     }
                 }
             }
@@ -895,41 +922,6 @@ namespace Xenko.UI.Controls
             return false;
         }
 
-        private void HandleRefreshed()
-        {
-            if (Refreshed != null)
-            {
-                var args = new CancelEventArgs();
-                Refreshed.Invoke(this, args);
-                if (args.Cancel)
-                    return;
-            }
-
-            if (RefreshImage != null)
-            {
-                if (_refreshElement == null)
-                {
-                    _refreshElement = new AnimatedImageElement
-                    {
-                        Source = RefreshImage,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = Thickness.UniformRectangle(RefreshImageMargin)
-                    };
-                    _refreshElement.Measure(Vector3.Zero);
-                    _refreshElement.Arrange(Vector3.Zero, false);
-                    SetVisualParent(_refreshElement, this);
-                    _refreshElement.SpriteChanged += OnRefreshElementSpriteChanged;
-                }
-                else
-                {
-                    _refreshElement.Visibility = Visibility.Visible;
-                }
-                foreach (var index in _scrollModeToDirectionIndices)
-                    UpdateRefreshElementWorldMatrix(index);
-            }
-        }
-
         private void UpdateScrollingBarsSize()
         {
             _canScrollContent = false;
@@ -940,19 +932,20 @@ namespace Xenko.UI.Controls
                 var scrollBar = _scrollBars[index];
 
                 // reset the bar size
-                scrollBar.Arrange(Vector3.Zero, false);
+                var barSize = Vector3.Zero;
+                scrollBar.Arrange(ref barSize, false);
 
                 float sizeChildren;
                 float sizeViewPort;
 
                 if (index == 0)
                 {
-                    sizeChildren = VisualContent.RenderSize.X + VisualContent.MarginInternal.Left + VisualContent.MarginInternal.Right;
+                    sizeChildren = VisualContent.ActualWidth + VisualContent.MarginInternal.TotalWidth;
                     sizeViewPort = ViewPort.X;
                 }
                 else
                 {
-                    sizeChildren = VisualContent.RenderSize.Y + VisualContent.MarginInternal.Top + VisualContent.MarginInternal.Bottom;
+                    sizeChildren = VisualContent.ActualHeight + VisualContent.MarginInternal.TotalHeight;
                     sizeViewPort = ViewPort.Y;
                 }
 
@@ -962,8 +955,7 @@ namespace Xenko.UI.Controls
                 }
                 var canScroll = sizeChildren > sizeViewPort;
 
-                var barSize = Vector3.Zero;
-                for (var dim = 0; dim < 3; dim++)
+                for (var dim = 0; dim < Dims; dim++)
                 {
                     float size;
                     if (dim == index)
@@ -980,12 +972,12 @@ namespace Xenko.UI.Controls
                     }
                     else
                     {
-                        size = Math.Min(ScrollBarThickness + scrollBar.Margin[dim + 3], ViewPort[dim]);
+                        size = Math.Min(ScrollBarThickness + scrollBar.Margin[dim + Thickness.DimOffset], ViewPort[dim]);
                     }
                     barSize[dim] = size;
                 }
 
-                scrollBar.Arrange(barSize, IsCollapsed);
+                scrollBar.Arrange(ref barSize, IsCollapsed);
 
                 if (!ScrollBarHidesNoActivity)
                 {
@@ -1040,7 +1032,7 @@ namespace Xenko.UI.Controls
                             if (childMinusParent > MathUtil.ZeroTolerance)
                             {
                                 var scrollBarPositionRatio = _actualScrollOffsets.X / childMinusParent;
-                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize.X);
+                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.ActualWidth);
                             }
                         }
                         else
@@ -1049,7 +1041,7 @@ namespace Xenko.UI.Controls
                             if (childMinusParent > MathUtil.ZeroTolerance)
                             {
                                 var scrollBarPositionRatio = _actualScrollOffsets.Y / childMinusParent;
-                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.RenderSize.Y);
+                                pos -= scrollBarPositionRatio * (renderSize - scrollBar.ActualHeight);
                             }
                         }
                     }
@@ -1081,14 +1073,69 @@ namespace Xenko.UI.Controls
             }
         }
 
+        private void InitializeRefresh(int index)
+        {
+            if (_refreshElement != null || _refreshImage == null)
+                return;
+
+            _refreshElement = new AnimatedImageElement
+            {
+                StretchType = StretchType.None,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                Visibility = Visibility.Hidden
+            };
+            SetVisualParent(_refreshElement, this);
+
+            // sort the element to top so it draws underneath the VisualContent
+            VisualChildrenCollection.Remove(_refreshElement);
+            VisualChildrenCollection.Insert(0, _refreshElement);
+
+            UpdateRefreshElement();
+
+            _refreshElement.SpriteChanged += OnRefreshElementSpriteChanged;
+
+            var size = _refreshImage.GetSprite().Texture.Size;
+            _refreshShowOffsetRequired = index == 0 ? size.Width : size.Height;
+        }
+
+        private void OnRefreshElementSpriteChanged(object sender, EventArgs e)
+        {
+            // TODO: It would be better not to have to mark the entire ScrollViewer as Dirty.
+            // Need a propagate IsDirty system to a parent that has IsTopLevelDirty property set to true
+            IsDirty = true;
+        }
+
+        private void UpdateRefreshElement()
+        {
+            _refreshElement.Source = _refreshImage;
+            _refreshElement.Measure(Vector3.Zero);
+            _refreshElement.Arrange(Vector3.Zero, false);
+        }
+
+        private void ShowRefreshElement(bool show)
+        {
+            var vis = show ? Visibility.Visible : Visibility.Hidden;
+            if (vis != _refreshElement.Visibility)
+            {
+                _refreshElement.Visibility = vis;
+                if (show)
+                {
+                    // so it shows at right position initially
+                    foreach (var index in _scrollModeToDirectionIndices)
+                        UpdateRefreshElementWorldMatrix(index);
+                }
+                IsDirty = true;
+            }
+        }
+
         private void UpdateRefreshElementWorldMatrix(int index)
         {
-            var elemSize = CalculateSizeWithThickness(ref _refreshElement.RenderSizeInternal, ref _refreshElement.MarginInternal);
             var elemPosition = Vector3.Zero;
             if (index == 0)
-                elemPosition.X = (VisualContent.RenderSize.X + elemSize.X) / -2f;
+                elemPosition.X = (VisualContent.ActualWidth + _refreshElement.RenderSizeInternal.X + _actualScrollOffsets.X) / -2f;
             else
-                elemPosition.Y = (VisualContent.RenderSize.Y + elemSize.Y) / -2f;
+                elemPosition.Y = (VisualContent.ActualHeight + _refreshElement.RenderSizeInternal.Y + _actualScrollOffsets.Y) / -2f;
 
             var parentMatrix = VisualContent.WorldMatrix;
             parentMatrix.TranslationVector += elemPosition;
@@ -1104,7 +1151,7 @@ namespace Xenko.UI.Controls
                 return;
 
             StopCurrentScrolling();
-            IsTouchedDown = true;
+            _isTouchedDown = true;
             _accumulatedTouchTranslation = Vector3.Zero;
         }
 
@@ -1129,7 +1176,7 @@ namespace Xenko.UI.Controls
                 IsUserScrollingViewer = false;
             }
 
-            IsTouchedDown = false;
+            _isTouchedDown = false;
             _accumulatedTouchTranslation = Vector3.Zero;
         }
 
@@ -1146,7 +1193,7 @@ namespace Xenko.UI.Controls
             base.OnTouchLeave(args);
 
             IsUserScrollingViewer = false;
-            IsTouchedDown = false;
+            _isTouchedDown = false;
             _accumulatedTouchTranslation = Vector3.Zero;
         }
 
@@ -1154,7 +1201,7 @@ namespace Xenko.UI.Controls
         {
             base.OnPreviewTouchMove(args);
 
-            if (!IsTouchedDown || ScrollMode == ScrollingMode2D.None || !TouchScrollingEnabled)
+            if (!_isTouchedDown || ScrollMode == ScrollingMode2D.None || !TouchScrollingEnabled)
                 return;
 
             // accumulate all the touch moves of the frame

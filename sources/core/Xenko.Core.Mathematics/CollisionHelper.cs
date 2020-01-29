@@ -684,6 +684,83 @@ namespace Xenko.Core.Mathematics
         }
 
         /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a rectangle.
+        /// Optimization of RayIntersectsRectangle with normalAxis=2.
+        /// </summary>
+        /// <param name="ray">The ray to test</param>
+        /// <param name="rectangleWorldMatrix">The world matrix applied on the rectangle</param>
+        /// <param name="rectangleSize">The size of the rectangle in 3D</param>
+        /// <param name="intersectionPoint">The position of the intersection point in the world</param>
+        /// <returns><value>true</value> if the ray and rectangle intersects.</returns>
+        public static bool RayIntersectsRectangle(ref Ray ray, ref Matrix rectangleWorldMatrix, ref Vector3 rectangleSize, out Vector3 intersectionPoint)
+        {
+            var rectanglePosition = rectangleWorldMatrix.TranslationVector;
+
+            var plane = new Plane(rectanglePosition, rectangleWorldMatrix.Backward);
+
+            // early exit the planes were parallels 
+            if (!plane.Intersects(ref ray, out intersectionPoint))
+                return false;
+
+            // the position of the intersection point with respect to the rectangle center
+            var intersectionInRectangle = intersectionPoint - rectanglePosition;
+
+            bool intersects;
+
+            // optimization for the simple but very frequent case where the element is not rotated
+            if (rectangleWorldMatrix.M12 == 0 && rectangleWorldMatrix.M13 == 0 &&
+                rectangleWorldMatrix.M21 == 0 && rectangleWorldMatrix.M23 == 0 &&
+                rectangleWorldMatrix.M31 == 0 && rectangleWorldMatrix.M32 == 0)
+            {
+                var halfSize1 = Math.Abs(rectangleWorldMatrix.M11 * rectangleSize.X / 2f);
+                var halfSize2 = Math.Abs(rectangleWorldMatrix.M22 * rectangleSize.Y / 2f);
+
+                intersects = -halfSize1 <= intersectionInRectangle.X && intersectionInRectangle.X <= halfSize1 &&
+                             -halfSize2 <= intersectionInRectangle.Y && intersectionInRectangle.Y <= halfSize2;
+            }
+            // general case: decompose the rectangle into two triangles and check that all angles are less than 180 degrees in at least one of the triangles.
+            else
+            {
+                // find the most significant component of the plane normal
+                var normalTestIndex = 0;
+                for (int i = 1; i < 3; i++)
+                {
+                    if (Math.Abs(plane.Normal[i]) > Math.Abs(plane.Normal[normalTestIndex]))
+                        normalTestIndex = i;
+                }
+                var normalSign = Math.Sign(plane.Normal[normalTestIndex]);
+
+                // the base vector
+                var base1 = rectangleSize.X * rectangleWorldMatrix.Right / 2;
+                var base2 = rectangleSize.Y * rectangleWorldMatrix.Up / 2;
+
+                // build the first triangle and perform the test
+                var v1 = -base1 - base2 - intersectionInRectangle;
+                var v2 = +base1 - base2 - intersectionInRectangle;
+                var v3 = +base1 + base2 - intersectionInRectangle;
+
+                intersects = Math.Sign(Vector3.Cross(v1, v2)[normalTestIndex]) == normalSign &&
+                             Math.Sign(Vector3.Cross(v2, v3)[normalTestIndex]) == normalSign &&
+                             Math.Sign(Vector3.Cross(v3, v1)[normalTestIndex]) == normalSign;
+
+                // early exit on success
+                if (intersects)
+                    return true;
+
+                // build second triangle and perform the test
+                v1 = -base1 - base2 - intersectionInRectangle;
+                v2 = +base1 + base2 - intersectionInRectangle;
+                v3 = -base1 + base2 - intersectionInRectangle;
+
+                intersects = Math.Sign(Vector3.Cross(v1, v2)[normalTestIndex]) == normalSign &&
+                             Math.Sign(Vector3.Cross(v2, v3)[normalTestIndex]) == normalSign &&
+                             Math.Sign(Vector3.Cross(v3, v1)[normalTestIndex]) == normalSign;
+            }
+
+            return intersects;
+        }
+
+        /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a rectangle (2D).
         /// </summary>
         /// <param name="ray">The ray to test</param>

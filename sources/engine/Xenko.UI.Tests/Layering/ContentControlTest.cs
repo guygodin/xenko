@@ -141,7 +141,7 @@ namespace Xenko.UI.Tests.Layering
 
             // Test that returned value is the one provided when no content
             var providedSize = 1000 * rand.NextVector3();
-            var arrangedSize = ArrangeOverride(providedSize);
+            var arrangedSize = ArrangeOverride(ref providedSize);
             Assert.Equal(providedSize, arrangedSize);
 
             ResetState();
@@ -153,7 +153,7 @@ namespace Xenko.UI.Tests.Layering
             Padding = rand.NextThickness(10, 20, 30, 40, 50, 60);
             var providedSizeWithoutPadding = CalculateSizeWithoutThickness(ref providedSize, ref padding);
             content.ExpectedArrangeValue = providedSizeWithoutPadding;
-            arrangedSize = ArrangeOverride(providedSize);
+            arrangedSize = ArrangeOverride(ref providedSize);
             Assert.Equal(providedSize, arrangedSize);
             var childOffsets = new Vector3(Padding.Left, Padding.Top, Padding.Front) - arrangedSize / 2;
             Assert.Equal(Matrix.Translation(childOffsets), VisualContent.DependencyProperties.Get(ContentArrangeMatrixPropertyKey));

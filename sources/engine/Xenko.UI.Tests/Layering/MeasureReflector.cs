@@ -11,7 +11,7 @@ namespace Xenko.UI.Tests.Layering
     /// </summary>
     public class MeasureReflector: UIElement
     {
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             return availableSizeWithoutMargins;
         }

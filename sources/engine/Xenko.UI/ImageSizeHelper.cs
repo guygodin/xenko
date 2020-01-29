@@ -19,7 +19,7 @@ namespace Xenko.UI
         /// <param name="stretchDirection"></param>
         /// <param name="isMeasuring"></param>
         /// <returns></returns>
-        public static Vector3 CalculateImageSizeFromAvailable(Sprite sprite, Vector3 availableSizeWithoutMargins, StretchType stretchType, StretchDirection stretchDirection, bool isMeasuring)
+        public static Vector3 CalculateImageSizeFromAvailable(Sprite sprite, ref Vector3 availableSizeWithoutMargins, StretchType stretchType, StretchDirection stretchDirection, bool isMeasuring)
         {
             if (sprite == null) // no associated image -> no region needed
                 return Vector3.Zero;

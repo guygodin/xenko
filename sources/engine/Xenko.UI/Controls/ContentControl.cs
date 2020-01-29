@@ -84,16 +84,16 @@ namespace Xenko.UI.Controls
                 yield return Content;
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // measure size desired by the children
             var childDesiredSizeWithMargins = Vector3.Zero;
             if (VisualContent != null)
             {
                 // remove space for padding in availableSizeWithoutMargins
-                var childAvailableSizeWithMargins = CalculateSizeWithoutThickness(ref availableSizeWithoutMargins, ref padding);
+                var childAvailableSizeWithoutPadding = CalculateSizeWithoutThickness(ref availableSizeWithoutMargins, ref padding);
 
-                VisualContent.Measure(childAvailableSizeWithMargins);
+                VisualContent.Measure(ref childAvailableSizeWithoutPadding);
                 childDesiredSizeWithMargins = VisualContent.DesiredSizeWithMargins;
             }
 
@@ -103,19 +103,46 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // arrange the content
             if (VisualContent != null)
             {
+                var actualPadding = padding;
+
+                // adjust padding if child larger than element size without padding
+                var spaceAroundChild = finalSizeWithoutMargins - VisualContent.DesiredSizeWithMargins;
+                if (spaceAroundChild.X <= 0)
+                {
+                    actualPadding.Left = 0;
+                    actualPadding.Right = 0;
+                }
+                else if (spaceAroundChild.X < padding.TotalWidth)
+                {
+                    var ratio = spaceAroundChild.X / padding.TotalWidth;
+                    actualPadding.Left *= ratio;
+                    actualPadding.Right *= ratio;
+                }
+                if (spaceAroundChild.Y <= 0)
+                {
+                    actualPadding.Top = 0;
+                    actualPadding.Bottom = 0;
+                }
+                else if (spaceAroundChild.Y < padding.TotalHeight)
+                {
+                    var ratio = spaceAroundChild.Y / padding.TotalHeight;
+                    actualPadding.Top *= ratio;
+                    actualPadding.Bottom *= ratio;
+                }
+
                 // calculate the remaining space for the child after having removed the padding space.
-                var childSizeWithoutPadding = CalculateSizeWithoutThickness(ref finalSizeWithoutMargins, ref padding);
+                var childSizeWithoutPadding = CalculateSizeWithoutThickness(ref finalSizeWithoutMargins, ref actualPadding);
 
                 // arrange the child
-                VisualContent.Arrange(childSizeWithoutPadding, IsCollapsed);
+                VisualContent.Arrange(ref childSizeWithoutPadding, IsCollapsed);
 
                 // compute the rendering offsets of the child element wrt the parent origin (0,0,0)
-                var childOffsets = new Vector3(Padding.Left, Padding.Top, Padding.Front) - finalSizeWithoutMargins / 2;
+                var childOffsets = new Vector3(actualPadding.Left, actualPadding.Top, actualPadding.Front) - finalSizeWithoutMargins / 2;
 
                 // set the arrange matrix of the child.
                 VisualContent.DependencyProperties.Set(ContentArrangeMatrixPropertyKey, Matrix.Translation(childOffsets));

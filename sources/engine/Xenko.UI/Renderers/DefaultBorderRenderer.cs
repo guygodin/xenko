@@ -24,9 +24,11 @@ namespace Xenko.UI.Renderers
 
             var border = (Border)element;
 
-            var borderColor = border.RenderOpacity * border.BorderColorInternal;
+            var borderColor = border.BorderColorInternal;
+            if (border.RenderOpacity != 1f)
+                borderColor *= border.RenderOpacity;
             // optimization: don't draw the border if transparent
-            if (borderColor == new Color())
+            if (borderColor.A == 0)
                 return;
 
             if (border.BorderThickness.Front != 0f || border.BorderThickness.Back != 0f)

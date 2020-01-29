@@ -112,7 +112,7 @@ namespace Xenko.UI
                 classHandler.Invoke(this, e);
 
             // Trigger instance handlers
-            if (eventsToHandlers.ContainsKey(routedEvent))
+            if (eventsToHandlers.TryGetValue(routedEvent, out var infoList))
             {
                 // get a list of handler from the pool where we can copy the handler to trigger
                 if (RoutedEventHandlerInfoListPool.Count == 0)
@@ -120,7 +120,7 @@ namespace Xenko.UI
                 var pooledList = RoutedEventHandlerInfoListPool.Dequeue();
 
                 // copy the RoutedEventHandlerEventInfo list into a list of the pool in order to be able to modify the handler list in the handler itself
-                pooledList.AddRange(eventsToHandlers[routedEvent]);
+                pooledList.AddRange(infoList);
 
                 // iterate on the pooled list to invoke handlers
                 foreach (var handlerInfo in pooledList)
@@ -186,10 +186,13 @@ namespace Xenko.UI
             if (routedEvent == null) throw new ArgumentNullException(nameof(routedEvent));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
-            if (!eventsToHandlers.ContainsKey(routedEvent))
-                eventsToHandlers[routedEvent] = new List<RoutedEventHandlerInfo>();
+            if (!eventsToHandlers.TryGetValue(routedEvent, out var infoList))
+            {
+                infoList = new List<RoutedEventHandlerInfo>();
+                eventsToHandlers.Add(routedEvent, infoList);
+            }
 
-            eventsToHandlers[routedEvent].Add(new RoutedEventHandlerInfo<T>(handler, handledEventsToo));
+            infoList.Add(new RoutedEventHandlerInfo<T>(handler, handledEventsToo));
         }
 
         /// <summary>
@@ -203,10 +206,10 @@ namespace Xenko.UI
             if (routedEvent == null) throw new ArgumentNullException(nameof(routedEvent));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
-            if (!eventsToHandlers.ContainsKey(routedEvent))
+            if (!eventsToHandlers.TryGetValue(routedEvent, out var infoList))
                 return;
 
-            eventsToHandlers[routedEvent].Remove(new RoutedEventHandlerInfo<T>(handler));
+            infoList.Remove(new RoutedEventHandlerInfo<T>(handler));
         }
 
         private readonly Dictionary<RoutedEvent, List<RoutedEventHandlerInfo>> eventsToHandlers = new Dictionary<RoutedEvent, List<RoutedEventHandlerInfo>>();

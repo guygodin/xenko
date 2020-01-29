@@ -28,6 +28,8 @@ namespace Xenko.UI.Controls
         public Button()
         {
             DrawLayerNumber += 1; // (button design image)
+
+            // this breaks the ability to set a Thickness(0) in GameStudio, since it will not deserialize a default Thickness(0), and hence Padding will stay at this value 
             Padding = new Thickness(10, 5, 10, 7);
 
             MouseOverStateChanged += (sender, args) => InvalidateButtonImage();
@@ -168,19 +170,19 @@ namespace Xenko.UI.Controls
         internal Sprite ButtonImage => ButtonImageProvider?.GetSprite();
 
         /// <inheritdoc/>
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             return sizeToContent
-                ? base.ArrangeOverride(finalSizeWithoutMargins)
-                : ImageSizeHelper.CalculateImageSizeFromAvailable(ButtonImage, finalSizeWithoutMargins, ImageStretchType, ImageStretchDirection, false);
+                ? base.ArrangeOverride(ref finalSizeWithoutMargins)
+                : ImageSizeHelper.CalculateImageSizeFromAvailable(ButtonImage, ref finalSizeWithoutMargins, ImageStretchType, ImageStretchDirection, false);
         }
 
         /// <inheritdoc/>
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             return sizeToContent
-                ? base.MeasureOverride(availableSizeWithoutMargins)
-                : ImageSizeHelper.CalculateImageSizeFromAvailable(ButtonImage, availableSizeWithoutMargins, ImageStretchType, ImageStretchDirection, true);
+                ? base.MeasureOverride(ref availableSizeWithoutMargins)
+                : ImageSizeHelper.CalculateImageSizeFromAvailable(ButtonImage, ref availableSizeWithoutMargins, ImageStretchType, ImageStretchDirection, true);
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace Xenko.UI.Controls
     public class Border : ContentControl
     {
         internal Color BorderColorInternal = Color.Black;
-        private Thickness borderThickness = Thickness.UniformCuboid(0);
+        private Thickness borderThickness;
 
         /// <summary>
         /// Gets or sets the color of the border.
@@ -43,16 +43,16 @@ namespace Xenko.UI.Controls
             }
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             var availableLessBorders = CalculateSizeWithoutThickness(ref availableSizeWithoutMargins, ref borderThickness);
 
-            var neededSize = base.MeasureOverride(availableLessBorders);
+            var neededSize = base.MeasureOverride(ref availableLessBorders);
 
             return CalculateSizeWithThickness(ref neededSize, ref borderThickness);
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // arrange the content
             if (VisualContent != null)
@@ -62,7 +62,7 @@ namespace Xenko.UI.Controls
                 var childSizeWithoutPadding = CalculateSizeWithoutThickness(ref availableLessBorders, ref padding);
 
                 // arrange the child
-                VisualContent.Arrange(childSizeWithoutPadding, IsCollapsed);
+                VisualContent.Arrange(ref childSizeWithoutPadding, IsCollapsed);
 
                 // compute the rendering offsets of the child element wrt the parent origin (0,0,0)
                 var childOffsets = new Vector3(padding.Left + borderThickness.Left, padding.Top + borderThickness.Top, padding.Front + borderThickness.Front) - finalSizeWithoutMargins / 2;

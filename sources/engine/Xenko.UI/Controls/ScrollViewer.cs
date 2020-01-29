@@ -160,7 +160,7 @@ namespace Xenko.UI.Controls
 
         private Vector3 accumulatedTranslation;
 
-        private readonly bool[] startedSnapping = new bool[3];
+        private readonly bool[] startedSnapping = new bool[Dims];
 
         /// <summary>
         /// The current content casted as <see cref="IScrollInfo"/>.
@@ -353,7 +353,7 @@ namespace Xenko.UI.Controls
 
                 if (SnapToAnchors && ContentAsAnchorInfo != null)
                 {
-                    for (var i = 0; i < 3; ++i)
+                    for (var i = 0; i < Dims; ++i)
                     {
                         if (!ContentAsAnchorInfo.ShouldAnchor((Orientation)i))
                             continue;
@@ -406,7 +406,7 @@ namespace Xenko.UI.Controls
                 ScrollOfInternal(ref lastFrameTranslation, false);
 
             // Smoothly hide the scroll bars if the no movements
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 var shouldFadeOutScrollingBar = Math.Abs(CurrentScrollingSpeed[dim]) < MathUtil.ZeroTolerance && (!TouchScrollingEnabled || !IsUserScrollingViewer);
                 if (shouldFadeOutScrollingBar)
@@ -611,7 +611,7 @@ namespace Xenko.UI.Controls
             }
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // measure size desired by the children
             var childDesiredSizeWithMargins = Vector3.Zero;
@@ -629,7 +629,7 @@ namespace Xenko.UI.Controls
                     childAvailableSizeWithMargins[index] = float.PositiveInfinity;
                 }
 
-                VisualContent.Measure(childAvailableSizeWithMargins);
+                VisualContent.Measure(ref childAvailableSizeWithMargins);
                 childDesiredSizeWithMargins = VisualContent.DesiredSizeWithMargins;
             }
 
@@ -639,7 +639,7 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // calculate the remaining space for the child after having removed the padding space.
             ViewPort = finalSizeWithoutMargins;
@@ -656,7 +656,7 @@ namespace Xenko.UI.Controls
                 }
 
                 // arrange the child
-                VisualContent.Arrange(childSizeWithoutPadding, IsCollapsed);
+                VisualContent.Arrange(ref childSizeWithoutPadding, IsCollapsed);
 
                 // update the scrolling bars 
                 UpdateScrollingBarsSize();
@@ -688,23 +688,23 @@ namespace Xenko.UI.Controls
         private void UpdateScrollingBarsSize()
         {
             // reset the bar sizes
+            var barSize = Vector3.Zero;
             foreach (var scrollBar in scrollBars)
-                scrollBar.Arrange(Vector3.Zero, false);
+                scrollBar.Arrange(ref barSize, false);
 
             // set the size of the bar we want to show
             foreach (var index in ScrollModeToDirectionIndices[ScrollMode])
             {
                 var sizeChildren = (ContentAsScrollInfo != null) ?
                     ContentAsScrollInfo.Extent[index] :
-                    VisualContent.RenderSize[index] + VisualContent.MarginInternal[index] + VisualContent.MarginInternal[3 + index];
+                    VisualContent.RenderSize[index] + VisualContent.MarginInternal[index] + VisualContent.MarginInternal[Thickness.DimOffset + index];
 
                 var barLength = Math.Min(1f, ViewPort[index] / sizeChildren) * ViewPort[index];
 
-                var barSize = Vector3.Zero;
-                for (var dim = 0; dim < 3; dim++)
+                for (var dim = 0; dim < Dims; dim++)
                     barSize[dim] = dim == index ? barLength : Math.Min(ScrollBarThickness, ViewPort[dim]);
 
-                scrollBars[index].Arrange(barSize, IsCollapsed);
+                scrollBars[index].Arrange(ref barSize, IsCollapsed);
             }
         }
 
@@ -712,7 +712,7 @@ namespace Xenko.UI.Controls
         {
             // calculate the offsets to move the element of
             var offsets = ScrollOffsets;
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < Dims; i++)
             {
                 if (ContentAsScrollInfo != null && ContentAsScrollInfo.CanScroll((Orientation)i))
                     offsets[i] = ContentAsScrollInfo.Offset[i];
@@ -860,7 +860,7 @@ namespace Xenko.UI.Controls
                 return;
 
             // reset current scrolling speed if we reached one extrema of the content
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < Dims; i++)
             {
                 if (ContentAsScrollInfo.ScrollBarPositions[i] < MathUtil.ZeroTolerance || ContentAsScrollInfo.ScrollBarPositions[i] > 1 - MathUtil.ZeroTolerance)
                     CurrentScrollingSpeed[i] = 0f;

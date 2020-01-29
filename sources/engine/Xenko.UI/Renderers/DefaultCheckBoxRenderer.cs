@@ -30,9 +30,11 @@ namespace Xenko.UI.Renderers
             if (texture == null)
                 return;
 
-            var color = checkBox.RenderOpacity * (element.IsEnabled ? Color.White : Color.Gray);
+            var color = element.IsEnabled ? Color.White : Color.Gray;
+            if (checkBox.RenderOpacity != 1f)
+                color *= checkBox.RenderOpacity;
             var size = new Vector3(sprite.SizeInPixels, 0f);
-            var translation = Matrix.Translation(-element.RenderSize.X / 2 + size.X / 2, 0f, 0f);
+            var translation = Matrix.Translation((-element.ActualWidth + size.X) / 2, 0f, 0f);
             Matrix.Multiply(ref element.WorldMatrixInternal, ref translation, out Matrix matrix);
             Batch.DrawImage(texture, ref matrix, ref sprite.RegionInternal, ref size, ref sprite.BordersInternal, ref color, context.DepthBias, sprite.Orientation);
         }

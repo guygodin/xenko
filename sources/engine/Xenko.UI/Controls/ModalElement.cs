@@ -76,8 +76,8 @@ namespace Xenko.UI.Controls
                 return;
 
             var position = args.WorldPosition - new Vector3(WorldMatrixInternal.M41, WorldMatrixInternal.M42, WorldMatrixInternal.M43);
-            if (position.X < 0 || position.X > RenderSize.X
-                || position.Y < 0 || position.Y > RenderSize.Y)
+            if (position.X < 0 || position.X > ActualWidth
+                || position.Y < 0 || position.Y > ActualHeight)
             {
                 var eventArgs = new RoutedEventArgs(OutsideClickEvent);
                 RaiseEvent(eventArgs);
@@ -98,7 +98,7 @@ namespace Xenko.UI.Controls
             var virtualResolution = LayoutingContext.VirtualResolution;
             var worldmatrix = Matrix.Identity;
             
-            return CollisionHelper.RayIntersectsRectangle(ref ray, ref worldmatrix, ref virtualResolution, 2, out intersectionPoint);
+            return CollisionHelper.RayIntersectsRectangle(ref ray, ref worldmatrix, ref virtualResolution, out intersectionPoint);
         }
     }
 }

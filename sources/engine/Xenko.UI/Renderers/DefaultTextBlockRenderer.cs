@@ -24,16 +24,24 @@ namespace Xenko.UI.Renderers
 
             var textBlock = (TextBlock)element;
 
-            if (textBlock.Font == null)
+            var font = textBlock.Font;
+            if (font == null)
                 return;
 
             var text = textBlock.TextToDisplay;
             if (string.IsNullOrEmpty(text))
                 return;
+
+            var color = textBlock.IsEnabled ? textBlock.TextColor : Color.FromBgra(0xFF555555);
+            if (textBlock.RenderOpacity != 1f)
+                color *= textBlock.RenderOpacity;
+            // optimization: don't draw the text if transparent
+            if (color.A == 0)
+                return;
             
             var drawCommand = new SpriteFont.InternalUIDrawCommand
             {
-                Color = textBlock.RenderOpacity * (textBlock.IsEnabled ? textBlock.TextColor : Color.FromBgra(0xFF555555)),
+                Color = color,
                 DepthBias = context.DepthBias,
                 RealVirtualResolutionRatio = element.LayoutingContext.RealVirtualResolutionRatio,
                 RequestedFontSize = textBlock.ActualTextSize,
@@ -44,17 +52,17 @@ namespace Xenko.UI.Renderers
                 TextBoxSize = new Vector2(textBlock.ActualWidth, textBlock.ActualHeight)
             };
 
-            if (textBlock.Font.FontType == SpriteFontType.SDF)
+            if (font.FontType == SpriteFontType.SDF)
             {
                 Batch.End();
                 Batch.BeginCustom(context.GraphicsContext, 1);
-                Batch.DrawString(textBlock.Font, text, ref drawCommand);
+                Batch.DrawString(font, text, ref drawCommand);
                 Batch.End();
                 Batch.BeginCustom(context.GraphicsContext, 0);
             }
             else
             {
-                Batch.DrawString(textBlock.Font, text, ref drawCommand);
+                Batch.DrawString(font, text, ref drawCommand);
             }
         }
     }

@@ -118,6 +118,7 @@ namespace Xenko.UI.Controls
 
             CanBeHitByUser = true;
             IsSelectionActive = false;
+            // this breaks the ability to set a Thickness(0) in GameStudio, since it will not deserialize a default Thickness(0), and hence Padding will stay at this value 
             Padding = new Thickness(8, 4, 0, 8, 8, 0);
             DrawLayerNumber += 4; // ( 1: image, 2: selection, 3: Text, 4:Cursor) 
             CaretWidth = 1f;
@@ -795,7 +796,7 @@ namespace Xenko.UI.Controls
             return realSize;
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             var desiredSize = Vector3.Zero;
             if (Font != null)
@@ -814,7 +815,7 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // get the maximum between the final size and the desired size
             var returnSize = new Vector3(

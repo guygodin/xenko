@@ -16,7 +16,7 @@ namespace Xenko.UI.Controls
 
         public ImageButton()
         {
-            Padding = Thickness.UniformCuboid(0);
+            Padding = new Thickness(0);
             base.Content = contentImageElement;
 
             MouseOverStateChanged += (sender, args) => UpdateContentImage();

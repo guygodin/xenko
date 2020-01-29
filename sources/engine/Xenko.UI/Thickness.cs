@@ -17,6 +17,8 @@ namespace Xenko.UI
     [DebuggerDisplay("Left:{Left}, Top:{Top}, Back:{Back}, Right:{Right}, Bottom:{Bottom}, Front:{Front}")]
     public struct Thickness : IEquatable<Thickness>
     {
+        internal const int DimOffset = 3;
+
         /// <summary>
         /// Initializes a new instance of the Thickness structure that has the specified uniform length on the Left, Right, Top, Bottom side and 0 for the Front and Back side.
         /// </summary>
@@ -36,7 +38,21 @@ namespace Xenko.UI
         {
             return new Thickness(thickness, thickness, thickness, thickness, thickness, thickness);
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the Thickness structure that has the specified uniform length on all sides.
+        /// </summary>
+        /// <param name="thickness">The uniform length applied to all sides.</param>
+        public Thickness(float thickness)
+        {
+            Bottom = thickness;
+            Left = thickness;
+            Right = thickness;
+            Top = thickness;
+            Front = thickness;
+            Back = thickness;
+        }
+
         /// <summary>
         /// Initializes a new instance of the Thickness structure that has specific lengths applied to each side of the rectangle.
         /// </summary>
@@ -127,7 +143,7 @@ namespace Xenko.UI
         /// <param name="index">The index of the component to access. Use 0 for the Left component, 1 for the Top component, 
         /// 2 for the Front component, 3 for the Right component, 4 for the Bottom component, 5 for the Back component.</param>
         /// <returns>The value of the component at the specified index.</returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 5].</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 5].</exception>
         [DataMemberIgnore]
         public float this[int index]
         {
@@ -146,6 +162,10 @@ namespace Xenko.UI
                 throw new ArgumentOutOfRangeException(nameof(index), $"Indices for {nameof(Thickness)} run from {0} to {5}, inclusive.");
             }
         }
+
+        public float TotalWidth => Left + Right;
+        public float TotalHeight => Top + Bottom;
+        public float TotalDepth => Front + Back;
 
         public bool Equals(Thickness other)
         {

@@ -35,6 +35,8 @@ namespace Xenko.UI.Controls
         public ToggleButton()
         {
             DrawLayerNumber += 1; // (toggle design image)
+
+            // this breaks the ability to set a Thickness(0) in GameStudio, since it will not deserialize a default Thickness(0), and hence Padding will stay at this value 
             Padding = new Thickness(10, 5, 10, 7);
         }
 
@@ -136,7 +138,6 @@ namespace Xenko.UI.Controls
 
                 state = value;
                 StateChanged?.Invoke(this, EventArgs.Empty);
-                IsDirty = true;
 
                 switch (value)
                 {
@@ -153,7 +154,16 @@ namespace Xenko.UI.Controls
                     default:
                         throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
+                IsDirty = true;
             }
+        }
+
+        [DataMemberIgnore]
+        public bool IsChecked
+        {
+            get { return state == ToggleState.Checked; }
+            set { State = value ? ToggleState.Checked : ToggleState.UnChecked; }
         }
 
         public event EventHandler StateChanged;

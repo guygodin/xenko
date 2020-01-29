@@ -12,18 +12,18 @@ namespace Xenko.UI.Tests.Layering
         public Vector3 ExpectedArrangeValue;
         public Vector3 ReturnedMeasuredValue;
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             return ReturnedMeasuredValue;
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             var maxLength = Math.Max(finalSizeWithoutMargins.Length(), ExpectedArrangeValue.Length());
             Assert.True((finalSizeWithoutMargins - ExpectedArrangeValue).Length() <= maxLength * 0.001f, 
                 "Arrange validator test failed: expected value=" + ExpectedArrangeValue + ", Received value=" + finalSizeWithoutMargins + " (Validator='" + Name + "'");
 
-            return base.ArrangeOverride(finalSizeWithoutMargins);
+            return base.ArrangeOverride(ref finalSizeWithoutMargins);
         }
     }
 }

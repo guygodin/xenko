@@ -40,7 +40,7 @@ namespace Xenko.UI.Panels
             parentPanel?.childrenWithArrangeMatrixInvalidated.Add(element);
         }
 
-        private readonly bool[] shouldAnchor = new bool[3];
+        private readonly bool[] shouldAnchor = new bool[Dims];
 
         /// <summary>
         /// A comparer sorting the <see cref="Panel"/> children by increasing Z-Index.
@@ -102,7 +102,7 @@ namespace Xenko.UI.Panels
         protected Panel()
         {
             // activate anchoring by default
-            for (var i = 0; i < shouldAnchor.Length; i++)
+            for (var i = 0; i < Dims; i++)
                 shouldAnchor[i] = true;
 
             Children = new UIElementCollection();

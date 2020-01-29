@@ -20,6 +20,7 @@ namespace Xenko.UI.Controls
     {
         private ISpriteProvider source;
         private Sprite sprite;
+        private Color color = Color.White;
         private StretchType stretchType = StretchType.Uniform;
         private StretchDirection stretchDirection = StretchDirection.Both;
 
@@ -41,7 +42,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 source = value;
-                UpdateSprite();
+                OnSourceChanged();
             }
         }
 
@@ -52,7 +53,17 @@ namespace Xenko.UI.Controls
         /// <userdoc>The color used to tint the image. The default value is white.</userdoc>
         [DataMember]
         [Display(category: AppearanceCategory)]
-        public Color Color { get; set; } = Color.White;
+        public Color Color
+        {
+            get { return color; }
+            set
+            {
+                if (value == color)
+                    return;
+                color = value;
+                IsDirty = true;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value that describes how the image should be stretched to fill the destination rectangle.
@@ -88,14 +99,19 @@ namespace Xenko.UI.Controls
             }
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected virtual void OnSourceChanged()
         {
-            return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, finalSizeWithoutMargins, StretchType, StretchDirection, false);
+            UpdateSprite();
         }
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
-            return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, availableSizeWithoutMargins, StretchType, StretchDirection, true);
+            return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, ref finalSizeWithoutMargins, StretchType, StretchDirection, false);
+        }
+
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        {
+            return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, ref availableSizeWithoutMargins, StretchType, StretchDirection, true);
         }
 
         protected override void Update(GameTime time)
@@ -103,10 +119,10 @@ namespace Xenko.UI.Controls
             UpdateSprite();
         }
 
-        private void InvalidateMeasure(object sender, EventArgs eventArgs)
+        /*private void InvalidateMeasure(object sender, EventArgs eventArgs)
         {
             InvalidateMeasure();
-        }
+        }*/
 
         private void UpdateSprite()
         {
@@ -114,20 +130,22 @@ namespace Xenko.UI.Controls
             if (sprite == currentSprite)
                 return;
 
-            if (sprite != null)
+            // this seems a little heavy-handed, especially since a sprite will never change size/border
+            // also commented out for optimization for animated images which change CurrentFrame frequently
+            /*if (sprite != null)
             {
                 sprite.SizeChanged -= InvalidateMeasure;
                 sprite.BorderChanged -= InvalidateMeasure;
-            }
+            }*/
 
             bool sizeChanged = sprite == null || currentSprite == null || currentSprite.SizeInPixels != sprite.SizeInPixels;
             sprite = currentSprite;
 
-            if (sprite != null)
+            /*if (sprite != null)
             {
                 sprite.SizeChanged += InvalidateMeasure;
                 sprite.BorderChanged += InvalidateMeasure;
-            }
+            }*/
 
             // no need to re-measure if sprite size the same as before
             if (sizeChanged)

@@ -331,9 +331,9 @@ namespace Xenko.UI.Tests.Layering
 
         private MeasureOverrideDelegate onMeasureOverride;
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
-            return onMeasureOverride != null ? onMeasureOverride(availableSizeWithoutMargins) : base.MeasureOverride(availableSizeWithoutMargins);
+            return onMeasureOverride != null ? onMeasureOverride(availableSizeWithoutMargins) : base.MeasureOverride(ref availableSizeWithoutMargins);
         }
 
         /// <summary>
@@ -481,12 +481,12 @@ namespace Xenko.UI.Tests.Layering
 
         private ArrangeOverrideDelegate onArrageOverride;
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             if (onArrageOverride != null)
                 return onArrageOverride(finalSizeWithoutMargins);
 
-            return base.ArrangeOverride(finalSizeWithoutMargins);
+            return base.ArrangeOverride(ref finalSizeWithoutMargins);
         }
 
         private bool collaspedHasBeenCalled;
@@ -506,7 +506,7 @@ namespace Xenko.UI.Tests.Layering
 
             // set the callbacks
             onCollapsedOverride = () => collaspedHasBeenCalled = true;
-            onArrageOverride = size => { arrangeOverridedHasBeenCalled = true; return base.ArrangeOverride(size); };
+            onArrageOverride = size => { arrangeOverridedHasBeenCalled = true; return base.ArrangeOverride(ref size); };
 
             // check with the parent
             PertubArrangeResultValues();
@@ -606,7 +606,7 @@ namespace Xenko.UI.Tests.Layering
                     Assert.Equal(expectedProvidedSizeInMeasureOverride, size);
                     arrangeOverridedHasBeenCalled = true; 
 
-                    return base.ArrangeOverride(size);
+                    return base.ArrangeOverride(ref size);
                 };
 
             // check size and offset when size is fixed
@@ -958,22 +958,22 @@ namespace Xenko.UI.Tests.Layering
                 ArrangeHasBeenCalled = false;
             }
 
-            protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+            protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
             {
                 MeasureHasBeenCalled = true;
 
                 var size = (OnMeasureOverride != null) ? OnMeasureOverride(availableSizeWithoutMargins) : availableSizeWithoutMargins;
 
-                return base.MeasureOverride(size);
+                return base.MeasureOverride(ref size);
             }
 
-            protected override Vector3 ArrangeOverride(Vector3 availableSizeWithoutMargins)
+            protected override Vector3 ArrangeOverride(ref Vector3 availableSizeWithoutMargins)
             {
                 ArrangeHasBeenCalled = true;
 
                 var size = (OnArrangeOverride != null) ? OnArrangeOverride(availableSizeWithoutMargins) : availableSizeWithoutMargins;
 
-                return base.ArrangeOverride(size);
+                return base.ArrangeOverride(ref size);
             }
         }
 

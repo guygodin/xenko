@@ -23,8 +23,7 @@ namespace Xenko.UI.Renderers
         private void RenderSelection(EditText editText, UIRenderingContext context, int start, int length, Color color, out float offsetTextStart, out float offsetAlignment, out float selectionSize)
         {
             // calculate the size of the text region by removing padding
-            var textRegionSize = new Vector2(editText.ActualWidth - editText.Padding.Left - editText.Padding.Right,
-                                                editText.ActualHeight - editText.Padding.Top - editText.Padding.Bottom);
+            var textRegionSize = new Vector2(editText.ActualWidth - editText.Padding.TotalWidth, editText.ActualHeight - editText.Padding.TotalHeight);
 
             var font = editText.Font;
 
@@ -76,7 +75,8 @@ namespace Xenko.UI.Renderers
 
             var editText = (EditText)element;
 
-            if (editText.Font == null)
+            var font = editText.Font;
+            if (font == null)
                 return;
             
             // determine the image to draw in background of the edit text
@@ -91,10 +91,8 @@ namespace Xenko.UI.Renderers
             }
             
             // calculate the size of the text region by removing padding
-            var textRegionSize = new Vector2(editText.ActualWidth - editText.Padding.Left - editText.Padding.Right,
-                                                editText.ActualHeight - editText.Padding.Top - editText.Padding.Bottom);
+            var textRegionSize = new Vector2(editText.ActualWidth - editText.Padding.TotalWidth, editText.ActualHeight - editText.Padding.TotalHeight);
 
-            var font = editText.Font;
             var caretColor = editText.RenderOpacity * editText.CaretColor;
 
             var offsetTextStart = 0f;
@@ -128,7 +126,7 @@ namespace Xenko.UI.Renderers
                 TextBoxSize = textRegionSize
             };
 
-            if (editText.Font.FontType == SpriteFontType.SDF)
+            if (font.FontType == SpriteFontType.SDF)
             {
                 Batch.End();
                 Batch.BeginCustom(context.GraphicsContext, 1);
@@ -137,7 +135,7 @@ namespace Xenko.UI.Renderers
             // Draw the text
             Batch.DrawString(font, editText.TextToDisplay, ref drawCommand);
 
-            if (editText.Font.FontType == SpriteFontType.SDF)
+            if (font.FontType == SpriteFontType.SDF)
             {
                 Batch.End();
                 Batch.BeginCustom(context.GraphicsContext, 0);
@@ -146,8 +144,8 @@ namespace Xenko.UI.Renderers
             // Draw the cursor
             if (editText.IsCaretVisible)
             {
-                var lineSpacing = editText.Font.GetTotalLineSpacing(editText.ActualTextSize);
-                if (editText.Font.FontType == SpriteFontType.SDF)
+                var lineSpacing = font.GetTotalLineSpacing(editText.ActualTextSize);
+                if (font.FontType == SpriteFontType.SDF)
                     lineSpacing *= editText.ActualTextSize / font.Size;
 
                 var sizeCaret = editText.CaretWidth / fontScale.X;

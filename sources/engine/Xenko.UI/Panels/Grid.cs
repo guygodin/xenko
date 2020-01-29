@@ -21,7 +21,7 @@ namespace Xenko.UI.Panels
     {
         private readonly Logger logger = GlobalLogger.GetLogger("UI");
 
-        private readonly StripDefinitionCollection[] stripDefinitions = new StripDefinitionCollection[3];
+        private readonly StripDefinitionCollection[] stripDefinitions = new StripDefinitionCollection[Dims];
 
         /// <summary>
         /// For each dimension and index of strip, return the list of UIElement that are contained only in auto-sized strips
@@ -185,7 +185,7 @@ namespace Xenko.UI.Panels
         [Display(category: LayoutCategory)]
         public StripDefinitionCollection LayerDefinitions { get; } = new StripDefinitionCollection();
 
-        protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
+        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
         {
             // This function is composed of 6 main parts:
             // 1. Add default strip definition to ensure that all elements are in the grid
@@ -224,7 +224,7 @@ namespace Xenko.UI.Panels
 
             // calculate size available for all auto elements.
             var autoElementAvailableSize = availableSizeWithoutMargins;
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 foreach (var definition in stripDefinitions[dim])
                 {
@@ -236,7 +236,7 @@ namespace Xenko.UI.Panels
             foreach (var child in autoDefinedElements)
             {
                 var childAvailableSize = Vector3.Zero;
-                for (var dim = 0; dim < 3; dim++)
+                for (var dim = 0; dim < Dims; dim++)
                 {
                     var autoAvailableWithMin = autoElementAvailableSize[dim];
                     foreach (var definition in elementToStripDefinitions[dim][child])
@@ -248,7 +248,7 @@ namespace Xenko.UI.Panels
                             childAvailableSize[dim] = Math.Min(autoAvailableWithMin, childAvailableSize[dim] + definition.MaximumSize);
                     }
                 }
-                child.Measure(childAvailableSize);
+                child.Measure(ref childAvailableSize);
             }
 
             // 4. Determine the size of the auto-sized strips
@@ -277,7 +277,7 @@ namespace Xenko.UI.Panels
             //    The reason between this choice is that (1) will tend to increase excessively the size of auto-sized strips (for nothing).
             //    Moreover, we consider most of the time elements included both auto and star-size strips are more elements that we want
             //    to be spread along several strips rather than elements that we want auto-sized.
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 var definitions = stripDefinitions[dim];
 
@@ -328,13 +328,13 @@ namespace Xenko.UI.Panels
             }
 
             // 5. Calculate the actual size of 1-star strip. 
-            CalculateStarStripSize(availableSizeWithoutMargins);
+            CalculateStarStripSize(ref availableSizeWithoutMargins);
 
             // 6. Re-measure all the children, this time with the exact available size.
             foreach (var child in VisualChildrenCollection)
             {
                 var availableToChildWithMargin = Vector3.Zero;
-                for (var dim = 0; dim < 3; dim++)
+                for (var dim = 0; dim < Dims; dim++)
                     availableToChildWithMargin[dim] = SumStripCurrentSize(elementToStripDefinitions[dim][child]);
 
                 child.Measure(availableToChildWithMargin);
@@ -349,7 +349,7 @@ namespace Xenko.UI.Panels
             // -> calculate the size needed by the grid
             //
             var neededSize = Vector3.Zero;
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 var definitions = stripDefinitions[dim];
 
@@ -450,26 +450,22 @@ namespace Xenko.UI.Panels
         {
             foreach (var definition in definitions)
             {
-                var stripSize = 0f;
-
-                if (definition.Type == StripType.Fixed)
-                    stripSize = definition.SizeValue;
-
+                var stripSize = definition.Type == StripType.Fixed ? definition.SizeValue : 0f;
                 definition.ActualSize = definition.ClampSizeByMinimumMaximum(stripSize);
             }
         }
 
-        protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
+        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
         {
             // determine the size of the star strips now that we have the final available size.
-            CalculateStarStripSize(finalSizeWithoutMargins);
+            CalculateStarStripSize(ref finalSizeWithoutMargins);
 
             // Update strip starting position cache data
             RebuildStripPositionCacheData();
 
             // calculate the final size of the grid.
             var gridFinalSize = Vector3.Zero;
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
                 gridFinalSize[dim] = Math.Max(cachedStripIndexToStripPosition[dim][stripDefinitions[dim].Count], finalSizeWithoutMargins[dim]);
 
             // arrange the children
@@ -492,16 +488,16 @@ namespace Xenko.UI.Panels
                     SumStripCurrentSize(elementToStripDefinitions[2][child]));
 
                 // arrange the child
-                child.Arrange(providedSize, IsCollapsed);
+                child.Arrange(ref providedSize, IsCollapsed);
             }
 
             return gridFinalSize;
         }
 
-        private void CalculateStarStripSize(Vector3 finalSizeWithoutMargins)
+        private void CalculateStarStripSize(ref Vector3 finalSizeWithoutMargins)
         {
             // calculate the ActualSize of the start-sized strips. Possible minimum and maximum values have to be taken in account for that calculation.
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 starDefinitionsCopy.Clear();
                 starDefinitionsCopy.AddRange(dimToStarDefinitions[dim]);
@@ -576,7 +572,7 @@ namespace Xenko.UI.Panels
         {
             base.OnLogicalChildRemoved(oldElement, index);
 
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 // remove the strip definitions associated to the removed child
                 elementToStripDefinitions[dim].Remove(oldElement);
@@ -592,7 +588,7 @@ namespace Xenko.UI.Panels
         {
             base.OnLogicalChildAdded(newElement, index);
 
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 // ensure that all children have a associate list strip definitions
                 elementToStripDefinitions[dim][newElement] = new List<StripDefinition>();
@@ -605,7 +601,7 @@ namespace Xenko.UI.Panels
         private void RebuildMeasureCacheData()
         {
             // clear existing cache data
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 // the 'stripIndexToNoStarElements' entries
                 for (var index = 0; index < stripDefinitions[dim].Count; ++index)
@@ -632,7 +628,7 @@ namespace Xenko.UI.Panels
                 var childPosition = GetElementGridPositions(child);
                 var childSpan = GetElementSpanValues(child);
 
-                for (var dim = 0; dim < 3; ++dim)
+                for (var dim = 0; dim < Dims; ++dim)
                 {
                     var childHasNoStarDefinitions = true;
 
@@ -662,12 +658,14 @@ namespace Xenko.UI.Panels
             }
             
             // build the star definitions cache
-            for (var dim = 0; dim < 3; ++dim)
+            for (var dim = 0; dim < Dims; ++dim)
             {
                 dimToStarDefinitions[dim].Clear();
                 foreach (var definition in stripDefinitions[dim])
+                {
                     if (definition.Type == StripType.Star)
                         dimToStarDefinitions[dim].Add(definition);
+                }
             }
         }
 
@@ -682,7 +680,7 @@ namespace Xenko.UI.Panels
             foreach (var child in VisualChildrenCollection)
             {
                 var childLastStripPlusOne = GetElementGridPositions(child) + GetElementSpanValues(child);
-                for (var dim = 0; dim < 3; dim++)
+                for (var dim = 0; dim < Dims; dim++)
                 {
                     // TODO: We should reassign everything outside to last row or 0?
                     if (stripDefinitions[dim].Count < childLastStripPlusOne[dim])
@@ -707,7 +705,7 @@ namespace Xenko.UI.Panels
         private void RebuildStripPositionCacheData()
         {
             // rebuild strip begin position cached data 
-            for (var dim = 0; dim < 3; dim++)
+            for (var dim = 0; dim < Dims; dim++)
             {
                 //clear last cached data
                 cachedStripIndexToStripPosition[dim].Clear();
@@ -779,7 +777,7 @@ namespace Xenko.UI.Panels
                 ++index;
 
             distances = new Vector2(stripPosition[index - 1], stripPosition[index]);
-            distances -= new Vector2(validPosition, validPosition);
+            distances -= new Vector2(validPosition);
         }
 
         public override Vector2 GetSurroudingAnchorDistances(Orientation direction, float position)

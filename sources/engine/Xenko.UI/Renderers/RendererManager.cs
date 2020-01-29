@@ -31,26 +31,34 @@ namespace Xenko.UI.Renderers
 
         public ElementRenderer GetRenderer(UIElement element)
         {
-            ElementRenderer elementRenderer;
-            elementIdToRenderer.TryGetValue(element.Id, out elementRenderer);
-            if (elementRenderer == null)
+            if (!elementIdToRenderer.TryGetValue(element.Id, out var elementRenderer))
             {
                 // try to get the renderer from the user registered class factory
-                var currentType = element.GetType();
-                while (elementRenderer == null && currentType != null)
+                if (typesToUserFactories.Count > 0)
                 {
-                    if (typesToUserFactories.ContainsKey(currentType))
-                        elementRenderer = typesToUserFactories[currentType].TryCreateRenderer(element);
+                    var currentType = element.GetType();
+                    while (currentType != null)
+                    {
+                        if (typesToUserFactories.TryGetValue(currentType, out var factory))
+                        {
+                            elementRenderer = factory.TryCreateRenderer(element);
+                            if (elementRenderer != null)
+                                break;
+                        }
 
-                    currentType = currentType.GetTypeInfo().BaseType;
+                        currentType = currentType.GetTypeInfo().BaseType;
+                    }
                 }
 
                 // try to get the renderer from the default renderer factory.
-                if (elementRenderer == null && defaultFactory != null)
-                    elementRenderer = defaultFactory.TryCreateRenderer(element);
-
                 if (elementRenderer == null)
-                    throw new InvalidOperationException($"No renderer found for element {element}");
+                {
+                    if (defaultFactory != null)
+                        elementRenderer = defaultFactory.TryCreateRenderer(element);
+
+                    if (elementRenderer == null)
+                        throw new InvalidOperationException($"No renderer found for element {element}");
+                }
 
                 // cache the renderer for future uses.
                 elementIdToRenderer[element.Id] = elementRenderer;
