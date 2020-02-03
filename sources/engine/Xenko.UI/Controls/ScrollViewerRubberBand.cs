@@ -55,7 +55,6 @@ namespace Xenko.UI.Controls
         private int[] _scrollModeToDirectionIndices = ScrollModeToDirectionIndicesMap[ScrollingMode.Vertical];
         private Color _scrollBarColor = new Color(96, 96, 96);
         private ISpriteProvider _scrollBarThumbImage;
-        private ISpriteProvider _refreshImage;
         private bool _touchScrollingEnabled = true;
         private bool _isTouchedDown;
         private bool _isUserScrollingViewer;
@@ -65,6 +64,7 @@ namespace Xenko.UI.Controls
         private Vector2 _accumulatedTouchTranslation;
         private Vector2 _contentRenderSizeWithoutPadding;
         private Vector2 _accumulatedDelayedTranslation;
+        private Vector2 _previousAccumulatedDelayedTranslation;
         private Vector2 _actualViewPort;
 
         private bool _rubberBandEntered;
@@ -72,14 +72,16 @@ namespace Xenko.UI.Controls
         private bool _rubberBandUpSpace;
         private float _rubberBandStartOffset;
 
-        private Border _refreshBkgdElement;
+        private ISpriteProvider _refreshImage;
+        private Thickness _refreshImageMargin = new Thickness(3);
         private AnimatedImageElement _refreshElement;
+        private Border _refreshBkgdElement;
         private Color _refreshBkgdColor = new Color(16, 16, 16);
         private float _refreshShowOffsetRequired;
         private float _refreshFrameDistanceRatio;
+        private bool _refreshEnabled = true;
         private bool _isRefreshing;
         private bool _refreshingInitiated;
-        private bool _refreshingCancelled;
         private bool _refreshElementFixedAtTop;
 
         private readonly ScrollBar[] _scrollBars =
@@ -101,7 +103,7 @@ namespace Xenko.UI.Controls
 
         public event EventHandler IsUserScrollingViewerChanged;
 
-        public event CancelEventHandler Refreshing;
+        public event EventHandler Refreshing;
         public event EventHandler Refresh;
 
         public ScrollViewerRubberBand()
@@ -274,6 +276,23 @@ namespace Xenko.UI.Controls
         }
 
         /// <summary>
+        /// Gets or sets the value indicating if refresh should be enabled.
+        /// </summary>
+        [DataMember]
+        [Display(category: RefreshCategory)]
+        [DefaultValue(true)]
+        public bool RefreshEnabled
+        {
+            get { return _refreshEnabled; }
+            set
+            {
+                _refreshEnabled = value;
+                if (!value)
+                    IsRefreshing = false;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the refresh animation sprite sheet to display in top or left rubberband empty area.
         /// </summary>
         /// <userdoc>The image to display as refresh animation.</userdoc>
@@ -288,10 +307,7 @@ namespace Xenko.UI.Controls
                 _refreshImage = value;
 
                 if (_refreshElement != null)
-                {
-                    foreach (var index in _scrollModeToDirectionIndices)
-                        UpdateRefreshElement(index);
-                }
+                    UpdateRefreshElement();
             }
         }
 
@@ -313,13 +329,27 @@ namespace Xenko.UI.Controls
             }
         }
 
+        [DataMember]
+        [Display(category: RefreshCategory)]
+        public Thickness RefreshImageMargin
+        {
+            get { return _refreshImageMargin; }
+            set
+            {
+                _refreshImageMargin = value;
+
+                if (_refreshElement != null)
+                    UpdateRefreshElement();
+            }
+        }
+
         /// <summary>
         /// The pull down offset required to raise the Refreshing event.
         /// </summary>
         [DataMember]
         [Display(category: RefreshCategory)]
-        [DefaultValue(60f)]
-        public float RefreshingOffsetRequired { get; set; } = 60f;
+        [DefaultValue(70f)]
+        public float RefreshingOffsetRequired { get; set; } = 70f;
 
         /// <summary>
         /// A factor to adjust the current Refresh image frame per distance pulled. A smaller number would slow it down.
@@ -438,12 +468,36 @@ namespace Xenko.UI.Controls
         {
             if (_userManuallyScrolled)
             {
-                if (_accumulatedDelayedTranslation != Vector2.Zero)
+                foreach (var index in _scrollModeToDirectionIndices)
                 {
-                    _delayedManuallyScrolled = true;
-                    ScrollOfInternal(ref _accumulatedDelayedTranslation, false);
-                    _delayedManuallyScrolled = false;
-                    _accumulatedDelayedTranslation = Vector2.Zero;
+                    if (index == 0)
+                    {
+                    }
+                    else
+                    {
+                        if (_accumulatedDelayedTranslation.Y != 0)
+                        {
+                            if (Math.Sign(_previousAccumulatedDelayedTranslation.Y) != Math.Sign(_accumulatedDelayedTranslation.Y))
+                            {
+                                // user flipped direction from + to - (or vice-versa) on thumbstick
+                                // so there's no delay when easing out
+                                _scrollOffsets = _actualScrollOffsets;
+                            }
+
+                            _delayedManuallyScrolled = true;
+                            ScrollOfInternal(ref _accumulatedDelayedTranslation, false);
+                            _delayedManuallyScrolled = false;
+
+                            _previousAccumulatedDelayedTranslation = _accumulatedDelayedTranslation;
+                            _accumulatedDelayedTranslation = Vector2.Zero;
+                        }
+                        else
+                        {
+                            // so there's no delay when easing out
+                            _scrollOffsets = _actualScrollOffsets;
+                            _previousAccumulatedDelayedTranslation = _accumulatedDelayedTranslation;
+                        }
+                    }
                 }
 
                 _userManuallyScrolled = false;
@@ -489,7 +543,7 @@ namespace Xenko.UI.Controls
                         StopCurrentScrolling();
 
                         // raise Refresh event if released and still beyond refreshing offset
-                        if (_refreshingInitiated && !_refreshingCancelled && !IsRefreshing)
+                        if (_refreshingInitiated && _refreshEnabled && !IsRefreshing)
                         {
                             foreach (var index in _scrollModeToDirectionIndices)
                             {
@@ -823,7 +877,7 @@ namespace Xenko.UI.Controls
 
         private bool UpdateScrollOffsets(Vector2 desiredScrollPosition)
         {
-            var offsets = _actualScrollOffsets;
+            var startScrollOffsets = _actualScrollOffsets;
 
             var topOffset = IsRefreshing ? _refreshShowOffsetRequired : 0f;
 
@@ -865,7 +919,8 @@ namespace Xenko.UI.Controls
                         if (_rubberBandEasingOut)
                         {
                             _rubberBandEasingOut = false;
-                            _refreshElementFixedAtTop = true;
+                            if (IsRefreshing)
+                                _refreshElementFixedAtTop = true;
                             offset = _rubberBandStartOffset;
                             _currentScrollingSpeed[index] = 0f;
                         }
@@ -895,7 +950,7 @@ namespace Xenko.UI.Controls
 
                             if (aboveLeftLimit)
                             {
-                                InitializeRefresh(index);
+                                InitializeRefresh();
                             }
                         }
                         else
@@ -918,47 +973,32 @@ namespace Xenko.UI.Controls
             {
                 foreach (var index in _scrollModeToDirectionIndices)
                 {
-                    // graph this out to see it, try https://www.desmos.com/calculator
-                    // [ 50 * ln (x / 40 + 1) ]
-                    // for an ideal height of 80 pixels, it is arrived at by 158 pixels of translation
                     float offset;
                     if (index == 0)
                     {
                         var n = Math.Abs(_actualScrollOffsets.X - _rubberBandStartOffset);
-                        offset = (float)(50.0 * Math.Log(Math.Min(n, ViewPort.X) / 40.0 + 1.0));
-                        if (!_rubberBandUpSpace)
-                            offset = -offset;
+                        n = Math.Min(n, ViewPort.X); // the thumbstick can generate very high values, clamp it
+                        offset = CalcRubberBandOffset(n);
                         _actualScrollOffsets.X = offset + _rubberBandStartOffset;
                     }
                     else
                     {
                         var n = Math.Abs(_actualScrollOffsets.Y - _rubberBandStartOffset);
-                        offset = (float)(50.0 * Math.Log(Math.Min(n, ViewPort.Y) / 40.0 + 1.0));
-                        if (!_rubberBandUpSpace)
-                            offset = -offset;
+                        n = Math.Min(n, ViewPort.Y); // the thumbstick can generate very high values, clamp it
+                        offset = CalcRubberBandOffset(n);
                         _actualScrollOffsets.Y = offset + _rubberBandStartOffset;
                     }
 
                     if (_rubberBandUpSpace && _refreshElement != null && _refreshElement.CanAnimate && !IsRefreshing)
                     {
                         // so it doesn't clip
-                        bool show = offset >= _refreshShowOffsetRequired && !_refreshingCancelled;
+                        bool show = offset >= _refreshShowOffsetRequired && _refreshEnabled;
                         if (show)
                         {
                             if (!_refreshingInitiated && offset >= RefreshingOffsetRequired)
                             {
                                 _refreshingInitiated = true;
-                                if (Refreshing != null)
-                                {
-                                    var args = new CancelEventArgs();
-                                    Refreshing.Invoke(this, args);
-                                    if (args.Cancel)
-                                    {
-                                        _refreshingCancelled = true;
-                                        // hide the image on cancel
-                                        show = false;
-                                    }
-                                }
+                                Refreshing?.Invoke(this, EventArgs.Empty);
                             }
                             if (show)
                             {
@@ -981,7 +1021,7 @@ namespace Xenko.UI.Controls
                     _actualScrollOffsets.Y = (float)Math.Round(_actualScrollOffsets.Y);
             }
 
-            if (offsets != _actualScrollOffsets)
+            if (startScrollOffsets != _actualScrollOffsets)
             {
                 if (_rubberBandEntered)
                 {
@@ -990,6 +1030,18 @@ namespace Xenko.UI.Controls
                 return true;
             }
             return false;
+        }
+
+        private float CalcRubberBandOffset(float offset)
+        {
+            // graph this out to see it, try https://www.desmos.com/calculator
+            // [ 50 * ln (x / 40 + 1) ]
+            // for an ideal height of 80 pixels, it is arrived at by 158 pixels of translation
+
+            offset = (float)(50.0 * Math.Log(offset / 40.0 + 1.0));
+            if (!_rubberBandUpSpace)
+                offset = -offset;
+            return offset;
         }
 
         private void UpdateScrollingBarsSize()
@@ -1145,11 +1197,11 @@ namespace Xenko.UI.Controls
             }
         }
 
-        private bool InitializeRefresh(int index)
+        private bool InitializeRefresh()
         {
             if (_refreshElement == null)
             {
-                if (_refreshImage == null)
+                if (!_refreshEnabled || _refreshImage == null)
                     return false;
 
                 _refreshBkgdElement = new Border
@@ -1177,56 +1229,54 @@ namespace Xenko.UI.Controls
                 VisualChildrenCollection.Insert(1, _refreshBkgdElement);
                 VisualChildrenCollection.Insert(2, _refreshElement);
 
-                UpdateRefreshElement(index);
+                UpdateRefreshElement();
             }
             return true;
         }
 
-        private void UpdateRefreshElement(int index)
+        private void UpdateRefreshElement()
         {
-            var size = _refreshImage.GetSprite().Texture.Size;
-            if (index == 0)
+            foreach (var index in _scrollModeToDirectionIndices)
             {
-                _refreshShowOffsetRequired = size.Width;
-                _refreshBkgdElement.Width = size.Width;
-                _refreshBkgdElement.Height = ActualHeight;
+                var size = _refreshImage.GetSprite().SizeInPixels;
+                if (index == 0)
+                {
+                    _refreshShowOffsetRequired = size.X;
+                    _refreshBkgdElement.Width = size.X;
+                    _refreshBkgdElement.Height = ActualHeight;
+                }
+                else
+                {
+                    _refreshShowOffsetRequired = size.Y;
+                    _refreshBkgdElement.Width = ActualWidth;
+                    _refreshBkgdElement.Height = size.Y;
+                }
+
+                // about 100 pixels in a direction for a full rotation of all frames (times a user-controller adjustment factor)
+                _refreshFrameDistanceRatio = _refreshImage.SpritesCount / 100f * RefreshFrameDistanceFactor;
+
+                _refreshElement.Source = _refreshImage;
+                _refreshElement.Margin = _refreshImageMargin;
+                _refreshElement.Measure(Vector2.Zero);
+                _refreshElement.Arrange(Vector2.Zero, false);
+
+                _refreshBkgdElement.Measure(Vector2.Zero);
+                _refreshBkgdElement.Arrange(Vector2.Zero, false);
+
+                var parentMatrix = WorldMatrix;
+                parentMatrix.TranslationVector -= RenderSize / 2f;
+                ((IUIElementUpdate)_refreshBkgdElement).UpdateWorldMatrix(ref parentMatrix, true);
             }
-            else
-            {
-                _refreshShowOffsetRequired = size.Height;
-                _refreshBkgdElement.Width = ActualWidth;
-                _refreshBkgdElement.Height = size.Height;
-            }
-
-            // about 100 pixels in a direction for a full rotation of all frames (times a user-controller adjustment factor)
-            _refreshFrameDistanceRatio = _refreshImage.SpritesCount / 100f * RefreshFrameDistanceFactor;
-
-            _refreshElement.Source = _refreshImage;
-            _refreshElement.Measure(Vector2.Zero);
-            _refreshElement.Arrange(Vector2.Zero, false);
-
-            _refreshBkgdElement.Measure(Vector2.Zero);
-            _refreshBkgdElement.Arrange(Vector2.Zero, false);
-
-            var parentMatrix = WorldMatrix;
-            parentMatrix.TranslationVector -= RenderSize / 2f;
-            ((IUIElementUpdate)_refreshBkgdElement).UpdateWorldMatrix(ref parentMatrix, true);
         }
 
         private void OnIsRefreshingChanged()
         {
             if (_isRefreshing)
             {
-                if (_refreshElement == null)
+                if (!InitializeRefresh())
                 {
-                    foreach (var index in _scrollModeToDirectionIndices)
-                    {
-                        if (!InitializeRefresh(index))
-                        {
-                            _isRefreshing = false;
-                            return;
-                        }
-                    }
+                    _isRefreshing = false;
+                    return;
                 }
 
                 if (!_refreshingInitiated)
@@ -1250,7 +1300,6 @@ namespace Xenko.UI.Controls
                 if (_refreshElement != null)
                 {
                     _refreshingInitiated = false;
-                    _refreshingCancelled = false;
                     _refreshElementFixedAtTop = false;
                     _refreshElement.IsAnimating = false;
                     _refreshBkgdElement.Visibility = Visibility.Hidden;
