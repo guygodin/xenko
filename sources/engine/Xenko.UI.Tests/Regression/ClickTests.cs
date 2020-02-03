@@ -34,28 +34,28 @@ namespace Xenko.UI.Tests.Regression
             ApplyTextBlockDefaultStyle(textblock);
             var element1 = new Button { Name = "1", Width = 800, Height = 400, Content = textblock };
             ApplyButtonDefaultStyle(element1);
-            element1.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector3(100, 50, 0));
+            element1.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector2(100, 50));
             element1.DependencyProperties.Set(Panel.ZIndexPropertyKey, -1);
 
             textblock = new TextBlock { Font = Content.Load<SpriteFont>("CourierNew12"), SynchronousCharacterGeneration = true };
             ApplyTextBlockDefaultStyle(textblock);
             var element2 = new Button { Name = "2", Width = 400, Height = 200, Content = textblock };
             ApplyButtonDefaultStyle(element2);
-            element2.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector3(300, 150, 0));
+            element2.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector2(300, 150));
             element2.DependencyProperties.Set(Panel.ZIndexPropertyKey, 1);
 
             textblock = new TextBlock { Font = Content.Load<SpriteFont>("CourierNew12"), SynchronousCharacterGeneration = true };
             ApplyTextBlockDefaultStyle(textblock);
             var element3 = new Button { Name = "3", Width = 400, Height = 200, Content = textblock };
             ApplyButtonDefaultStyle(element3);
-            element3.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector3(150, 225, 0));
+            element3.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector2(150, 225));
             element3.DependencyProperties.Set(Panel.ZIndexPropertyKey, 2);
 
             textblock = new TextBlock { Font = Content.Load<SpriteFont>("CourierNew12"), SynchronousCharacterGeneration = true };
             ApplyTextBlockDefaultStyle(textblock);
             var element4 = new Button { Name = "4", Width = 400, Height = 200, Content = textblock };
             ApplyButtonDefaultStyle(element4);
-            element4.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector3(450, 75, 0));
+            element4.DependencyProperties.Set(Canvas.AbsolutePositionPropertyKey, new Vector2(450, 75));
             element4.DependencyProperties.Set(Panel.ZIndexPropertyKey, 0);
 
             var canvas = new Canvas();

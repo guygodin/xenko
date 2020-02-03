@@ -44,7 +44,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(Orientation.Horizontal, slider.Orientation);
             Assert.Equal(HorizontalAlignment.Center, slider.HorizontalAlignment);
             Assert.Equal(VerticalAlignment.Center, slider.VerticalAlignment);
-            Assert.Equal(DepthAlignment.Center, slider.DepthAlignment);
         }
 
         /// <summary>
@@ -235,33 +234,29 @@ namespace Xenko.UI.Tests.Layering
             var slider = new Slider();
             var sprite = new Sprite { Region = new RectangleF(2, 3, 40, 50) };
 
-            slider.Measure(new Vector3(100, 200, 300));
+            slider.Measure(new Vector2(100, 200));
             Assert.Equal(new Vector3(0), slider.RenderSize);
             
             slider.TrackBackgroundImage = (SpriteFromTexture)sprite;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(100, 50, 0), slider.DesiredSize);
+            slider.Measure(new Vector2(100, 200));
+            Assert.Equal(new Vector2(100, 50), slider.DesiredSize);
 
             slider.Orientation = Orientation.Vertical;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(50, 200, 0), slider.DesiredSize);
-
-            slider.Orientation = Orientation.InDepth;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(50, 50, 300), slider.DesiredSize); // subject to changes
+            slider.Measure(new Vector2(100, 200));
+            Assert.Equal(new Vector2(50, 200), slider.DesiredSize);
 
             slider.Orientation = Orientation.Horizontal;
             sprite.Orientation = ImageOrientation.Rotated90;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(100, 40, 0), slider.DesiredSize);
+            slider.Measure(new Vector2(100, 200));
+            Assert.Equal(new Vector2(100, 40), slider.DesiredSize);
             
             slider.Orientation = Orientation.Vertical;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(40, 200, 0), slider.DesiredSize);
+            slider.Measure(new Vector2(100, 200));
+            Assert.Equal(new Vector2(40, 200), slider.DesiredSize);
 
             sprite.Orientation = ImageOrientation.AsIs;
-            slider.Measure(new Vector3(100, 200, 300));
-            Assert.Equal(new Vector3(50, 200, 0), slider.DesiredSize);
+            slider.Measure(new Vector2(100, 200));
+            Assert.Equal(new Vector2(50, 200), slider.DesiredSize);
         }
     }
 }

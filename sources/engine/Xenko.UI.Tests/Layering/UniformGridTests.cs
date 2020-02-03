@@ -22,7 +22,6 @@ namespace Xenko.UI.Tests.Layering
             // - test the properties that are supposed to invalidate the object measurement
             UIElementLayeringTests.TestMeasureInvalidation(this, () => Columns = 7);
             UIElementLayeringTests.TestMeasureInvalidation(this, () => Rows = 34);
-            UIElementLayeringTests.TestMeasureInvalidation(this, () => Layers = 34);
         }
 
         /// <summary>
@@ -31,8 +30,8 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestSurroudingAnchor()
         {
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(100, 200, 300);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(100, 200);
             
             var grid = new UniformGrid { Columns = 2, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center};
 
@@ -43,8 +42,8 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(child1);
             grid.Children.Add(child2);
 
-            grid.Measure(1000 * Vector3.One);
-            grid.Arrange(1000 * Vector3.One, false);
+            grid.Measure(1000 * Vector2.One);
+            grid.Arrange(1000 * Vector2.One, false);
             
             Assert.Equal(new Vector2(0, 100), grid.GetSurroudingAnchorDistances(Orientation.Horizontal, -1));
             Assert.Equal(new Vector2(0, 100), grid.GetSurroudingAnchorDistances(Orientation.Horizontal, 0));
@@ -58,10 +57,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Vector2(0, 200), grid.GetSurroudingAnchorDistances(Orientation.Vertical, -1));
             Assert.Equal(new Vector2(-100, 100), grid.GetSurroudingAnchorDistances(Orientation.Vertical, 100));
             Assert.Equal(new Vector2(-200, 0), grid.GetSurroudingAnchorDistances(Orientation.Vertical, 500));
-
-            Assert.Equal(new Vector2(0, 300), grid.GetSurroudingAnchorDistances(Orientation.InDepth, -1));
-            Assert.Equal(new Vector2(-150, 150), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 150));
-            Assert.Equal(new Vector2(-300, 0), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 500));
         }
     }
 }

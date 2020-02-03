@@ -137,7 +137,6 @@ Hierarchy:
                 Children: {}
                 RowDefinitions: {}
                 ColumnDefinitions: {}
-                LayerDefinitions: {}
         -   UIElement: !ScrollingText
                 Id: 7d51286a-f844-48de-afe1-cb6b00e2dcb8
                 DependencyProperties: {}

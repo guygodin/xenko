@@ -10,47 +10,25 @@ using Xenko.Core.Annotations;
 namespace Xenko.UI
 {
     /// <summary>
-    /// Describes the thickness of a frame around a cuboid. Six float values describe the Left, Top, Right, Bottom, Front, and Back sides of the cuboid, respectively.
+    /// Describes the thickness of a frame. Four float values describe the Left, Top, Right, and Bottom sides of the rectangle, respectively.
     /// </summary>
     [DataContract(nameof(Thickness))]
     [DataStyle(DataStyle.Compact)]
-    [DebuggerDisplay("Left:{Left}, Top:{Top}, Back:{Back}, Right:{Right}, Bottom:{Bottom}, Front:{Front}")]
+    [DebuggerDisplay("Left:{Left}, Top:{Top}, Right:{Right}, Bottom:{Bottom}")]
     public struct Thickness : IEquatable<Thickness>
     {
-        internal const int DimOffset = 3;
+        public const int DimOffset = 2;
 
         /// <summary>
-        /// Initializes a new instance of the Thickness structure that has the specified uniform length on the Left, Right, Top, Bottom side and 0 for the Front and Back side.
+        /// Initializes a new instance of the Thickness structure that has the specified uniform length on the Left, Right, Top, Bottom side.
         /// </summary>
         /// <param name="thickness">The uniform length applied to all four sides of the bounding rectangle.</param>
-        /// <returns>The created thickness class</returns>
-        public static Thickness UniformRectangle(float thickness)
-        {
-            return new Thickness(thickness, thickness, thickness, thickness);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the Thickness structure that has the specified uniform length on the Left, Right, Top, Bottom, Front, and Back side.
-        /// </summary>
-        /// <param name="thickness">The uniform length applied to all six sides of the bounding cuboid.</param>
-        /// <returns>The created thickness class</returns>
-        public static Thickness UniformCuboid(float thickness)
-        {
-            return new Thickness(thickness, thickness, thickness, thickness, thickness, thickness);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the Thickness structure that has the specified uniform length on all sides.
-        /// </summary>
-        /// <param name="thickness">The uniform length applied to all sides.</param>
         public Thickness(float thickness)
         {
             Bottom = thickness;
             Left = thickness;
             Right = thickness;
             Top = thickness;
-            Front = thickness;
-            Back = thickness;
         }
 
         /// <summary>
@@ -66,52 +44,15 @@ namespace Xenko.UI
             Left = left;
             Right = right;
             Top = top;
-            Front = 0;
-            Back = 0;
         }
-
-        /// <summary>
-        /// Initializes a new instance of the Thickness structure that has specific lengths applied to each side of the cuboid.
-        /// </summary>
-        /// <param name="bottom">The thickness for the lower side of the cuboid.</param>
-        /// <param name="left">The thickness for the left side of the cuboid.</param>
-        /// <param name="right">The thickness for the right side of the cuboid</param>
-        /// <param name="top">The thickness for the upper side of the cuboid.</param>
-        /// <param name="front">The thickness for the front side of the cuboid.</param>
-        /// <param name="back">The thickness for the Back side of the cuboid.</param>
-        public Thickness(float left, float top, float back, float right, float bottom, float front)
-        {
-            Bottom = bottom;
-            Left = left;
-            Right = right;
-            Top = top;
-            Front = front;
-            Back = back;
-        }
-
-        /// <summary>
-        /// The Back side of the bounding cuboid.
-        /// </summary>
-        /// <userdoc>The Back side of the bounding cuboid.</userdoc>
-        [DataMember(2)]
-        [DefaultValue(0.0f)]
-        public float Back;
 
         /// <summary>
         /// The bottom side of the bounding rectangle or cuboid.
         /// </summary>
         /// <userdoc>The bottom side of the bounding rectangle or cuboid.</userdoc>
-        [DataMember(4)]
+        [DataMember(3)]
         [DefaultValue(0.0f)]
         public float Bottom;
-
-        /// <summary>
-        /// The front side of the bounding cuboid.
-        /// </summary>
-        /// <userdoc>The front side of the bounding cuboid.</userdoc>
-        [DataMember(5)]
-        [DefaultValue(0.0f)]
-        public float Front;
 
         /// <summary>
         /// The left side of the bounding rectangle or cuboid.
@@ -125,7 +66,7 @@ namespace Xenko.UI
         /// The right side of the bounding rectangle or cuboid.
         /// </summary>
         /// <userdoc>The right side of the bounding rectangle or cuboid.</userdoc>
-        [DataMember(3)]
+        [DataMember(2)]
         [DefaultValue(0.0f)]
         public float Right;
 
@@ -143,7 +84,7 @@ namespace Xenko.UI
         /// <param name="index">The index of the component to access. Use 0 for the Left component, 1 for the Top component, 
         /// 2 for the Front component, 3 for the Right component, 4 for the Bottom component, 5 for the Back component.</param>
         /// <returns>The value of the component at the specified index.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 5].</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is out of the range [0, 3].</exception>
         [DataMemberIgnore]
         public float this[int index]
         {
@@ -153,24 +94,20 @@ namespace Xenko.UI
                 {
                     case 0: return Left;
                     case 1: return Top;
-                    case 2: return Front;
-                    case 3: return Right;
-                    case 4: return Bottom;
-                    case 5: return Back;
+                    case 2: return Right;
+                    case 3: return Bottom;
                 }
 
-                throw new ArgumentOutOfRangeException(nameof(index), $"Indices for {nameof(Thickness)} run from {0} to {5}, inclusive.");
+                throw new ArgumentOutOfRangeException(nameof(index), $"Indices for {nameof(Thickness)} run from {0} to {3}, inclusive.");
             }
         }
 
         public float TotalWidth => Left + Right;
         public float TotalHeight => Top + Bottom;
-        public float TotalDepth => Front + Back;
 
         public bool Equals(Thickness other)
         {
-            return Back.Equals(other.Back) && Bottom.Equals(other.Bottom)
-                && Front.Equals(other.Front) && Left.Equals(other.Left)
+            return Bottom.Equals(other.Bottom) && Left.Equals(other.Left)
                 && Right.Equals(other.Right) && Top.Equals(other.Top);
         }
 
@@ -184,9 +121,7 @@ namespace Xenko.UI
         {
             unchecked
             {
-                var hashCode = Back.GetHashCode();
-                hashCode = (hashCode * 397) ^ Bottom.GetHashCode();
-                hashCode = (hashCode * 397) ^ Front.GetHashCode();
+                var hashCode = Bottom.GetHashCode();
                 hashCode = (hashCode * 397) ^ Left.GetHashCode();
                 hashCode = (hashCode * 397) ^ Right.GetHashCode();
                 hashCode = (hashCode * 397) ^ Top.GetHashCode();
@@ -211,7 +146,7 @@ namespace Xenko.UI
         /// <returns>A Thickness with the opposite direction.</returns>
         public static Thickness operator -(Thickness value)
         {
-            return new Thickness(-value.Left, -value.Top, -value.Back, -value.Right, -value.Bottom, -value.Front);
+            return new Thickness(-value.Left, -value.Top, -value.Right, -value.Bottom);
         }
 
         /// <summary>
@@ -222,7 +157,7 @@ namespace Xenko.UI
         /// <returns>A Thickness representing the difference between the two Thickness.</returns>
         public static Thickness operator -(Thickness value1, Thickness value2)
         {
-            return new Thickness(value1.Left - value2.Left, value1.Top - value2.Top, value1.Back - value2.Back, value1.Right - value2.Right, value1.Bottom - value2.Bottom, value1.Front - value2.Front);
+            return new Thickness(value1.Left - value2.Left, value1.Top - value2.Top, value1.Right - value2.Right, value1.Bottom - value2.Bottom);
         }
 
         /// <summary>
@@ -233,7 +168,7 @@ namespace Xenko.UI
         /// <returns>A Thickness representing the sum of the two Thickness.</returns>
         public static Thickness operator +(Thickness value1, Thickness value2)
         {
-            return new Thickness(value1.Left + value2.Left, value1.Top + value2.Top, value1.Back + value2.Back, value1.Right + value2.Right, value1.Bottom + value2.Bottom, value1.Front + value2.Front);
+            return new Thickness(value1.Left + value2.Left, value1.Top + value2.Top, value1.Right + value2.Right, value1.Bottom + value2.Bottom);
         }
 
         /// <summary>
@@ -244,7 +179,7 @@ namespace Xenko.UI
         /// <returns>The divided thickness</returns>
         public static Thickness operator /(Thickness value1, float value2)
         {
-            return new Thickness(value1.Left / value2, value1.Top / value2, value1.Back / value2, value1.Right / value2, value1.Bottom / value2, value1.Front / value2);
+            return new Thickness(value1.Left / value2, value1.Top / value2, value1.Right / value2, value1.Bottom / value2);
         }
 
         /// <summary>
@@ -255,8 +190,7 @@ namespace Xenko.UI
         /// <returns>The multiplied thickness</returns>
         public static Thickness operator *(Thickness value1, float value2)
         {
-            return new Thickness(value1.Left * value2, value1.Top * value2, value1.Back * value2, value1.Right * value2, value1.Bottom * value2, value1.Front * value2);
+            return new Thickness(value1.Left * value2, value1.Top * value2, value1.Right * value2, value1.Bottom * value2);
         }
-
     }
 }

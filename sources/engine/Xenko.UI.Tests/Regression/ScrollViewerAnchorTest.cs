@@ -48,7 +48,7 @@ namespace Xenko.UI.Tests.Regression
 
         private readonly Random random = new Random(0);
 
-        private readonly Vector3 scrollValue = new Vector3(300, 400, 500);
+        private readonly Vector2 scrollValue = new Vector2(300, 400);
 
         public ScrollViewerAnchorTest()
         {
@@ -80,7 +80,6 @@ namespace Xenko.UI.Tests.Regression
             const int gridColumns = 10;
             const int gridRows = 10;
             grid = new Grid();
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Auto));
             for (int i = 0; i < gridColumns; i++)
                 grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto));
             for (int i = 0; i < gridRows; i++)

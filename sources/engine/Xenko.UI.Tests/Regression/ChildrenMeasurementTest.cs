@@ -67,7 +67,7 @@ namespace Xenko.UI.Tests.Regression
         {
             var resolution = UIComponent.Resolution;
             resolution.Z = 0;
-            canvas.Size = resolution;
+            canvas.Size = (Vector2)resolution;
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Xenko.UI.Tests.Regression
         /// </summary>
         private void DrawTest2()
         {
-            canvas.Size = new Vector3(float.NaN);
+            canvas.Size = new Vector2(float.NaN);
             stackPanel.BackgroundColor = Color.LightGray;
         }
 

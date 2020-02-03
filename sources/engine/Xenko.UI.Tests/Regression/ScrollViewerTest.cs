@@ -152,7 +152,7 @@ namespace Xenko.UI.Tests.Regression
         private void Draw2()
         {
             // check that ScrollTo works properly for a content not implementing IScrollInfo
-            scrollViewer.ScrollTo(new Vector3(1000, 1000, 1000));
+            scrollViewer.ScrollTo(new Vector2(1000, 1000));
         }
 
         private void Draw3()
@@ -171,7 +171,7 @@ namespace Xenko.UI.Tests.Regression
         private void Draw5()
         {
             // check that ScrollOf works properly for a content not implementing IScrollInfo
-            scrollViewer.ScrollOf(new Vector3(400,400,400));
+            scrollViewer.ScrollOf(new Vector2(400,400));
         }
 
         private void Draw6()
@@ -216,7 +216,7 @@ namespace Xenko.UI.Tests.Regression
         private void Draw12()
         {
             // check that ScrollOf works properly for a content implementing IScrollInfo
-            scrollViewer.ScrollOf(new Vector3(400, 400, 400));
+            scrollViewer.ScrollOf(new Vector2(400, 400));
         }
 
         private void Draw13()
@@ -228,7 +228,7 @@ namespace Xenko.UI.Tests.Regression
         private void Draw14()
         {
             // check that ScrollTo works properly for a content implementing IScrollInfo
-            scrollViewer.ScrollTo(new Vector3(300, 300, 300));
+            scrollViewer.ScrollTo(new Vector2(300, 300));
         }
 
         [Fact]

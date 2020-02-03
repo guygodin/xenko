@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:view="clr-namespace:Xenko.Core.Presentation.Quantum.View;assembly=Xenko.Core.Presentation.Quantum"
                     xmlns:ui="clr-namespace:Xenko.UI;assembly=Xenko.UI"
@@ -36,7 +36,6 @@
                   <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                   </Grid.RowDefinitions>
 
                   <!-- Left -->
@@ -62,18 +61,6 @@
                          Source="{StaticResource ImageThicknessDown}" />
                   <xk:NumericTextBox Grid.Row="1" Grid.Column="3" TextAlignment="Center" SelectAllOnFocus="True"
                                        Value="{Binding Bottom, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                                       DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
-                  <!-- Back -->
-                  <Image Grid.Row="2" Grid.Column="0" ToolTip="Back" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor"
-                         Source="{StaticResource ImageThicknessBack}" />
-                  <xk:NumericTextBox Grid.Row="2" Grid.Column="1" TextAlignment="Center" SelectAllOnFocus="True"
-                                       Value="{Binding Back, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                                       DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
-                  <!-- Front -->
-                  <Image Grid.Row="2" Grid.Column="2" ToolTip="Front" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor"
-                         Source="{StaticResource ImageThicknessFront}" />
-                  <xk:NumericTextBox Grid.Row="2" Grid.Column="3" TextAlignment="Center" SelectAllOnFocus="True"
-                                       Value="{Binding Front, RelativeSource={RelativeSource Mode=TemplatedParent}}"
                                        DecimalPlaces="{Binding DecimalPlaces, RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
                 </Grid>
               </ControlTemplate>

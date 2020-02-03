@@ -36,16 +36,16 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Adorners
             Visual.Opacity = 0.0f;
         }
 
-        public override void Update(Vector3 position)
+        public override void Update(Vector2 position)
         {
             UpdateFromSettings();
-            Size = GameSideElement.RenderSize;
+            Size = (Vector2)GameSideElement.RenderSize;
         }
 
         protected override void UpdateSize()
         {
             base.UpdateSize();
-            Visual.Margin = Thickness.UniformCuboid(-BorderThickness);
+            Visual.Margin = new Thickness(-BorderThickness);
         }
 
         private void UpdateFromSettings()

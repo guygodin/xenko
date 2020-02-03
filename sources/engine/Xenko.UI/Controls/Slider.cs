@@ -338,13 +338,13 @@ namespace Xenko.UI.Controls
             return shouldSnapToTicks ? Math.Max(Step, (Maximum - Minimum)/TickFrequency) : Step;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             if (trackBackgroundSprite == null)
                 return base.MeasureOverride(ref availableSizeWithoutMargins);
 
             var idealSize = trackBackgroundSprite.SizeInPixels.Y;
-            var desiredSize = new Vector3(idealSize, idealSize, 0)
+            var desiredSize = new Vector2(idealSize)
             {
                 [(int)Orientation] = availableSizeWithoutMargins[(int)Orientation]
             };

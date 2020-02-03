@@ -9,12 +9,12 @@ namespace Xenko.UI.Tests.Layering
 {
     class MeasureValidator : UIElement
     {
-        public Vector3 ReturnedMeasuredValue;
-        public Vector3 ExpectedMeasureValue;
+        public Vector2 ReturnedMeasuredValue;
+        public Vector2 ExpectedMeasureValue;
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < Dims; i++)
             {
                 var val1 = availableSizeWithoutMargins[i];
                 var val2 = ExpectedMeasureValue[i];

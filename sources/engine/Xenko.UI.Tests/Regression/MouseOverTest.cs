@@ -51,11 +51,11 @@ namespace Xenko.UI.Tests.Regression
             ApplyTextBlockDefaultStyle(text1);
             button1 = new Button { Content = text1 };
             ApplyButtonDefaultStyle(button1);
-            button1.SetCanvasRelativePosition(new Vector3(0.025f, 0.05f, 0f));
+            button1.SetCanvasRelativePosition(new Vector2(0.025f, 0.05f));
 
             edit1 = new EditText() { Text = "Edit text 1", Font = Content.Load<SpriteFont>("CourierNew12"), SynchronousCharacterGeneration = true, };
             ApplyEditTextDefaultStyle(edit1);
-            edit1.SetCanvasRelativePosition(new Vector3(0.025f, 0.15f, 0f));
+            edit1.SetCanvasRelativePosition(new Vector2(0.025f, 0.15f));
 
             var text2 = new TextBlock { Text = "text block button 2", Font = Content.Load<SpriteFont>("MicrosoftSansSerif15"), SynchronousCharacterGeneration = true };
             ApplyTextBlockDefaultStyle(text2);
@@ -71,8 +71,8 @@ namespace Xenko.UI.Tests.Regression
                 VerticalAlignment = VerticalAlignment.Center, 
                 Orientation = Orientation.Horizontal
             };
-            stackPanel.SetCanvasRelativePosition(new Vector3(0.5f, 0.5f, 0f));
-            stackPanel.SetCanvasPinOrigin(new Vector3(.5f));
+            stackPanel.SetCanvasRelativePosition(new Vector2(0.5f, 0.5f));
+            stackPanel.SetCanvasPinOrigin(new Vector2(.5f));
 
             canvas = new Canvas { Children = {button1, edit1, stackPanel}, CanBeHitByUser = true };
 

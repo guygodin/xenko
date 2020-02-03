@@ -42,8 +42,8 @@ namespace Xenko.UI.Tests.Layering
             var worldMatrix = Matrix.Zero;
             var localMatrix = Matrix.Identity;
 
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             UpdateWorldMatrix(ref worldMatrix, false);
 
             worldMatrix.M11 = 2;
@@ -66,7 +66,7 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(localMatrix.M11, children.WorldMatrix.M11);
 
             InvalidateArrange();
-            Arrange(Vector3.Zero, false);
+            Arrange(Vector2.Zero, false);
 
             worldMatrix.M11 = 5;
             UpdateWorldMatrix(ref worldMatrix, false);

@@ -19,17 +19,17 @@ namespace Xenko.UI
         /// <param name="stretchDirection"></param>
         /// <param name="isMeasuring"></param>
         /// <returns></returns>
-        public static Vector3 CalculateImageSizeFromAvailable(Sprite sprite, ref Vector3 availableSizeWithoutMargins, StretchType stretchType, StretchDirection stretchDirection, bool isMeasuring)
+        public static Vector2 CalculateImageSizeFromAvailable(Sprite sprite, ref Vector2 availableSizeWithoutMargins, StretchType stretchType, StretchDirection stretchDirection, bool isMeasuring)
         {
             if (sprite == null) // no associated image -> no region needed
-                return Vector3.Zero;
+                return Vector2.Zero;
 
             var idealSize = sprite.SizeInPixels;
             if (idealSize.X <= 0 || idealSize.Y <= 0) // image size null or invalid -> no region needed
-                return Vector3.Zero;
+                return Vector2.Zero;
 
             if (float.IsInfinity(availableSizeWithoutMargins.X) && float.IsInfinity(availableSizeWithoutMargins.Y)) // unconstrained available size -> take the best size for the image: the image size
-                return new Vector3(idealSize, 0);
+                return idealSize;
 
             // initialize the desired size with maximum available size
             var desiredSize = availableSizeWithoutMargins;
@@ -84,7 +84,7 @@ namespace Xenko.UI
             }
 
             // update the desired size based on the desired scales
-            desiredSize = new Vector3(idealSize.X * desiredScale.X, idealSize.Y * desiredScale.Y, 0f);
+            desiredSize = new Vector2(idealSize.X * desiredScale.X, idealSize.Y * desiredScale.Y);
             
             if (!isMeasuring || !sprite.HasBorders)
                 return desiredSize;
@@ -94,7 +94,7 @@ namespace Xenko.UI
             if (sprite.Orientation == ImageOrientation.Rotated90)
                 Utilities.Swap(ref borderSum.X, ref borderSum.Y);
 
-            return new Vector3(Math.Max(desiredSize.X, borderSum.X), Math.Max(desiredSize.Y, borderSum.Y), desiredSize.Z);
+            return new Vector2(Math.Max(desiredSize.X, borderSum.X), Math.Max(desiredSize.Y, borderSum.Y));
         }
     }
 }

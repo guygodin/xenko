@@ -170,7 +170,7 @@ namespace Xenko.UI.Controls
         internal Sprite ButtonImage => ButtonImageProvider?.GetSprite();
 
         /// <inheritdoc/>
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             return sizeToContent
                 ? base.ArrangeOverride(ref finalSizeWithoutMargins)
@@ -178,7 +178,7 @@ namespace Xenko.UI.Controls
         }
 
         /// <inheritdoc/>
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             return sizeToContent
                 ? base.MeasureOverride(ref availableSizeWithoutMargins)

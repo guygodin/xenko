@@ -95,6 +95,8 @@ namespace Xenko.UI
                 mouseOverState = value;
 
                 MouseOverStateChanged?.Invoke(this, new PropertyChangedArgs<MouseOverState> { NewValue = value, OldValue = oldValue });
+
+                IsDirty = true;
             }
         }
 

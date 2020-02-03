@@ -92,10 +92,9 @@ namespace Xenko.UI.Tests.Layering
             // set the size of the content
             child.Width = 100 * rand.NextFloat();
             child.Height = 100 * rand.NextFloat();
-            child.Depth = 150 * rand.NextFloat();
 
             // arrange and check child render size
-            Arrange(1000 * rand.NextVector3(), true);
+            Arrange(1000 * rand.NextVector2(), true);
             Assert.Equal(Vector3.Zero, child.RenderSize);
         }
 
@@ -108,21 +107,21 @@ namespace Xenko.UI.Tests.Layering
             ResetState();
 
             // test that desired size without content correspond to padding
-            Padding = rand.NextThickness(10, 20, 30, 40, 50, 60);
-            Measure(1000*rand.NextVector3());
-            var v0 = Vector3.Zero;
+            Padding = rand.NextThickness(10, 20, 40, 50);
+            Measure(1000*rand.NextVector2());
+            var v0 = Vector2.Zero;
             var expectedSize = CalculateSizeWithThickness(ref v0, ref padding);
             Assert.Equal(expectedSize, DesiredSize);
 
             // test desired size with a child
             var content = new MeasureValidator();
             Content = content;
-            var availableSize = 1000 * rand.NextVector3();
-            content.Margin = rand.NextThickness(60, 50, 40, 30, 20, 10);
+            var availableSize = 1000 * rand.NextVector2();
+            content.Margin = rand.NextThickness(60, 50, 30, 20);
             var availableSizeWithoutPadding = CalculateSizeWithoutThickness(ref availableSize, ref padding);
             var availableSizeWithoutPaddingChildMargin = CalculateSizeWithoutThickness(ref availableSizeWithoutPadding, ref content.MarginInternal);
             content.ExpectedMeasureValue = availableSizeWithoutPaddingChildMargin;
-            content.ReturnedMeasuredValue = 100 * rand.NextVector3();
+            content.ReturnedMeasuredValue = 100 * rand.NextVector2();
             var returnedValueWithMargin = CalculateSizeWithThickness(ref content.ReturnedMeasuredValue, ref content.MarginInternal);
             expectedSize = CalculateSizeWithThickness(ref returnedValueWithMargin, ref padding);
             Measure(availableSize);
@@ -137,25 +136,23 @@ namespace Xenko.UI.Tests.Layering
         {
             ResetState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // Test that returned value is the one provided when no content
-            var providedSize = 1000 * rand.NextVector3();
+            var providedSize = 1000 * rand.NextVector2();
             var arrangedSize = ArrangeOverride(ref providedSize);
             Assert.Equal(providedSize, arrangedSize);
 
             ResetState();
 
             // Test arrange with some content
-            providedSize = 1000 * rand.NextVector3();
-            var content = new ArrangeValidator { DepthAlignment = DepthAlignment.Stretch };
+            providedSize = 1000 * rand.NextVector2();
+            var content = new ArrangeValidator();
             Content = content;
-            Padding = rand.NextThickness(10, 20, 30, 40, 50, 60);
+            Padding = rand.NextThickness(10, 20, 40, 50);
             var providedSizeWithoutPadding = CalculateSizeWithoutThickness(ref providedSize, ref padding);
             content.ExpectedArrangeValue = providedSizeWithoutPadding;
             arrangedSize = ArrangeOverride(ref providedSize);
             Assert.Equal(providedSize, arrangedSize);
-            var childOffsets = new Vector3(Padding.Left, Padding.Top, Padding.Front) - arrangedSize / 2;
+            var childOffsets = new Vector2(Padding.Left, Padding.Top) - arrangedSize / 2;
             Assert.Equal(Matrix.Translation(childOffsets), VisualContent.DependencyProperties.Get(ContentArrangeMatrixPropertyKey));
         }
 
@@ -167,10 +164,8 @@ namespace Xenko.UI.Tests.Layering
         {
             ResetState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // set the panel size to 1
-            Arrange(Vector3.One, false);
+            Arrange(Vector2.One, false);
 
             // test that the world matrix of the panel is correctly updated.
             var localMatrix = Matrix.Scaling(0.1f, 0.5f, 1f);
@@ -180,7 +175,7 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Matrix(0.1f, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0, 0.4f, 0, 0.5f, 0.4f, 0.2f, 1), WorldMatrix);
 
             // add a child and set its local matrix
-            var child = new ContentControlTest { DepthAlignment = DepthAlignment.Stretch };
+            var child = new ContentControlTest();
             var childArrangementMatrix = Matrix.Translation(10, 20, 30);
             var childLocalMatrix = new Matrix(0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
             child.LocalMatrix = childLocalMatrix;
@@ -190,7 +185,7 @@ namespace Xenko.UI.Tests.Layering
             VisualContent.DependencyProperties.Set(ContentArrangeMatrixPropertyKey, childArrangementMatrix);
 
             // arrange the child (set its size to 1)
-            child.Arrange(Vector3.One, false);
+            child.Arrange(Vector2.One, false);
 
             // check that the value of the world matrix of the child is correctly updated too
             UpdateWorldMatrix(ref worldMatrix, true);
@@ -230,8 +225,8 @@ namespace Xenko.UI.Tests.Layering
             var worldMatrix = Matrix.Zero;
             var localMatrix = Matrix.Identity;
 
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             UpdateWorldMatrix(ref worldMatrix, false);
 
             worldMatrix.M11 = 2;
@@ -254,7 +249,7 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(localMatrix.M11, children.WorldMatrix.M11);
 
             InvalidateArrange();
-            Arrange(Vector3.Zero, false);
+            Arrange(Vector2.Zero, false);
 
             worldMatrix.M11 = 5;
             UpdateWorldMatrix(ref worldMatrix, false);

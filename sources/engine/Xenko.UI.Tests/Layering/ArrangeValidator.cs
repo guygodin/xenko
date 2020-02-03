@@ -9,15 +9,15 @@ namespace Xenko.UI.Tests.Layering
 {
     class ArrangeValidator : UIElement
     {
-        public Vector3 ExpectedArrangeValue;
-        public Vector3 ReturnedMeasuredValue;
+        public Vector2 ExpectedArrangeValue;
+        public Vector2 ReturnedMeasuredValue;
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             return ReturnedMeasuredValue;
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             var maxLength = Math.Max(finalSizeWithoutMargins.Length(), ExpectedArrangeValue.Length());
             Assert.True((finalSizeWithoutMargins - ExpectedArrangeValue).Length() <= maxLength * 0.001f, 

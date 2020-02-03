@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
@@ -119,7 +119,7 @@ namespace Xenko.UI.Controls
             CanBeHitByUser = true;
             IsSelectionActive = false;
             // this breaks the ability to set a Thickness(0) in GameStudio, since it will not deserialize a default Thickness(0), and hence Padding will stay at this value 
-            Padding = new Thickness(8, 4, 0, 8, 8, 0);
+            Padding = new Thickness(8, 4, 8, 8);
             DrawLayerNumber += 4; // ( 1: image, 2: selection, 3: Text, 4:Cursor) 
             CaretWidth = 1f;
             CaretFrequency = 1f;
@@ -796,17 +796,17 @@ namespace Xenko.UI.Controls
             return realSize;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
-            var desiredSize = Vector3.Zero;
+            var desiredSize = Vector2.Zero;
             if (Font != null)
             {
                 // take the maximum between the text size and the minimum visible line size as text desired size
                 var fontLineSpacing = Font.GetTotalLineSpacing(ActualTextSize);
                 if (Font.FontType == SpriteFontType.SDF)
                     fontLineSpacing *= ActualTextSize / Font.Size;
-                var currentTextSize = new Vector3(CalculateTextSize(), 0);
-                desiredSize = new Vector3(currentTextSize.X, Math.Min(Math.Max(currentTextSize.Y, fontLineSpacing * MinLines), fontLineSpacing * MaxLines), currentTextSize.Z);
+                var currentTextSize = CalculateTextSize();
+                desiredSize = new Vector2(currentTextSize.X, Math.Min(Math.Max(currentTextSize.Y, fontLineSpacing * MinLines), fontLineSpacing * MaxLines));
             }
 
             // add the padding to the text desired size
@@ -815,13 +815,12 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             // get the maximum between the final size and the desired size
-            var returnSize = new Vector3(
+            var returnSize = new Vector2(
                 Math.Max(finalSizeWithoutMargins.X, DesiredSize.X),
-                Math.Max(finalSizeWithoutMargins.Y, DesiredSize.Y),
-                Math.Max(finalSizeWithoutMargins.Z, DesiredSize.Z));
+                Math.Max(finalSizeWithoutMargins.Y, DesiredSize.Y));
 
             return returnSize;
         }

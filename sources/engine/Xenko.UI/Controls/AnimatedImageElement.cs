@@ -16,7 +16,6 @@ namespace Xenko.UI.Controls
         private bool isAnimating = true;
         private bool checkCanAnimate = true;
         private bool restart;
-        private int frames;
         private long frameTicks;
         private long startTicks;
 
@@ -39,13 +38,14 @@ namespace Xenko.UI.Controls
             }
         }
 
-        [DataMemberIgnore]
-        public bool CanAnimate { get; private set; }
+        internal bool CanAnimate { get; private set; }
+        internal int Frames { get; private set; }
 
         protected override void OnSourceChanged()
         {
             base.OnSourceChanged();
             checkCanAnimate = true;
+            restart = true;
         }
 
         protected override void Update(GameTime time)
@@ -58,12 +58,11 @@ namespace Xenko.UI.Controls
                 CanAnimate = false;
                 if (Source is IAnimatableSpriteProvider spriteProvider)
                 {
-                    frames = Source.SpritesCount;
-                    if (frames >= 2)
+                    Frames = Source.SpritesCount;
+                    if (Frames >= 2)
                     {
                         CanAnimate = true;
-                        frameTicks = TimeSpan.FromSeconds(1.0 / frames).Ticks;
-                        restart = true;
+                        frameTicks = TimeSpan.FromSeconds(1.0 / Frames).Ticks;
                     }
                 }
             }
@@ -71,6 +70,8 @@ namespace Xenko.UI.Controls
             var isVisible = IsVisible;
             if (!isVisible)
             {
+                if (CanAnimate)
+                    ((IAnimatableSpriteProvider)Source).CurrentFrame = 0;
                 restart = true;
                 return;
             }
@@ -82,7 +83,6 @@ namespace Xenko.UI.Controls
                     restart = false;
 
                     // start animation
-                    ((IAnimatableSpriteProvider)Source).CurrentFrame = 0;
                     startTicks = time.Total.Ticks;
                 }
                 else
@@ -91,7 +91,7 @@ namespace Xenko.UI.Controls
                         return;
 
                     var spriteProvider = (IAnimatableSpriteProvider)Source;
-                    spriteProvider.CurrentFrame = (spriteProvider.CurrentFrame + 1) % frames;
+                    spriteProvider.CurrentFrame = (spriteProvider.CurrentFrame + 1) % Frames;
                     startTicks += frameTicks;
                 }
             }

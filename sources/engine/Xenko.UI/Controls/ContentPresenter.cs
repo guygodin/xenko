@@ -21,11 +21,6 @@ namespace Xenko.UI.Controls
         private Matrix contentWorldMatrix;
         private UIElement content;
 
-        public ContentPresenter()
-        {
-            DepthAlignment = DepthAlignment.Stretch;
-        }
-
         /// <summary>
         /// Gets or sets the content of the presenter.
         /// </summary>
@@ -60,10 +55,10 @@ namespace Xenko.UI.Controls
                 yield return Content;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             // measure size desired by the children
-            var childDesiredSizeWithMargins = Vector3.Zero;
+            var childDesiredSizeWithMargins = Vector2.Zero;
             if (Content != null)
             {
                 Content.Measure(ref availableSizeWithoutMargins);
@@ -73,7 +68,7 @@ namespace Xenko.UI.Controls
             return childDesiredSizeWithMargins;
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             // arrange child elements
             Content?.Arrange(ref finalSizeWithoutMargins, IsCollapsed);

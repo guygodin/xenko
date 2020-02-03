@@ -33,7 +33,7 @@ namespace Xenko.UI.Tests.Layering
             var control = new ControlTests();
 
             // test properties default values
-            Assert.Equal(Thickness.UniformCuboid(0), control.Padding);
+            Assert.Equal(new Thickness(0), control.Padding);
         }
         
         /// <summary>
@@ -44,7 +44,7 @@ namespace Xenko.UI.Tests.Layering
         {
             // - test the properties that are not supposed to invalidate the object layout state
 
-            UIElementLayeringTests.TestMeasureInvalidation(this, () => Padding = Thickness.UniformRectangle(23));
+            UIElementLayeringTests.TestMeasureInvalidation(this, () => Padding = new Thickness(23));
         }
     }
 }

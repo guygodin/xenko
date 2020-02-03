@@ -21,11 +21,10 @@ namespace Xenko.UI.Panels
         /// <summary>
         /// The final size of one cell
         /// </summary>
-        private Vector3 finalForOneCell;
+        private Vector2 finalForOneCell;
 
         private int rows = 1;
         private int columns = 1;
-        private int layers = 1;
 
         /// <summary>
         /// Gets or sets the number of rows that the <see cref="UniformGrid"/> has.
@@ -65,66 +64,46 @@ namespace Xenko.UI.Panels
             }
         }
 
-        /// <summary>
-        /// Gets or sets the number of layers that the <see cref="UniformGrid"/> has.
-        /// </summary>
-        /// <remarks>The value is coerced in the range [1, <see cref="int.MaxValue"/>].</remarks>
-        /// <userdoc>The number of layers.</userdoc>
-        [DataMember]
-        [DataMemberRange(1, 0)]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(1)]
-        public int Layers
-        {
-            get { return layers; }
-            set
-            {
-                layers = MathUtil.Clamp(value, 1, int.MaxValue);
-                InvalidateMeasure();
-            }
-        }
-
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             // compute the size available for one cell
-            var gridSize = new Vector3(Columns, Rows, Layers);
-            var availableForOneCell = new Vector3(availableSizeWithoutMargins.X / gridSize.X, availableSizeWithoutMargins.Y / gridSize.Y, availableSizeWithoutMargins.Z / gridSize.Z);
+            var gridSize = new Vector2(Columns, Rows);
+            var availableForOneCell = new Vector2(availableSizeWithoutMargins.X / gridSize.X, availableSizeWithoutMargins.Y / gridSize.Y);
 
             // measure all the children
-            var neededForOneCell = Vector3.Zero;
+            var neededForOneCell = Vector2.Zero;
             foreach (var child in VisualChildrenCollection)
             {
                 // compute the size available for the child depending on its spans values
                 var childSpans = GetElementSpanValuesAsFloat(child);
-                var availableForChildWithMargin = Vector3.Modulate(childSpans, availableForOneCell);
+                var availableForChildWithMargin = Vector2.Modulate(childSpans, availableForOneCell);
 
                 child.Measure(ref availableForChildWithMargin);
 
-                neededForOneCell = new Vector3(
+                neededForOneCell = new Vector2(
                     Math.Max(neededForOneCell.X, child.DesiredSizeWithMargins.X / childSpans.X),
-                    Math.Max(neededForOneCell.Y, child.DesiredSizeWithMargins.Y / childSpans.Y),
-                    Math.Max(neededForOneCell.Z, child.DesiredSizeWithMargins.Z / childSpans.Z));
+                    Math.Max(neededForOneCell.Y, child.DesiredSizeWithMargins.Y / childSpans.Y));
             }
 
-            return Vector3.Modulate(gridSize, neededForOneCell);
+            return Vector2.Modulate(gridSize, neededForOneCell);
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             // compute the size available for one cell
-            var gridSize = new Vector3(Columns, Rows, Layers);
-            finalForOneCell = new Vector3(finalSizeWithoutMargins.X / gridSize.X, finalSizeWithoutMargins.Y / gridSize.Y, finalSizeWithoutMargins.Z / gridSize.Z);
+            var gridSize = new Vector2(Columns, Rows);
+            finalForOneCell = new Vector2(finalSizeWithoutMargins.X / gridSize.X, finalSizeWithoutMargins.Y / gridSize.Y);
 
             // arrange all the children
             foreach (var child in VisualChildrenCollection)
             {
                 // compute the final size of the child depending on its spans values
                 var childSpans = GetElementSpanValuesAsFloat(child);
-                var finalForChildWithMargin = Vector3.Modulate(childSpans, finalForOneCell);
+                var finalForChildWithMargin = Vector2.Modulate(childSpans, finalForOneCell);
 
                 // set the arrange matrix of the child
                 var childOffsets = GetElementGridPositionsAsFloat(child);
-                child.DependencyProperties.Set(PanelArrangeMatrixPropertyKey, Matrix.Translation(Vector3.Modulate(childOffsets, finalForOneCell) - finalSizeWithoutMargins / 2));
+                child.DependencyProperties.Set(PanelArrangeMatrixPropertyKey, Matrix.Translation(Vector2.Modulate(childOffsets, finalForOneCell) - finalSizeWithoutMargins / 2));
 
                 // arrange the child
                 child.Arrange(ref finalForChildWithMargin, IsCollapsed);
@@ -151,7 +130,7 @@ namespace Xenko.UI.Panels
         public override Vector2 GetSurroudingAnchorDistances(Orientation direction, float position)
         {
             Vector2 distances;
-            var gridElements = new Vector3(Columns, Rows, Layers);
+            var gridElements = new Vector2(Columns, Rows);
             
             CalculateDistanceToSurroundingModulo(position, finalForOneCell[(int)direction], gridElements[(int)direction], out distances);
 
@@ -163,11 +142,11 @@ namespace Xenko.UI.Panels
         /// </summary>
         /// <param name="element">The element from which extract the span values</param>
         /// <returns>The span values of the element</returns>
-        protected Vector3 GetElementSpanValuesAsFloat(UIElement element)
+        protected Vector2 GetElementSpanValuesAsFloat(UIElement element)
         {
             var intValues = GetElementSpanValues(element);
 
-            return new Vector3(intValues.X, intValues.Y, intValues.Z);
+            return new Vector2(intValues.X, intValues.Y);
         }
 
         /// <summary>
@@ -175,11 +154,11 @@ namespace Xenko.UI.Panels
         /// </summary>
         /// <param name="element">The element from which extract the position values</param>
         /// <returns>The position of the element</returns>
-        protected Vector3 GetElementGridPositionsAsFloat(UIElement element)
+        protected Vector2 GetElementGridPositionsAsFloat(UIElement element)
         {
             var intValues = GetElementGridPositions(element);
 
-            return new Vector3(intValues.X, intValues.Y, intValues.Z);
+            return new Vector2(intValues.X, intValues.Y);
         }
     }
 }

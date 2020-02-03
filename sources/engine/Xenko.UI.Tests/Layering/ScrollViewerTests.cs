@@ -21,9 +21,6 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestBasicInvalidations()
         {
-            // - test the properties that are supposed to invalidate the object measurement
-            UIElementLayeringTests.TestMeasureInvalidation(this, () => ScrollMode = ScrollingMode.InDepthHorizontal);
-
             // - test the properties that are not supposed to invalidate the object layout state
             UIElementLayeringTests.TestNoInvalidation(this, () => Deceleration = 5.5f);
             UIElementLayeringTests.TestNoInvalidation(this, () => TouchScrollingEnabled = !TouchScrollingEnabled);
@@ -37,94 +34,81 @@ namespace Xenko.UI.Tests.Layering
         {
             const float elementWidth = 100;
             const float elementHeight = 200;
-            const float elementDepth = 300;
 
             var rand = new Random();
-            var scrollViewer = new ScrollViewer { ScrollMode = ScrollingMode.HorizontalVertical, Width = elementWidth, Height = elementHeight, Depth = elementDepth };
-            scrollViewer.Measure(Vector3.Zero);
-            scrollViewer.Arrange(Vector3.Zero, false);
+            var scrollViewer = new ScrollViewer { ScrollMode = ScrollingMode.HorizontalVertical, Width = elementWidth, Height = elementHeight };
+            scrollViewer.Measure(Vector2.Zero);
+            scrollViewer.Arrange(Vector2.Zero, false);
 
             // tests that no crashes happen with no content
-            scrollViewer.ScrollTo(rand.NextVector3());
-            Assert.Equal(Vector3.Zero, ScrollPosition);
-            scrollViewer.ScrollOf(rand.NextVector3());
-            Assert.Equal(Vector3.Zero, ScrollPosition);
+            scrollViewer.ScrollTo(rand.NextVector2());
+            Assert.Equal(Vector2.Zero, ScrollPosition);
+            scrollViewer.ScrollOf(rand.NextVector2());
+            Assert.Equal(Vector2.Zero, ScrollPosition);
             scrollViewer.ScrollToBeginning(Orientation.Horizontal);
-            Assert.Equal(Vector3.Zero, ScrollPosition);
-            scrollViewer.ScrollToBeginning(Orientation.InDepth);
-            Assert.Equal(Vector3.Zero, ScrollPosition);
+            Assert.Equal(Vector2.Zero, ScrollPosition);
             scrollViewer.ScrollToEnd(Orientation.Horizontal);
-            Assert.Equal(Vector3.Zero, ScrollPosition);
-            scrollViewer.ScrollToEnd(Orientation.InDepth);
-            Assert.Equal(Vector3.Zero, ScrollPosition);
+            Assert.Equal(Vector2.Zero, ScrollPosition);
 
             // tests with an arranged element
             const float contentWidth = 1000;
             const float contentHeight = 2000;
-            const float contentDepth = 3000;
-            var content = new ContentDecorator { Width = contentWidth, Height = contentHeight, Depth = contentDepth };
+            var content = new ContentDecorator { Width = contentWidth, Height = contentHeight };
             scrollViewer.Content = content;
-            scrollViewer.Measure(Vector3.Zero);
-            scrollViewer.Arrange(Vector3.Zero, false);
+            scrollViewer.Measure(Vector2.Zero);
+            scrollViewer.Arrange(Vector2.Zero, false);
 
-            var scrollValue = new Vector3(123, 456, 789);
+            var scrollValue = new Vector2(123, 456);
             scrollViewer.ScrollTo(scrollValue);
-            Assert.Equal(new Vector3(scrollValue.X, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(scrollValue.X, scrollValue.Y), scrollViewer.ScrollPosition);
 
             scrollViewer.ScrollToEnd(Orientation.Horizontal);
-            Assert.Equal(new Vector3(contentWidth - elementWidth, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(contentWidth - elementWidth, scrollValue.Y), scrollViewer.ScrollPosition);
             scrollViewer.ScrollToEnd(Orientation.Vertical);
-            Assert.Equal(new Vector3(contentWidth - elementWidth, contentHeight - elementHeight, 0), scrollViewer.ScrollPosition);
-            scrollViewer.ScrollToEnd(Orientation.InDepth);
-            Assert.Equal(new Vector3(contentWidth - elementWidth, contentHeight - elementHeight, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(contentWidth - elementWidth, contentHeight - elementHeight), scrollViewer.ScrollPosition);
 
             scrollViewer.ScrollToBeginning(Orientation.Horizontal);
-            Assert.Equal(new Vector3(0, contentHeight - elementHeight, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(0, contentHeight - elementHeight), scrollViewer.ScrollPosition);
             scrollViewer.ScrollToBeginning(Orientation.Vertical);
-            Assert.Equal(new Vector3(0, 0, 0), scrollViewer.ScrollPosition);
-            scrollViewer.ScrollToBeginning(Orientation.InDepth);
-            Assert.Equal(new Vector3(0, 0, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(0, 0), scrollViewer.ScrollPosition);
 
             scrollViewer.ScrollOf(scrollValue);
-            Assert.Equal(new Vector3(scrollValue.X, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            Assert.Equal(new Vector2(scrollValue.X, scrollValue.Y), scrollViewer.ScrollPosition);
 
             // tests with an not arranged element
             content.InvalidateArrange();
             scrollViewer.ScrollTo(scrollValue);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(scrollValue.X, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(scrollValue.X, scrollValue.Y), scrollViewer.ScrollPosition);
             content.InvalidateArrange();
             scrollViewer.ScrollOf(2*scrollValue);
             scrollViewer.ScrollTo(scrollValue);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(scrollValue.X, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(scrollValue.X, scrollValue.Y), scrollViewer.ScrollPosition);
 
             content.InvalidateArrange();
             scrollViewer.ScrollToEnd(Orientation.Horizontal);
             scrollViewer.ScrollToEnd(Orientation.Vertical);
-            scrollViewer.ScrollToEnd(Orientation.InDepth);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(contentWidth - elementWidth, contentHeight - elementHeight, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(contentWidth - elementWidth, contentHeight - elementHeight), scrollViewer.ScrollPosition);
 
             content.InvalidateArrange();
             scrollViewer.ScrollToBeginning(Orientation.Horizontal);
             scrollViewer.ScrollToBeginning(Orientation.Vertical);
-            scrollViewer.ScrollToBeginning(Orientation.InDepth);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(0, 0, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(0, 0), scrollViewer.ScrollPosition);
 
             content.InvalidateArrange();
             scrollViewer.ScrollOf(scrollValue);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(scrollValue.X, scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(scrollValue.X, scrollValue.Y), scrollViewer.ScrollPosition);
             content.InvalidateArrange();
             scrollViewer.ScrollToBeginning(Orientation.Horizontal);
             scrollViewer.ScrollToBeginning(Orientation.Vertical);
-            scrollViewer.ScrollToBeginning(Orientation.InDepth);
             scrollViewer.ScrollOf(scrollValue);
             scrollViewer.ScrollOf(scrollValue);
-            scrollViewer.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(2*scrollValue.X, 2*scrollValue.Y, 0), scrollViewer.ScrollPosition);
+            scrollViewer.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(2*scrollValue.X, 2*scrollValue.Y), scrollViewer.ScrollPosition);
         }
 
         /// <summary>
@@ -133,7 +117,7 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestStopScrolling()
         {
-            var referenceValue = Vector3.One;
+            var referenceValue = Vector2.One;
 
             ScrollMode = ScrollingMode.Horizontal;
 
@@ -141,23 +125,23 @@ namespace Xenko.UI.Tests.Layering
 
             // tests the function itself
             StopCurrentScrolling();
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
 
             CurrentScrollingSpeed = referenceValue;
 
             // tests ScrollTo function
-            ScrollTo(Vector3.Zero, false);
+            ScrollTo(Vector2.Zero, false);
             Assert.Equal(referenceValue, CurrentScrollingSpeed);
-            ScrollTo(Vector3.Zero);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            ScrollTo(Vector2.Zero);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
             
             CurrentScrollingSpeed = referenceValue;
 
             // tests ScrollOf function
-            ScrollOf(Vector3.Zero, false);
+            ScrollOf(Vector2.Zero, false);
             Assert.Equal(referenceValue, CurrentScrollingSpeed);
-            ScrollOf(Vector3.Zero);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            ScrollOf(Vector2.Zero);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
 
             CurrentScrollingSpeed = referenceValue;
 
@@ -167,10 +151,10 @@ namespace Xenko.UI.Tests.Layering
             ScrollToBeginning(Orientation.Vertical, false);
             Assert.Equal(referenceValue, CurrentScrollingSpeed);
             ScrollToBeginning(Orientation.Horizontal);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
             CurrentScrollingSpeed = referenceValue;
             ScrollToBeginning(Orientation.Vertical);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
 
             CurrentScrollingSpeed = referenceValue;
 
@@ -180,10 +164,10 @@ namespace Xenko.UI.Tests.Layering
             ScrollToEnd(Orientation.Vertical, false);
             Assert.Equal(referenceValue, CurrentScrollingSpeed);
             ScrollToEnd(Orientation.Horizontal);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
             CurrentScrollingSpeed = referenceValue;
             ScrollToEnd(Orientation.Vertical);
-            Assert.Equal(Vector3.Zero, CurrentScrollingSpeed);
+            Assert.Equal(Vector2.Zero, CurrentScrollingSpeed);
 
             CurrentScrollingSpeed = referenceValue;
         }

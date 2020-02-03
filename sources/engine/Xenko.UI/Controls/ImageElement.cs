@@ -24,8 +24,6 @@ namespace Xenko.UI.Controls
         private StretchType stretchType = StretchType.Uniform;
         private StretchDirection stretchDirection = StretchDirection.Both;
 
-        public event EventHandler SpriteChanged;
-
         /// <summary>
         /// Gets or sets the <see cref="ISpriteProvider"/> for the image.
         /// </summary>
@@ -43,6 +41,7 @@ namespace Xenko.UI.Controls
 
                 source = value;
                 OnSourceChanged();
+                IsDirty = true;
             }
         }
 
@@ -104,12 +103,12 @@ namespace Xenko.UI.Controls
             UpdateSprite();
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, ref finalSizeWithoutMargins, StretchType, StretchDirection, false);
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             return ImageSizeHelper.CalculateImageSizeFromAvailable(sprite, ref availableSizeWithoutMargins, StretchType, StretchDirection, true);
         }
@@ -152,8 +151,6 @@ namespace Xenko.UI.Controls
             {
                 InvalidateMeasure();
             }
-
-            SpriteChanged?.Invoke(this, EventArgs.Empty);
 
             IsDirty = true;
         }

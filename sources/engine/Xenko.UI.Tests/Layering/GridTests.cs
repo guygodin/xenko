@@ -64,7 +64,6 @@ namespace Xenko.UI.Tests.Layering
 
             TestDefinitionsDefaultState(grid.ColumnDefinitions);
             TestDefinitionsDefaultState(grid.RowDefinitions);
-            TestDefinitionsDefaultState(grid.LayerDefinitions);
         }
 
         private void TestDefinitionsDefaultState(StripDefinitionCollection definitions)
@@ -89,18 +88,15 @@ namespace Xenko.UI.Tests.Layering
             var c2 = new Canvas();
             c2.DependencyProperties.Set(GridBase.ColumnPropertyKey, 3);
             c2.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 3);
-            c2.DependencyProperties.Set(GridBase.LayerPropertyKey, 1);
-            c2.DependencyProperties.Set(GridBase.LayerSpanPropertyKey, 4);
 
             grid.Children.Add(c1);
             grid.Children.Add(c2);
 
-            grid.Measure(Vector3.Zero);
-            grid.Arrange(Vector3.Zero, false);
+            grid.Measure(Vector2.Zero);
+            grid.Arrange(Vector2.Zero, false);
 
             Assert.Empty(grid.ColumnDefinitions);
             Assert.Empty(grid.RowDefinitions);
-            Assert.Empty(grid.LayerDefinitions);
         }
 
         /// <summary>
@@ -111,22 +107,21 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var child0 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(200, 200, 0), ExpectedArrangeValue = new Vector3(200, 200, 0), ReturnedMeasuredValue = new Vector3(100, 400, 0), DepthAlignment = DepthAlignment.Stretch };
-            //var child1 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(200, 200, 0), ExpectedArrangeValue = new Vector3(200, 200, 0), ReturnedMeasuredValue = new Vector3(100, 400, 0), Width = 100, Height = 400, DepthAlignment = DepthAlignment.Stretch };
+            var child0 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(200, 200), ExpectedArrangeValue = new Vector2(200, 200), ReturnedMeasuredValue = new Vector2(100, 400) };
+            //var child1 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(200, 200), ExpectedArrangeValue = new Vector2(200, 200), ReturnedMeasuredValue = new Vector2(100, 400), Width = 100, Height = 400 };
 
             grid.Children.Add(child0);
             //grid.Children.Add(child1);
 
-            grid.Measure(new Vector3(200, 200, 0));
-            grid.Arrange(new Vector3(200, 200, 0), false);
+            grid.Measure(new Vector2(200, 200));
+            grid.Arrange(new Vector2(200, 200), false);
 
             // Try again with strips (it should behave the same)
             grid.ColumnDefinitions.Add(new StripDefinition());
             grid.RowDefinitions.Add(new StripDefinition());
-            grid.LayerDefinitions.Add(new StripDefinition());
 
-            grid.Measure(new Vector3(200, 200, 0));
-            grid.Arrange(new Vector3(200, 200, 0), false);
+            grid.Measure(new Vector2(200, 200));
+            grid.Arrange(new Vector2(200, 200), false);
         }
 
         /// <summary>
@@ -145,29 +140,26 @@ namespace Xenko.UI.Tests.Layering
             grid.RowDefinitions.Add(new StripDefinition(StripType.Fixed, 400));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Fixed, 500));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Fixed, 600));
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Fixed, 700));
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Fixed, 800));
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Fixed, 900));
 
             // the simple cells children
-            var child000 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 700), ExpectedArrangeValue = new Vector3(100, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child100 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(200, 400, 700), ExpectedArrangeValue = new Vector3(200, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child200 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(300, 400, 700), ExpectedArrangeValue = new Vector3(300, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child010 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 500, 700), ExpectedArrangeValue = new Vector3(100, 500, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child020 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 600, 700), ExpectedArrangeValue = new Vector3(100, 600, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child001 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 800), ExpectedArrangeValue = new Vector3(100, 400, 800), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child002 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 900), ExpectedArrangeValue = new Vector3(100, 400, 900), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
+            var child000 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child100 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(200, 400), ExpectedArrangeValue = new Vector2(200, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child200 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(300, 400), ExpectedArrangeValue = new Vector2(300, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child010 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 500), ExpectedArrangeValue = new Vector2(100, 500), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child020 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 600), ExpectedArrangeValue = new Vector2(100, 600), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child001 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child002 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
 
             // two cells children
-            var child000C2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(300, 400, 700), ExpectedArrangeValue = new Vector3(300, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child100C2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(500, 400, 700), ExpectedArrangeValue = new Vector3(500, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child000C3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(600, 400, 700), ExpectedArrangeValue = new Vector3(600, 400, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child000R2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 900, 700), ExpectedArrangeValue = new Vector3(100, 900, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child010R2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 1100, 700), ExpectedArrangeValue = new Vector3(100, 1100, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child000R3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 1500, 700), ExpectedArrangeValue = new Vector3(100, 1500, 700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child000L2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 1500), ExpectedArrangeValue = new Vector3(100, 400, 1500), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child001L2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 1700), ExpectedArrangeValue = new Vector3(100, 400, 1700), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
-            var child000L3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector3(100, 400, 2400), ExpectedArrangeValue = new Vector3(100, 400, 2400), ReturnedMeasuredValue = 1000 * rand.NextVector3(), DepthAlignment = DepthAlignment.Stretch };
+            var child000C2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(300, 400), ExpectedArrangeValue = new Vector2(300, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child100C2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(500, 400), ExpectedArrangeValue = new Vector2(500, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child000C3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(600, 400), ExpectedArrangeValue = new Vector2(600, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child000R2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 900), ExpectedArrangeValue = new Vector2(100, 900), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child010R2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 1100), ExpectedArrangeValue = new Vector2(100, 1100), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child000R3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 1500), ExpectedArrangeValue = new Vector2(100, 1500), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child000L2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child001L2 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
+            var child000L3 = new MeasureArrangeValidator { ExpectedMeasureValue = new Vector2(100, 400), ExpectedArrangeValue = new Vector2(100, 400), ReturnedMeasuredValue = 1000 * rand.NextVector2() };
 
             // set the span of the children
             child000C2.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 2);
@@ -176,20 +168,14 @@ namespace Xenko.UI.Tests.Layering
             child000R2.DependencyProperties.Set(GridBase.RowSpanPropertyKey, 2);
             child010R2.DependencyProperties.Set(GridBase.RowSpanPropertyKey, 2);
             child000R3.DependencyProperties.Set(GridBase.RowSpanPropertyKey, 3);
-            child000L2.DependencyProperties.Set(GridBase.LayerSpanPropertyKey, 2);
-            child001L2.DependencyProperties.Set(GridBase.LayerSpanPropertyKey, 2);
-            child000L3.DependencyProperties.Set(GridBase.LayerSpanPropertyKey, 3);
 
             // place the children in the grid
             child100.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
             child200.DependencyProperties.Set(GridBase.ColumnPropertyKey, 2);
             child010.DependencyProperties.Set(GridBase.RowPropertyKey, 1);
             child020.DependencyProperties.Set(GridBase.RowPropertyKey, 2);
-            child001.DependencyProperties.Set(GridBase.LayerPropertyKey, 1);
-            child002.DependencyProperties.Set(GridBase.LayerPropertyKey, 2);
             child100C2.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
             child010R2.DependencyProperties.Set(GridBase.RowPropertyKey, 1);
-            child001L2.DependencyProperties.Set(GridBase.LayerPropertyKey, 1);
 
             // add the children to the grid
             grid.Children.Add(child000);
@@ -210,17 +196,17 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(child000L3);
 
             //measure with too small size
-            grid.Measure(Vector3.Zero);
-            Assert.Equal(new Vector3(600, 1500, 2400), grid.DesiredSizeWithMargins);
+            grid.Measure(Vector2.Zero);
+            Assert.Equal(new Vector2(600, 1500), grid.DesiredSizeWithMargins);
             // measure with too big size
-            grid.Measure(float.PositiveInfinity * Vector3.One);
-            Assert.Equal(new Vector3(600, 1500, 2400), grid.DesiredSizeWithMargins);
+            grid.Measure(float.PositiveInfinity * Vector2.One);
+            Assert.Equal(new Vector2(600, 1500), grid.DesiredSizeWithMargins);
 
             // arrange with too small size
-            grid.Arrange(Vector3.Zero, false);
-            Assert.Equal(new Vector3(600, 1500, 2400), grid.RenderSize);
+            grid.Arrange(Vector2.Zero, false);
+            Assert.Equal(new Vector2(600, 1500), (Vector2)grid.RenderSize);
             // arrange with too big size
-            grid.Arrange(float.PositiveInfinity * Vector3.One, false);
+            grid.Arrange(float.PositiveInfinity * Vector2.One, false);
 
             // test the strip actual size
             Assert.Equal(100, grid.ColumnDefinitions[0].ActualSize);
@@ -229,9 +215,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(400, grid.RowDefinitions[0].ActualSize);
             Assert.Equal(500, grid.RowDefinitions[1].ActualSize);
             Assert.Equal(600, grid.RowDefinitions[2].ActualSize);
-            Assert.Equal(700, grid.LayerDefinitions[0].ActualSize);
-            Assert.Equal(800, grid.LayerDefinitions[1].ActualSize);
-            Assert.Equal(900, grid.LayerDefinitions[2].ActualSize);
         }
 
 
@@ -256,9 +239,8 @@ namespace Xenko.UI.Tests.Layering
 
             CreateFixedSizeDefinition(grid.ColumnDefinitions, columnSizes);
             CreateFixedSizeDefinition(grid.RowDefinitions, rowSizes);
-            CreateFixedSizeDefinition(grid.LayerDefinitions, layerSizes);
 
-            var size = rand.NextVector3();
+            var size = rand.NextVector2();
             grid.Measure(size);
             grid.Arrange(size, false);
 
@@ -297,9 +279,9 @@ namespace Xenko.UI.Tests.Layering
             foreach (var ratio in ratios)
                 grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, ratio));
 
-            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(15, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0) };
-            var c02 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0) };
+            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(15, 0), ExpectedArrangeValue = new Vector2(40, 0) };
+            var c02 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(60, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
             c02.DependencyProperties.Set(GridBase.ColumnPropertyKey, 2);
@@ -308,8 +290,8 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c01);
             grid.Children.Add(c02);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(60,0,0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(60,0), grid.DesiredSizeWithMargins);
 
             grid.Arrange(2*grid.DesiredSizeWithMargins, false);
 
@@ -339,11 +321,11 @@ namespace Xenko.UI.Tests.Layering
             foreach (var ratio in ratios)
                 grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, ratio));
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(15, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0) };
-            var c02 = new ArrangeValidator { Name = "c02", ReturnedMeasuredValue = new Vector3( 8, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c11 = new ArrangeValidator { Name = "c11", ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0) };
-            var c20 = new ArrangeValidator { Name = "c20", ReturnedMeasuredValue = new Vector3(55, 0, 0), ExpectedArrangeValue = new Vector3(120, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(60, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(15, 0), ExpectedArrangeValue = new Vector2(40, 0) };
+            var c02 = new ArrangeValidator { Name = "c02", ReturnedMeasuredValue = new Vector2( 8, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c11 = new ArrangeValidator { Name = "c11", ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(60, 0) };
+            var c20 = new ArrangeValidator { Name = "c20", ReturnedMeasuredValue = new Vector2(55, 0), ExpectedArrangeValue = new Vector2(120, 0) };
             
             c11.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 2);
             c20.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 3);
@@ -360,8 +342,8 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c11);
             grid.Children.Add(c20);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(60, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(60, 0), grid.DesiredSizeWithMargins);
 
             grid.Arrange(2 * grid.DesiredSizeWithMargins, false);
 
@@ -385,13 +367,13 @@ namespace Xenko.UI.Tests.Layering
             // |<-c00->   |
             // +----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0) };
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(20, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(20, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(15 * Vector3.One, false);
+            grid.Arrange(15 * Vector2.One, false);
             Assert.Equal(20 , grid.ColumnDefinitions[0].ActualSize);
 
          }
@@ -412,13 +394,13 @@ namespace Xenko.UI.Tests.Layering
             // |<----c00--|-->
             // +----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(20, 0) };
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(20, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(20, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(40 * Vector3.One, false);
+            grid.Arrange(40 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
         }
 
@@ -439,18 +421,18 @@ namespace Xenko.UI.Tests.Layering
             // |<-c00->   |<-c01->   |          
             // +----------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(30, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(50, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(50, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(15 * Vector3.One, false);
+            grid.Arrange(15 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
         }   
@@ -472,18 +454,18 @@ namespace Xenko.UI.Tests.Layering
             // |<---c00--->|<-c01->   |          
             // +---- ------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(25, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(60, 0, 0), ExpectedArrangeValue = new Vector3(80, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(25, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(60, 0), ExpectedArrangeValue = new Vector2(80, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(105, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(105, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(110 * Vector3.One, false);
+            grid.Arrange(110 * Vector2.One, false);
             Assert.Equal(30, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(80, grid.ColumnDefinitions[1].ActualSize);
         }
@@ -505,18 +487,18 @@ namespace Xenko.UI.Tests.Layering
             // |<---c00--->|<-c01->   |          
             // +-----------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(25, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(25, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(60, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(75, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(75, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(90 * Vector3.One, false);
+            grid.Arrange(90 * Vector2.One, false);
             Assert.Equal(30, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(60, grid.ColumnDefinitions[1].ActualSize);
         }
@@ -538,18 +520,18 @@ namespace Xenko.UI.Tests.Layering
             // |<---c00----|<->--c01--|-->           
             // +-----------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(25, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(35, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(25, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(35, 0), ExpectedArrangeValue = new Vector2(30, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(50, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(50, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(90 * Vector3.One, false);
+            grid.Arrange(90 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
         }
@@ -571,18 +553,18 @@ namespace Xenko.UI.Tests.Layering
             // |<---c00----|<->-c01-->|           
             // +-----------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(45, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(45, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(60, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(60, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(65 * Vector3.One, false);
+            grid.Arrange(65 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(45, grid.ColumnDefinitions[1].ActualSize);
         }
@@ -604,18 +586,18 @@ namespace Xenko.UI.Tests.Layering
             // |<---c00--->|<--c01--> |           
             // +-----------+----------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(15, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(25, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(15, 0), ExpectedArrangeValue = new Vector2(20, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(25, 0), ExpectedArrangeValue = new Vector2(40, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
 
             grid.Children.Add(c00);
             grid.Children.Add(c01);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(45, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(45, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(60 * Vector3.One, false);
+            grid.Arrange(60 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(40, grid.ColumnDefinitions[1].ActualSize);
         }
@@ -639,14 +621,14 @@ namespace Xenko.UI.Tests.Layering
             // |<---------------c00--------------->      |
             // +---- ------+----------+---------+--------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(25, 0, 0), ExpectedArrangeValue = new Vector3(140, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(25, 0), ExpectedArrangeValue = new Vector2(140, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(140, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(140, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(50 * Vector3.One, false);
+            grid.Arrange(50 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(40, grid.ColumnDefinitions[2].ActualSize);
@@ -672,14 +654,14 @@ namespace Xenko.UI.Tests.Layering
             // |<-------------------------c00-------------------------->|
             // +-------------+--------------+-------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(150, 0, 0), ExpectedArrangeValue = new Vector3(150, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(150, 0), ExpectedArrangeValue = new Vector2(150, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(150, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(150, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(150 * Vector3.One, false);
+            grid.Arrange(150 * Vector2.One, false);
             Assert.Equal(30, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(50, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(40, grid.ColumnDefinitions[2].ActualSize);
@@ -705,14 +687,14 @@ namespace Xenko.UI.Tests.Layering
             // |<-------------------------c00---------------------------|----->
             // +-------------+--------------+-------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(160, 0, 0), ExpectedArrangeValue = new Vector3(140, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(160, 0), ExpectedArrangeValue = new Vector2(140, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(140, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(140, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(200 * Vector3.One, false);
+            grid.Arrange(200 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(50, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(40, grid.ColumnDefinitions[2].ActualSize);
@@ -738,14 +720,14 @@ namespace Xenko.UI.Tests.Layering
             // |<-------------------------c00-------------------------->|
             // +-------------+--------------+-------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(110, 0, 0), ExpectedArrangeValue = new Vector3(110, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(110, 0), ExpectedArrangeValue = new Vector2(110, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(110, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(110, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(110 * Vector3.One, false);
+            grid.Arrange(110 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[2].ActualSize);
@@ -772,14 +754,14 @@ namespace Xenko.UI.Tests.Layering
             // |<-------------------------c00-------------------------->|
             // +-------------+--------------+-------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(145, 0, 0), ExpectedArrangeValue = new Vector3(145, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(145, 0), ExpectedArrangeValue = new Vector2(145, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(145, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(145, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(145 * Vector3.One, false);
+            grid.Arrange(145 * Vector2.One, false);
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(35, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(40, grid.ColumnDefinitions[2].ActualSize);
@@ -806,14 +788,14 @@ namespace Xenko.UI.Tests.Layering
             // |<-------------------------c00-------------------------->|
             // +-------------+--------------+-------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(195, 0, 0), ExpectedArrangeValue = new Vector3(195, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(195, 0), ExpectedArrangeValue = new Vector2(195, 0) };
             c00.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 4);
             grid.Children.Add(c00);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(195, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(195, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(195 * Vector3.One, false);
+            grid.Arrange(195 * Vector2.One, false);
             Assert.Equal(60, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(35, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(55, grid.ColumnDefinitions[2].ActualSize);
@@ -840,9 +822,9 @@ namespace Xenko.UI.Tests.Layering
             // |             |<-------------c11---------->|
             // +-------------+--------------+-------------+
 
-            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c11 = new ArrangeValidator { Name = "c11", ReturnedMeasuredValue = new Vector3(70, 0, 0), ExpectedArrangeValue = new Vector3(80, 0, 0) };
+            var c00 = new ArrangeValidator { Name = "c00", ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c01 = new ArrangeValidator { Name = "c01", ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c11 = new ArrangeValidator { Name = "c11", ReturnedMeasuredValue = new Vector2(70, 0), ExpectedArrangeValue = new Vector2(80, 0) };
 
             c01.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
             c11.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
@@ -853,10 +835,10 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c01);
             grid.Children.Add(c11);
 
-            grid.Measure(50 * rand.NextVector3());
-            Assert.Equal(new Vector3(100, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(50 * rand.NextVector2());
+            Assert.Equal(new Vector2(100, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(110 * Vector3.One, false);
+            grid.Arrange(110 * Vector2.One, false);
             Assert.Equal(30, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
             Assert.Equal(50, grid.ColumnDefinitions[2].ActualSize);
@@ -883,10 +865,10 @@ namespace Xenko.UI.Tests.Layering
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
 
-            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(10, 0, 0) };
-            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c11 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c12 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(40, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0) };
+            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(10, 0) };
+            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c11 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c12 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(40, 0), ExpectedArrangeValue = new Vector2(40, 0) };
 
             c00.DependencyProperties.Set(GridBase.ColumnPropertyKey, 0);
             c00.DependencyProperties.Set(GridBase.RowPropertyKey, 0);
@@ -905,10 +887,10 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c11);
             grid.Children.Add(c12);
 
-            grid.Measure(30 * rand.NextVector3());
-            Assert.Equal(new Vector3(80,0,0), grid.DesiredSizeWithMargins);
+            grid.Measure(30 * rand.NextVector2());
+            Assert.Equal(new Vector2(80,0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(30 * rand.NextVector3(), false);
+            grid.Arrange(30 * rand.NextVector2(), false);
 
             Assert.Equal(10, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
@@ -942,12 +924,12 @@ namespace Xenko.UI.Tests.Layering
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
 
-            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(10, 0, 0) };
-            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c10 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(40, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0) };
-            var c12 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(30, 0, 0) };
-            var c21 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0) };
-            var c30 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(70, 0, 0), ExpectedArrangeValue = new Vector3(70, 0, 0) };
+            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(10, 0) };
+            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c10 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(40, 0), ExpectedArrangeValue = new Vector2(40, 0) };
+            var c12 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(30, 0) };
+            var c21 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(60, 0) };
+            var c30 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(70, 0), ExpectedArrangeValue = new Vector2(70, 0) };
 
             // set the spans 
             c10.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 2);
@@ -971,10 +953,10 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c21);
             grid.Children.Add(c30);
 
-            grid.Measure(30 * rand.NextVector3());
-            Assert.Equal(new Vector3(70, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(30 * rand.NextVector2());
+            Assert.Equal(new Vector2(70, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(50 * rand.NextVector3(), false);
+            grid.Arrange(50 * rand.NextVector2(), false);
 
             Assert.Equal(10, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(30, grid.ColumnDefinitions[1].ActualSize);
@@ -1019,16 +1001,16 @@ namespace Xenko.UI.Tests.Layering
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
 
             // create the children
-            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c00" };
-            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(20, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c01" };
-            var c04 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c03" };
-            var c05 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c04" };
-            var c10 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(40, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0), Name = "c10" };
-            var c16 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(10, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c15" };
-            var c21 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(50, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0), Name = "c21" };
-            var c26 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(30, 0, 0), ExpectedArrangeValue = new Vector3(20, 0, 0), Name = "c25" };
-            var c32 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(40, 0, 0), ExpectedArrangeValue = new Vector3(40, 0, 0), Name = "c32" };
-            var c44 = new ArrangeValidator { ReturnedMeasuredValue = new Vector3(60, 0, 0), ExpectedArrangeValue = new Vector3(60, 0, 0), Name = "c44" };
+            var c00 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c00" };
+            var c01 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(20, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c01" };
+            var c04 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c03" };
+            var c05 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c04" };
+            var c10 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(40, 0), ExpectedArrangeValue = new Vector2(40, 0), Name = "c10" };
+            var c16 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(10, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c15" };
+            var c21 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(50, 0), ExpectedArrangeValue = new Vector2(60, 0), Name = "c21" };
+            var c26 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(30, 0), ExpectedArrangeValue = new Vector2(20, 0), Name = "c25" };
+            var c32 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(40, 0), ExpectedArrangeValue = new Vector2(40, 0), Name = "c32" };
+            var c44 = new ArrangeValidator { ReturnedMeasuredValue = new Vector2(60, 0), ExpectedArrangeValue = new Vector2(60, 0), Name = "c44" };
 
             // set the spans 
             c10.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 2);
@@ -1064,10 +1046,10 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(c32);
             grid.Children.Add(c44);
 
-            grid.Measure(30 * rand.NextVector3());
-            Assert.Equal(new Vector3(140, 0, 0), grid.DesiredSizeWithMargins);
+            grid.Measure(30 * rand.NextVector2());
+            Assert.Equal(new Vector2(140, 0), grid.DesiredSizeWithMargins);
 
-            grid.Arrange(100 * rand.NextVector3(), false);
+            grid.Arrange(100 * rand.NextVector2(), false);
 
             Assert.Equal(20, grid.ColumnDefinitions[0].ActualSize);
             Assert.Equal(20, grid.ColumnDefinitions[1].ActualSize);
@@ -1086,7 +1068,7 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 100 * Vector3.One;
+            var providedSize = 100 * Vector2.One;
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 4));
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 6));
@@ -1098,9 +1080,9 @@ namespace Xenko.UI.Tests.Layering
             var child0 = new MeasureReflector { Name = "0", };
             var child1 = new MeasureReflector { Name = "1", };
             var child2 = new MeasureReflector { Name = "2", };
-            var child3 = new ArrangeValidator { Name = "3", ReturnedMeasuredValue = new Vector3(5, providedSize.Y, providedSize.Z) };
+            var child3 = new ArrangeValidator { Name = "3", ReturnedMeasuredValue = new Vector2(5, providedSize.Y) };
             var child4 = new MeasureReflector { Name = "4", };
-            var child5 = new ArrangeValidator { Name = "5", ReturnedMeasuredValue = new Vector3(20, providedSize.Y, providedSize.Z)};
+            var child5 = new ArrangeValidator { Name = "5", ReturnedMeasuredValue = new Vector2(20, providedSize.Y)};
 
             child0.DependencyProperties.Set(GridBase.ColumnPropertyKey, 0);
             child1.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
@@ -1134,15 +1116,15 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 1000 * rand.NextVector3();
+            var providedSize = 1000 * rand.NextVector2();
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed) { MinimumSize = 5 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed) { MaximumSize = 0.5f });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed));
 
-            var child0 = new MeasureValidator { Name = "0", ExpectedMeasureValue = new Vector3(5, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = providedSize };
-            var child1 = new MeasureValidator { Name = "1", ExpectedMeasureValue = new Vector3(0.5f, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = providedSize };
-            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector3(1, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = providedSize };
+            var child0 = new MeasureValidator { Name = "0", ExpectedMeasureValue = new Vector2(5, providedSize.Y), ReturnedMeasuredValue = providedSize };
+            var child1 = new MeasureValidator { Name = "1", ExpectedMeasureValue = new Vector2(0.5f, providedSize.Y), ReturnedMeasuredValue = providedSize };
+            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector2(1, providedSize.Y), ReturnedMeasuredValue = providedSize };
 
             child0.DependencyProperties.Set(GridBase.ColumnPropertyKey, 0);
             child1.DependencyProperties.Set(GridBase.ColumnPropertyKey, 1);
@@ -1163,15 +1145,15 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 1000 * rand.NextVector3();
+            var providedSize = 1000 * rand.NextVector2();
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed) { MinimumSize = 5 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed) { MaximumSize = 0.5f });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed));
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed, 2));
 
-            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector3(3f, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = providedSize };
-            var child4 = new MeasureValidator { Name = "4", ExpectedMeasureValue = new Vector3(8.5f, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = providedSize };
+            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector2(3f, providedSize.Y), ReturnedMeasuredValue = providedSize };
+            var child4 = new MeasureValidator { Name = "4", ExpectedMeasureValue = new Vector2(8.5f, providedSize.Y), ReturnedMeasuredValue = providedSize };
 
             child2.DependencyProperties.Set(GridBase.ColumnPropertyKey, 2);
             child4.DependencyProperties.Set(GridBase.ColumnPropertyKey, 0);
@@ -1193,7 +1175,7 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 1000 * rand.NextVector3();
+            var providedSize = 1000 * rand.NextVector2();
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 10));
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 40));
@@ -1226,7 +1208,7 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 100 * Vector3.One;
+            var providedSize = 100 * Vector2.One;
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 10) { MinimumSize = 50 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star, 40) { MaximumSize = 10 });
@@ -1259,14 +1241,14 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 100 * Vector3.One;
+            var providedSize = 100 * Vector2.One;
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto));
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto) { MaximumSize = 10 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto));
 
             var child0 = new MeasureValidator { Name = "0", ReturnedMeasuredValue = providedSize, ExpectedMeasureValue = providedSize };
-            var child1 = new MeasureValidator { Name = "1", ReturnedMeasuredValue = providedSize, ExpectedMeasureValue = new Vector3(10, providedSize.Y, providedSize.Z) };
+            var child1 = new MeasureValidator { Name = "1", ReturnedMeasuredValue = providedSize, ExpectedMeasureValue = new Vector2(10, providedSize.Y) };
             var child2 = new MeasureValidator { Name = "2", ReturnedMeasuredValue = providedSize, ExpectedMeasureValue = providedSize };
 
             child0.DependencyProperties.Set(GridBase.ColumnPropertyKey, 0);
@@ -1288,7 +1270,7 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 100 * Vector3.One;
+            var providedSize = 100 * Vector2.One;
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star) { MinimumSize = 15 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto) { MinimumSize = 10 });
@@ -1331,7 +1313,7 @@ namespace Xenko.UI.Tests.Layering
         {
             var grid = new Grid();
 
-            var providedSize = 100 * Vector3.One;
+            var providedSize = 100 * Vector2.One;
 
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto) { MaximumSize = 10 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed, 20));
@@ -1340,11 +1322,11 @@ namespace Xenko.UI.Tests.Layering
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Auto) { MinimumSize = 10 });
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Star) { MinimumSize = 15 });
 
-            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector3(030, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = new Vector3(030, 100, 100) };
-            var child3 = new MeasureValidator { Name = "3", ExpectedMeasureValue = new Vector3(050, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = new Vector3(050, 100, 100) };
-            var child4 = new MeasureValidator { Name = "4", ExpectedMeasureValue = new Vector3(075, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = new Vector3(075, 100, 100) };
-            var child5 = new MeasureValidator { Name = "5", ExpectedMeasureValue = new Vector3(085, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = new Vector3(085, 100, 100) };
-            var child6 = new MeasureValidator { Name = "6", ExpectedMeasureValue = new Vector3(100, providedSize.Y, providedSize.Z), ReturnedMeasuredValue = new Vector3(100, 100, 100) };
+            var child2 = new MeasureValidator { Name = "2", ExpectedMeasureValue = new Vector2(030, providedSize.Y), ReturnedMeasuredValue = new Vector2(030, 100) };
+            var child3 = new MeasureValidator { Name = "3", ExpectedMeasureValue = new Vector2(050, providedSize.Y), ReturnedMeasuredValue = new Vector2(050, 100) };
+            var child4 = new MeasureValidator { Name = "4", ExpectedMeasureValue = new Vector2(075, providedSize.Y), ReturnedMeasuredValue = new Vector2(075, 100) };
+            var child5 = new MeasureValidator { Name = "5", ExpectedMeasureValue = new Vector2(085, providedSize.Y), ReturnedMeasuredValue = new Vector2(085, 100) };
+            var child6 = new MeasureValidator { Name = "6", ExpectedMeasureValue = new Vector2(100, providedSize.Y), ReturnedMeasuredValue = new Vector2(100, 100) };
 
             child2.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 2);
             child3.DependencyProperties.Set(GridBase.ColumnSpanPropertyKey, 3);
@@ -1377,7 +1359,6 @@ namespace Xenko.UI.Tests.Layering
             // - test the properties that are supposed to invalidate the object measurement
             UIElementLayeringTests.TestMeasureInvalidation(grid, () => grid.RowDefinitions.Add(new StripDefinition()));
             UIElementLayeringTests.TestMeasureInvalidation(grid, () => grid.ColumnDefinitions.Add(new StripDefinition()));
-            UIElementLayeringTests.TestMeasureInvalidation(grid, () => grid.LayerDefinitions.Add(new StripDefinition()));
             UIElementLayeringTests.TestMeasureInvalidation(grid, () => rowDefinition.MinimumSize = 37);
             UIElementLayeringTests.TestMeasureInvalidation(grid, () => rowDefinition.MaximumSize = 38);
             UIElementLayeringTests.TestMeasureInvalidation(grid, () => rowDefinition.Type = StripType.Fixed);
@@ -1393,16 +1374,14 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestSurroudingAnchor()
         {
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(100, 200, 300);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(100, 200);
 
             var grid = new Grid { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center };
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed, 100));
             grid.ColumnDefinitions.Add(new StripDefinition(StripType.Fixed, 200));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
             grid.RowDefinitions.Add(new StripDefinition(StripType.Auto));
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Star));
-            grid.LayerDefinitions.Add(new StripDefinition(StripType.Star));
 
             var child1 = new UniformGrid { Size = childSize1 };
             var child2 = new UniformGrid { Size = childSize2 };
@@ -1411,8 +1390,8 @@ namespace Xenko.UI.Tests.Layering
             grid.Children.Add(child1);
             grid.Children.Add(child2);
 
-            grid.Measure(1000 * Vector3.One);
-            grid.Arrange(1000 * Vector3.One, false);
+            grid.Measure(1000 * Vector2.One);
+            grid.Arrange(1000 * Vector2.One, false);
             
             Assert.Equal(new Vector2(   0, 100), grid.GetSurroudingAnchorDistances(Orientation.Horizontal, -1));
             Assert.Equal(new Vector2(   0, 100), grid.GetSurroudingAnchorDistances(Orientation.Horizontal, 0));
@@ -1431,15 +1410,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Vector2( -10, 190), grid.GetSurroudingAnchorDistances(Orientation.Vertical, 160));
             Assert.Equal(new Vector2(-200,   0), grid.GetSurroudingAnchorDistances(Orientation.Vertical, 350));
             Assert.Equal(new Vector2(-200,   0), grid.GetSurroudingAnchorDistances(Orientation.Vertical, 500));
-            
-            Assert.Equal(new Vector2(   0, 300), grid.GetSurroudingAnchorDistances(Orientation.InDepth, -1));
-            Assert.Equal(new Vector2(   0, 300), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 0));
-            Assert.Equal(new Vector2( -50, 250), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 50));
-            Assert.Equal(new Vector2( -80, 220), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 80));
-            Assert.Equal(new Vector2(   0, 300), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 300));
-            Assert.Equal(new Vector2( -10, 290), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 310));
-            Assert.Equal(new Vector2(-300,   0), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 600));
-            Assert.Equal(new Vector2(-300,   0), grid.GetSurroudingAnchorDistances(Orientation.InDepth, 900));
         }
     }
 }

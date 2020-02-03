@@ -141,7 +141,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Game
 
             public void Invalidate()
             {
-                prevMargin = Thickness.UniformCuboid(float.NaN);
+                prevMargin = new Thickness(float.NaN);
                 prevParentId = null;
                 prevRenderSize = new Vector3(float.NaN);
                 prevWorldMatrix = new Matrix(float.NaN);
@@ -178,18 +178,18 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Game
                 highlightAdorner?.Unlit();
             }
 
-            public void Update(ref Vector3 availableSize)
+            public void Update(ref Vector2 availableSize)
             {
-                Vector3 parentPosition;
-                Vector3 parentSize;
+                Vector2 parentPosition;
+                Vector2 parentSize;
                 Matrix parentMatrixInv;
                 var parent = gameSideElement.VisualParent;
                 if (parent != null)
                 {
                     // parentCanvas is sized to the parent of the associated UIElement
                     var parentMatrix = parent.WorldMatrix;
-                    parentPosition = parentMatrix.TranslationVector + availableSize * 0.5f;
-                    parentSize = parent.RenderSize;
+                    parentPosition = (Vector2)parentMatrix.TranslationVector + availableSize * 0.5f;
+                    parentSize = (Vector2)parent.RenderSize;
                     parentMatrixInv = Matrix.Invert(parent.WorldMatrix);
                 }
                 else
@@ -201,17 +201,18 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Game
                 }
                 parentCanvas.Size = parentSize;
                 parentCanvas.SetCanvasAbsolutePosition(parentPosition);
-                parentCanvas.SetCanvasPinOrigin(0.5f * Vector3.One); // centered on origin
+                parentCanvas.SetCanvasPinOrigin(0.5f * Vector2.One); // centered on origin
 
                 var diffMatrix = Matrix.Multiply(parentMatrixInv, gameSideElement.WorldMatrix);
-                var position = diffMatrix.TranslationVector + parentSize * 0.5f;
+                var position = (Vector2)diffMatrix.TranslationVector + parentSize * 0.5f;
                 // canvas is sized to the associated UIElement
-                canvas.Size = gameSideElement.RenderSize;
+                canvas.Size = (Vector2)gameSideElement.RenderSize;
                 // canvas is z-offset by depth bias (+1 to differentiate with the adorner root canvas)
-                canvas.Margin = new Thickness(0, 0, 0, 0, 0, -1*(gameSideElement.DepthBias + 1)); // because we are inside a canvas, only Left, Top and Front margins can be used.
+                //canvas.Margin = new Thickness(0, 0, 0, 0, 0, -1*(gameSideElement.DepthBias + 1)); // because we are inside a canvas, only Left, Top and Front margins can be used.
+                canvas.Margin = new Thickness(0);
 
                 canvas.SetCanvasAbsolutePosition(position);
-                canvas.SetCanvasPinOrigin(0.5f * Vector3.One); // centered on origin
+                canvas.SetCanvasPinOrigin(0.5f * Vector2.One); // centered on origin
 
                 adorners.ForEach(a => a.Update(position));
                 highlightAdorner?.Update(position);
@@ -535,7 +536,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Game
             var compositor = Game.SceneSystem.GraphicsCompositor;
             ((EditorTopLevelCompositor)compositor.Game).PostGizmoCompositors.Add(new DelegateSceneRenderer(context =>
             {
-                var canvasRenderSize = adornerCanvas.RenderSize;
+                var canvasRenderSize = (Vector2)adornerCanvas.RenderSize;
                 foreach (var layer in adornerLayers.Values)
                 {
                     if (!layer.IsEnabled || layer.CheckValidity())

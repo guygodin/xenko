@@ -98,7 +98,7 @@ namespace Xenko.UI.Tests.Regression
                 slider.IsDirectionReversed = !slider.IsDirectionReversed;
 
             if (Input.IsKeyReleased(Keys.O))
-                slider.Orientation = (Orientation)(((int)slider.Orientation + 1) % 3);
+                slider.Orientation = (Orientation)(((int)slider.Orientation + 1) % 2);
 
             if (Input.IsKeyReleased(Keys.Left))
                 slider.Decrease();

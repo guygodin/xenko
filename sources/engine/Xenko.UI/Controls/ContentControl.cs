@@ -84,10 +84,10 @@ namespace Xenko.UI.Controls
                 yield return Content;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             // measure size desired by the children
-            var childDesiredSizeWithMargins = Vector3.Zero;
+            var childDesiredSizeWithMargins = Vector2.Zero;
             if (VisualContent != null)
             {
                 // remove space for padding in availableSizeWithoutMargins
@@ -103,7 +103,7 @@ namespace Xenko.UI.Controls
             return desiredSizeWithPadding;
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             // arrange the content
             if (VisualContent != null)
@@ -142,7 +142,7 @@ namespace Xenko.UI.Controls
                 VisualContent.Arrange(ref childSizeWithoutPadding, IsCollapsed);
 
                 // compute the rendering offsets of the child element wrt the parent origin (0,0,0)
-                var childOffsets = new Vector3(actualPadding.Left, actualPadding.Top, actualPadding.Front) - finalSizeWithoutMargins / 2;
+                var childOffsets = new Vector2(actualPadding.Left, actualPadding.Top) - finalSizeWithoutMargins / 2;
 
                 // set the arrange matrix of the child.
                 VisualContent.DependencyProperties.Set(ContentArrangeMatrixPropertyKey, Matrix.Translation(childOffsets));

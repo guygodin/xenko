@@ -41,28 +41,24 @@ namespace Xenko.UI.Tests.Layering
 
         private void ResetElementState()
         {
-            Margin = Thickness.UniformCuboid(0f);
+            Margin = new Thickness(0f);
             Visibility = Visibility.Visible;
             Opacity = 1.0f;
             IsEnabled = true;
             ClipToBounds = false;
             Width = float.NaN;
             Height = float.NaN;
-            Depth = float.NaN;
             MaximumWidth = float.PositiveInfinity;
             MaximumHeight = float.PositiveInfinity;
-            MaximumDepth = float.PositiveInfinity;
             MinimumWidth = 0.0f;
             MinimumHeight = 0.0f;
-            MinimumDepth = 0.0f;
             LocalMatrix = Matrix.Identity;
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
-            DepthAlignment = DepthAlignment.Back;
             DependencyProperties.Clear();
             onMeasureOverride = null;
             onArrageOverride = null;
-            Arrange(Vector3.Zero, false);
+            Arrange(Vector2.Zero, false);
             InvalidateArrange();
             InvalidateMeasure();
         }
@@ -75,8 +71,7 @@ namespace Xenko.UI.Tests.Layering
         {
             ResetElementState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-            Arrange(Vector3.Zero, false);
+            Arrange(Vector2.Zero, false);
 
             var identity = Matrix.Identity;
             Matrix matrix;
@@ -104,8 +99,8 @@ namespace Xenko.UI.Tests.Layering
 
             // check that the margin and half render size offsets are properly included in the world transformation
             LocalMatrix = Matrix.Identity;
-            Margin = new Thickness(1,2,3,4,5,6);
-            Arrange(new Vector3(15,27,39), false);
+            Margin = new Thickness(1,2,4,5);
+            Arrange(new Vector2(15, 27), false);
             UpdateWorldMatrix(ref identity, true);
             Assert.Equal(Matrix.Translation(1+5,2+10,6+15), WorldMatrix);
 
@@ -139,21 +134,16 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(Visibility.Visible, newElement.Visibility);
             Assert.Equal(0f, newElement.DefaultWidth);
             Assert.Equal(0f, newElement.DefaultHeight);
-            Assert.Equal(0f, newElement.DefaultDepth);
             Assert.Equal(float.NaN, newElement.Height);
             Assert.Equal(float.NaN, newElement.Width);
-            Assert.Equal(float.NaN, newElement.Depth);
             Assert.Equal(0f, newElement.MinimumHeight);
             Assert.Equal(0f, newElement.MinimumWidth);
-            Assert.Equal(0f, newElement.MinimumDepth);
             Assert.Equal(float.PositiveInfinity, newElement.MaximumHeight);
             Assert.Equal(float.PositiveInfinity, newElement.MaximumWidth);
-            Assert.Equal(float.PositiveInfinity, newElement.MaximumDepth);
             Assert.Equal(HorizontalAlignment.Stretch, newElement.HorizontalAlignment);
             Assert.Equal(VerticalAlignment.Stretch, newElement.VerticalAlignment);
-            Assert.Equal(DepthAlignment.Center, newElement.DepthAlignment);
             Assert.Null(newElement.Name);
-            Assert.Equal(Thickness.UniformCuboid(0), newElement.Margin);
+            Assert.Equal(new Thickness(0), newElement.Margin);
             Assert.Equal(Matrix.Identity, newElement.LocalMatrix);
 
             /////////////////////////////////////////
@@ -182,13 +172,6 @@ namespace Xenko.UI.Tests.Layering
             DefaultHeight = float.PositiveInfinity;
             Assert.Equal(float.MaxValue, DefaultHeight);
 
-            DefaultDepth = -1f;
-            Assert.Equal(0f, DefaultDepth);
-            DefaultDepth = float.NaN;
-            Assert.Equal(0f, DefaultDepth); // previous value unchanged
-            DefaultDepth = float.PositiveInfinity;
-            Assert.Equal(float.MaxValue, DefaultDepth);
-
             // sizes (values should remain in range [0, float.MaxValue])
             Width = -1f;
             Assert.Equal(0f, Width);
@@ -199,11 +182,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(0f, Height);
             Height = float.PositiveInfinity;
             Assert.Equal(float.MaxValue, Height);
-
-            Depth = -1f;
-            Assert.Equal(0f, Depth);
-            Depth = float.PositiveInfinity;
-            Assert.Equal(float.MaxValue, Depth);
 
             // minimum sizes (values should remain in range [0, float.MaxValue])
             MinimumWidth = -1f;
@@ -220,13 +198,6 @@ namespace Xenko.UI.Tests.Layering
             MinimumHeight = float.PositiveInfinity;
             Assert.Equal(float.MaxValue, MinimumHeight);
 
-            MinimumDepth = -1f;
-            Assert.Equal(0f, MinimumDepth);
-            MinimumDepth = float.NaN;
-            Assert.Equal(0f, MinimumDepth); // previous value unchanged
-            MinimumDepth = float.PositiveInfinity;
-            Assert.Equal(float.MaxValue, MinimumDepth);
-
             // maximum sizes (values should remain in range [0, float.PositiveInfinity])
             MaximumWidth = -1f;
             Assert.Equal(0f, MaximumWidth);
@@ -237,11 +208,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(0f, MaximumHeight);
             MaximumHeight = float.NaN;
             Assert.Equal(0f, MaximumHeight); // previous value unchanged
-
-            MaximumDepth = -1f;
-            Assert.Equal(0f, MaximumDepth);
-            MaximumDepth = float.NaN;
-            Assert.Equal(0f, MaximumDepth); // previous value unchanged
         }
 
         /// <summary>
@@ -253,26 +219,26 @@ namespace Xenko.UI.Tests.Layering
             ResetElementState();
 
             // testing that a null thickness return a good value
-            var size = 1000 * rand.NextVector3();
-            var emptyThickness = Thickness.UniformCuboid(0f);
+            var size = 1000 * rand.NextVector2();
+            var emptyThickness = new Thickness(0f);
             AssertAreNearlySame(size, CalculateSizeWithoutThickness(ref size, ref emptyThickness));
 
             // testing with a positive thickness
-            size = 1000 * Vector3.One;
-            var thickness = rand.NextThickness(100, 200, 300, 400, 500, 600);
-            var expectedSize = new Vector3(size.X - thickness.Left - thickness.Right, size.Y - thickness.Top - thickness.Bottom, size.Z - thickness.Back - thickness.Front);
+            size = 1000 * Vector2.One;
+            var thickness = rand.NextThickness(100, 200, 400, 500);
+            var expectedSize = new Vector2(size.X - thickness.TotalWidth, size.Y - thickness.TotalHeight);
             AssertAreNearlySame(expectedSize, CalculateSizeWithoutThickness(ref size, ref thickness));
 
             // testing with a negative thickness 
-            size = 1000 * Vector3.One;
-            thickness = -rand.NextThickness(100, 200, 300, 400, 500, 600);
-            expectedSize = new Vector3(size.X - thickness.Left - thickness.Right, size.Y - thickness.Top - thickness.Bottom, size.Z - thickness.Back - thickness.Front);
+            size = 1000 * Vector2.One;
+            thickness = -rand.NextThickness(100, 200, 400, 500);
+            expectedSize = new Vector2(size.X - thickness.TotalWidth, size.Y - thickness.TotalHeight);
             AssertAreNearlySame(expectedSize, CalculateSizeWithoutThickness(ref size, ref thickness));
 
             // test with a over constrained thickness
-            size = 100 * rand.NextVector3();
-            thickness = new Thickness(100, 200, 300, 400, 500, 600);
-            AssertAreNearlySame(Vector3.Zero, CalculateSizeWithoutThickness(ref size, ref thickness));
+            size = 100 * rand.NextVector2();
+            thickness = new Thickness(100, 200, 400, 500);
+            AssertAreNearlySame(Vector2.Zero, CalculateSizeWithoutThickness(ref size, ref thickness));
         }
 
         /// <summary>
@@ -286,52 +252,48 @@ namespace Xenko.UI.Tests.Layering
             // test that  left, top, back value are returned if aligned to beginning
             HorizontalAlignment = HorizontalAlignment.Left;
             VerticalAlignment = VerticalAlignment.Top;
-            DepthAlignment = DepthAlignment.Front;
-            Margin = rand.NextThickness(10, 20, 30, 40, 50, 60);
-            var expectedOffsets = new Vector3(Margin.Left, Margin.Top, Margin.Front);
-            var randV1 = rand.NextVector3();
-            var randV2 = rand.NextVector3();
+            Margin = rand.NextThickness(10, 20, 40, 50);
+            var expectedOffsets = new Vector2(Margin.Left, Margin.Top);
+            var randV1 = rand.NextVector2();
+            var randV2 = rand.NextVector2();
             AssertAreNearlySame(expectedOffsets, CalculateAdjustmentOffsets(ref MarginInternal, ref randV1, ref randV2));
 
             // test that element is correctly centered 
             HorizontalAlignment = HorizontalAlignment.Center;
             VerticalAlignment = VerticalAlignment.Center;
-            DepthAlignment = DepthAlignment.Center;
-            Margin = rand.NextThickness(10, 20, 30, 40, 50, 60);
-            var givenSpace = 100 * rand.NextVector3();
-            var usedSpace = 100 * rand.NextVector3();
+            Margin = rand.NextThickness(10, 20, 40, 50);
+            var givenSpace = 100 * rand.NextVector2();
+            var usedSpace = 100 * rand.NextVector2();
             var usedSpaceWithMargins = CalculateSizeWithThickness(ref usedSpace, ref MarginInternal);
-            expectedOffsets = new Vector3(Margin.Left, Margin.Top, Margin.Front) + (givenSpace - usedSpaceWithMargins) / 2;
+            expectedOffsets = new Vector2(Margin.Left, Margin.Top) + (givenSpace - usedSpaceWithMargins) / 2;
             AssertAreNearlySame(expectedOffsets, CalculateAdjustmentOffsets(ref MarginInternal, ref givenSpace, ref usedSpace));
 
             // test that stretched is equivalent to centered
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
-            DepthAlignment = DepthAlignment.Stretch;
             AssertAreNearlySame(expectedOffsets, CalculateAdjustmentOffsets(ref MarginInternal, ref givenSpace, ref usedSpace));
 
             // test that the element is correctly right aligned
             HorizontalAlignment = HorizontalAlignment.Right;
             VerticalAlignment = VerticalAlignment.Bottom;
-            DepthAlignment = DepthAlignment.Back;
-            Margin = rand.NextThickness(10, 20, 30, 40, 50, 60);
-            givenSpace = 100 * rand.NextVector3();
-            usedSpace = 100 * rand.NextVector3();
+            Margin = rand.NextThickness(10, 20, 40, 50);
+            givenSpace = 100 * rand.NextVector2();
+            usedSpace = 100 * rand.NextVector2();
             usedSpaceWithMargins = CalculateSizeWithThickness(ref usedSpace, ref MarginInternal);
-            expectedOffsets = new Vector3(Margin.Left, Margin.Top, Margin.Front) + givenSpace - usedSpaceWithMargins;
+            expectedOffsets = new Vector2(Margin.Left, Margin.Top) + givenSpace - usedSpaceWithMargins;
             AssertAreNearlySame(expectedOffsets, CalculateAdjustmentOffsets(ref MarginInternal, ref givenSpace, ref usedSpace));
         }
 
-        private void AssertAreNearlySame(Vector3 v1, Vector3 v2)
+        private void AssertAreNearlySame(Vector2 v1, Vector2 v2)
         {
             Assert.True((v1 - v2).Length() <= v1.Length() * MathUtil.ZeroTolerance);
         }
 
-        delegate Vector3 MeasureOverrideDelegate(Vector3 availableSizeWithoutMargins);
+        delegate Vector2 MeasureOverrideDelegate(Vector2 availableSizeWithoutMargins);
 
         private MeasureOverrideDelegate onMeasureOverride;
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             return onMeasureOverride != null ? onMeasureOverride(availableSizeWithoutMargins) : base.MeasureOverride(ref availableSizeWithoutMargins);
         }
@@ -350,43 +312,39 @@ namespace Xenko.UI.Tests.Layering
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
             
             // Test that DesiredSize and DesiredSizeWithMargin are null with non null margins
-            Margin = rand.NextThickness(10, 20, 30, 40, 50, 60);
+            Margin = rand.NextThickness(10, 20, 40, 50);
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
             
             // set minimum size and test again
             MinimumWidth = 1000*rand.NextFloat();
             MinimumHeight = 1000*rand.NextFloat();
-            MinimumDepth = 1000 * rand.NextFloat(); 
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
 
             // set maximum size and test again
             MaximumWidth = 1000 * rand.NextFloat();
             MaximumHeight = 1000 * rand.NextFloat();
-            MaximumDepth = 1000 * rand.NextFloat();
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
 
             // set fixed size and test again
             Width = 1000 * rand.NextFloat();
             Height = 1000 * rand.NextFloat();
-            Depth = 1000 * rand.NextFloat();
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
 
             // set default size and test again
             DefaultWidth = 1000 * rand.NextFloat();
             DefaultHeight = 1000 * rand.NextFloat();
-            DefaultDepth = 1000 * rand.NextFloat();
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
 
             // set the MeasureOverred function and try again
-            onMeasureOverride += size => new Vector3(1, 2, 3);
+            onMeasureOverride += size => new Vector2(1, 2);
             MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull();
         }
 
         private void MeasuredWithRandomSizeAndCheckThatDesiredSizesAreNull()
         {
-            Measure(10 * Vector3.One + 1000 * rand.NextVector3());
-            Assert.Equal(Vector3.Zero, DesiredSize);
-            Assert.Equal(Vector3.Zero, DesiredSizeWithMargins);
+            Measure(10 * Vector2.One + 1000 * rand.NextVector2());
+            Assert.Equal(Vector2.Zero, DesiredSize);
+            Assert.Equal(Vector2.Zero, DesiredSizeWithMargins);
             Assert.True(IsMeasureValid);
         }
 
@@ -396,71 +354,63 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestMeasureNotCollapsed()
         {
-            TestMeasureNotCollapsedWithMinAndMax(Vector3.Zero, new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
-            TestMeasureNotCollapsedWithMinAndMax(new Vector3(1000,2000,3000), new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
-            TestMeasureNotCollapsedWithMinAndMax(Vector3.Zero, new Vector3(1, 2, 3));
+            TestMeasureNotCollapsedWithMinAndMax(Vector2.Zero, new Vector2(float.PositiveInfinity, float.PositiveInfinity));
+            TestMeasureNotCollapsedWithMinAndMax(new Vector2(1000,2000), new Vector2(float.PositiveInfinity, float.PositiveInfinity));
+            TestMeasureNotCollapsedWithMinAndMax(Vector2.Zero, new Vector2(1, 2));
         }
 
-        private void TestMeasureNotCollapsedWithMinAndMax(Vector3 min, Vector3 max)
+        private void TestMeasureNotCollapsedWithMinAndMax(Vector2 min, Vector2 max)
         {
             // reset state of the element
             ResetElementState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // set the min and max values
             MinimumWidth = min.X;
             MinimumHeight = min.Y;
-            MinimumDepth = min.Z;
             MaximumWidth = max.X;
             MaximumHeight = max.Y;
-            MaximumDepth = max.Z;
 
             // check with fixed size
             Width = 1000 * rand.NextFloat();
             Height = 1000 * rand.NextFloat();
-            Depth = 1000 * rand.NextFloat();
-            Margin = rand.NextThickness(10, 20, 30, 40, 50, 60);
-            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector3(), new Vector3(Width, Height, Depth), min, max);
+            Margin = rand.NextThickness(10, 20, 40, 50);
+            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector2(), Size, min, max);
 
             // reset fixed size
             Width = float.NaN;
             Height = float.NaN;
-            Depth = float.NaN;
 
             // check with MeasureOverride
-            var onMeasureOverrideSize = new Vector3(10, 20, 30);
+            var onMeasureOverrideSize = new Vector2(10, 20);
             onMeasureOverride += _ => onMeasureOverrideSize;
-            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector3(), onMeasureOverrideSize, min, max);
+            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector2(), onMeasureOverrideSize, min, max);
 
             // check size given to MeasureOverride
             onMeasureOverride = availableSize => availableSize / 2;
-            var providedSize = 100 * rand.NextVector3();
+            var providedSize = 100 * rand.NextVector2();
             var providedSizeWithoutMargin = CalculateSizeWithoutThickness(ref providedSize, ref MarginInternal);
-            var expectedSize = new Vector3(Math.Min(providedSizeWithoutMargin.X, max.X), Math.Min(providedSizeWithoutMargin.Y, max.Y), Math.Min(providedSizeWithoutMargin.Z, max.Z)) / 2;
+            var expectedSize = new Vector2(Math.Min(providedSizeWithoutMargin.X, max.X), Math.Min(providedSizeWithoutMargin.Y, max.Y)) / 2;
             MeasuredAndCheckThatDesiredSizesAreCorrect(providedSize, expectedSize, min, max);
 
             // check default values
-            expectedSize = new Vector3(40, 50, 60);
-            onMeasureOverride = _ => new Vector3(float.NaN, float.NaN, float.NaN);
+            expectedSize = new Vector2(40, 50);
+            onMeasureOverride = _ => new Vector2(float.NaN, float.NaN);
             DefaultWidth = expectedSize.X;
             DefaultHeight = expectedSize.Y;
-            DefaultDepth = expectedSize.Z;
-            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector3(), expectedSize, min, max);
+            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector2(), expectedSize, min, max);
 
             // check blend of all
-            onMeasureOverride = _ => new Vector3(0, onMeasureOverrideSize.Y, float.NaN);
+            onMeasureOverride = _ => new Vector2(0, onMeasureOverrideSize.Y);
             Width = 100 * rand.NextFloat();
-            expectedSize = new Vector3(Width, onMeasureOverrideSize.Y, DefaultDepth);
-            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector3(), expectedSize, min, max);
+            expectedSize = new Vector2(Width, onMeasureOverrideSize.Y);
+            MeasuredAndCheckThatDesiredSizesAreCorrect(100 * rand.NextVector2(), expectedSize, min, max);
         }
 
-        private void MeasuredAndCheckThatDesiredSizesAreCorrect(Vector3 availableSize, Vector3 expectedSizeWithoutMargins, Vector3 min, Vector3 max)
+        private void MeasuredAndCheckThatDesiredSizesAreCorrect(Vector2 availableSize, Vector2 expectedSizeWithoutMargins, Vector2 min, Vector2 max)
         {
-            var truncedExpectedSize = new Vector3(
+            var truncedExpectedSize = new Vector2(
                 Math.Min(max.X, Math.Max(min.X, expectedSizeWithoutMargins.X)),
-                Math.Min(max.Y, Math.Max(min.Y, expectedSizeWithoutMargins.Y)),
-                Math.Min(max.Z, Math.Max(min.Z, expectedSizeWithoutMargins.Z)));
+                Math.Min(max.Y, Math.Max(min.Y, expectedSizeWithoutMargins.Y)));
 
             var truncedExpectedSizeWithMargins = CalculateSizeWithThickness(ref truncedExpectedSize, ref MarginInternal);
 
@@ -477,11 +427,11 @@ namespace Xenko.UI.Tests.Layering
             onCollapsedOverride?.Invoke();
         }
 
-        private delegate Vector3 ArrangeOverrideDelegate(Vector3 finalSizeWithoutMargins);
+        private delegate Vector2 ArrangeOverrideDelegate(Vector2 finalSizeWithoutMargins);
 
         private ArrangeOverrideDelegate onArrageOverride;
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             if (onArrageOverride != null)
                 return onArrageOverride(finalSizeWithoutMargins);
@@ -502,7 +452,7 @@ namespace Xenko.UI.Tests.Layering
             ResetElementState();
 
             // set margins
-            Margin = new Thickness(11,12,13,14,15,16);
+            Margin = new Thickness(11,12,14,15);
 
             // set the callbacks
             onCollapsedOverride = () => collaspedHasBeenCalled = true;
@@ -520,22 +470,22 @@ namespace Xenko.UI.Tests.Layering
 
         private void ArrangeAndPerformsCollapsedStateTests(bool isParentCollapsed)
         {
-            ArrangeAndPerformsStateTests(new Vector3(10, 20, 30), Vector3.Zero, Vector3.Zero, isParentCollapsed, true);
+            ArrangeAndPerformsStateTests(new Vector2(10, 20), Vector2.Zero, Vector2.Zero, isParentCollapsed, true);
         }
 
-        private void ArrangeAndPerformsNotCollapsedStateTests(Vector3 providedSizeWithMargin, Vector3 expectedSizeWithoutMargin)
+        private void ArrangeAndPerformsNotCollapsedStateTests(Vector2 providedSizeWithMargin, Vector2 expectedSizeWithoutMargin)
         {
             var expectedOffsets = CalculateAdjustmentOffsets(ref MarginInternal, ref providedSizeWithMargin, ref expectedSizeWithoutMargin);
             ArrangeAndPerformsStateTests(providedSizeWithMargin, expectedOffsets, expectedSizeWithoutMargin, false, false);
         }
 
-        private void ArrangeAndPerformsStateTests(Vector3 arrangeSize, Vector3 expectedOffset, Vector3 expectedSize, bool isParentCollapsed, bool shouldBeCollapsed)
+        private void ArrangeAndPerformsStateTests(Vector2 arrangeSize, Vector2 expectedOffset, Vector2 expectedSize, bool isParentCollapsed, bool shouldBeCollapsed)
         {
             Measure(arrangeSize);
             Arrange(arrangeSize, isParentCollapsed);
             Assert.True(IsArrangeValid);
-            Assert.Equal(expectedSize, RenderSize);
-            Assert.Equal(expectedOffset, RenderOffsets);
+            Assert.Equal(expectedSize, (Vector2)RenderSize);
+            Assert.Equal(expectedOffset, (Vector2)RenderOffsets);
             Assert.Equal(shouldBeCollapsed, collaspedHasBeenCalled);
             Assert.Equal(!shouldBeCollapsed, arrangeOverridedHasBeenCalled);
         }
@@ -560,7 +510,7 @@ namespace Xenko.UI.Tests.Layering
             TestArrangeNotCollapsedCore(HorizontalAlignment.Right);
         }
 
-        private Vector3 expectedProvidedSizeInMeasureOverride;
+        private Vector2 expectedProvidedSizeInMeasureOverride;
 
         private void TestArrangeNotCollapsedCore(HorizontalAlignment alignX)
         {
@@ -573,19 +523,15 @@ namespace Xenko.UI.Tests.Layering
             {
                 case HorizontalAlignment.Left:
                     VerticalAlignment = VerticalAlignment.Top;
-                    DepthAlignment = DepthAlignment.Back;
                     break;
                 case HorizontalAlignment.Center:
                     VerticalAlignment = VerticalAlignment.Center;
-                    DepthAlignment = DepthAlignment.Center;
                     break;
                 case HorizontalAlignment.Right:
                     VerticalAlignment = VerticalAlignment.Bottom;
-                    DepthAlignment = DepthAlignment.Front;
                     break;
                 case HorizontalAlignment.Stretch:
                     VerticalAlignment = VerticalAlignment.Stretch;
-                    DepthAlignment = DepthAlignment.Stretch;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("alignX");
@@ -593,15 +539,15 @@ namespace Xenko.UI.Tests.Layering
 
             // check that the element is measured if necessary
             InvalidateMeasure();
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             Assert.True(IsMeasureValid);
 
             // set the default callbacks
-            var desiredSize = 1000 * rand.NextVector3();
+            var desiredSize = 1000 * rand.NextVector2();
             onMeasureOverride = _ => desiredSize;
             onCollapsedOverride = () => collaspedHasBeenCalled = true;
-            onArrageOverride = delegate(Vector3 size)
+            onArrageOverride = delegate(Vector2 size)
                 {
                     Assert.Equal(expectedProvidedSizeInMeasureOverride, size);
                     arrangeOverridedHasBeenCalled = true; 
@@ -612,21 +558,19 @@ namespace Xenko.UI.Tests.Layering
             // check size and offset when size is fixed
             Width = 100 * rand.NextFloat();
             Height = 100 * rand.NextFloat();
-            Depth = 100 * rand.NextFloat();
             PertubArrangeResultValues();
-            expectedProvidedSizeInMeasureOverride = new Vector3(Width, Height, Depth);
-            ArrangeAndPerformsNotCollapsedStateTests(1000 * rand.NextVector3(), expectedProvidedSizeInMeasureOverride);
+            expectedProvidedSizeInMeasureOverride = Size;
+            ArrangeAndPerformsNotCollapsedStateTests(1000 * rand.NextVector2(), expectedProvidedSizeInMeasureOverride);
 
             // revert fixed size
             Width = float.NaN;
             Height = float.NaN;
-            Depth = float.NaN;
 
             // check size and offset when size is not fixed
             PertubArrangeResultValues();
-            var providedSpace = 1000 * rand.NextVector3();
+            var providedSpace = 1000 * rand.NextVector2();
             var providedWithoutMargins = CalculateSizeWithoutThickness(ref providedSpace, ref MarginInternal);
-            if (HorizontalAlignment == HorizontalAlignment.Stretch && VerticalAlignment == VerticalAlignment.Stretch && DepthAlignment == DepthAlignment.Stretch)
+            if (HorizontalAlignment == HorizontalAlignment.Stretch && VerticalAlignment == VerticalAlignment.Stretch)
             {
                 expectedProvidedSizeInMeasureOverride = providedWithoutMargins;
                 ArrangeAndPerformsNotCollapsedStateTests(providedSpace, providedWithoutMargins);
@@ -634,32 +578,27 @@ namespace Xenko.UI.Tests.Layering
             else
             {
                 Measure(providedSpace);
-                expectedProvidedSizeInMeasureOverride = new Vector3(
+                expectedProvidedSizeInMeasureOverride = new Vector2(
                     Math.Min(DesiredSize.X, providedWithoutMargins.X),
-                    Math.Min(DesiredSize.Y, providedWithoutMargins.Y),
-                    Math.Min(DesiredSize.Z, providedWithoutMargins.Z));
+                    Math.Min(DesiredSize.Y, providedWithoutMargins.Y));
                 ArrangeAndPerformsNotCollapsedStateTests(providedSpace, expectedProvidedSizeInMeasureOverride);
             }
 
             // check the size if extrema values are set
             PertubArrangeResultValues();
-            var extremum = new Vector3(21, 22, 23);
+            var extremum = new Vector2(21, 22);
             MinimumWidth = extremum.X;
             MinimumHeight = extremum.Y;
-            MinimumDepth = extremum.Z;
             MaximumWidth = extremum.X;
             MaximumHeight = extremum.Y;
-            MaximumDepth = extremum.Z;
             expectedProvidedSizeInMeasureOverride = extremum;
             ArrangeAndPerformsNotCollapsedStateTests(providedSpace, extremum);
 
             // revert extrema values
             MinimumWidth = 0;
             MinimumHeight = 0;
-            MinimumDepth = 0;
             MaximumWidth = float.PositiveInfinity;
             MaximumHeight =float.PositiveInfinity;
-            MaximumDepth = float.PositiveInfinity;
 
             // check blend of above cases
             PertubArrangeResultValues();
@@ -667,20 +606,20 @@ namespace Xenko.UI.Tests.Layering
             MaximumWidth = extremum.X;
             Height = 100 * rand.NextFloat();
             providedWithoutMargins = CalculateSizeWithoutThickness(ref providedSpace, ref MarginInternal);
-            if (HorizontalAlignment == HorizontalAlignment.Stretch && VerticalAlignment == VerticalAlignment.Stretch && DepthAlignment == DepthAlignment.Stretch)
+            if (HorizontalAlignment == HorizontalAlignment.Stretch && VerticalAlignment == VerticalAlignment.Stretch)
             {
-                expectedProvidedSizeInMeasureOverride = new Vector3(extremum.X, Height, providedWithoutMargins.Z);
+                expectedProvidedSizeInMeasureOverride = new Vector2(extremum.X, Height);
                 ArrangeAndPerformsNotCollapsedStateTests(providedSpace, expectedProvidedSizeInMeasureOverride);
             }
             else
             {
-                expectedProvidedSizeInMeasureOverride = new Vector3(extremum.X, Height, Math.Min(desiredSize.Z, providedWithoutMargins.Z));
+                expectedProvidedSizeInMeasureOverride = new Vector2(extremum.X, Height);
                 ArrangeAndPerformsNotCollapsedStateTests(providedSpace, expectedProvidedSizeInMeasureOverride);
             }
 
             // check that the size returned by ArrangeOverride override the previous calculated size for RenderSize
             PertubArrangeResultValues();
-            var onArrangeOverrideSize = new Vector3(10000, 20000, 30000);
+            var onArrangeOverrideSize = new Vector2(10000, 20000);
             onArrageOverride = delegate { arrangeOverridedHasBeenCalled = true; return onArrangeOverrideSize; };
             ArrangeAndPerformsNotCollapsedStateTests(providedSpace, onArrangeOverrideSize);
         }
@@ -689,16 +628,16 @@ namespace Xenko.UI.Tests.Layering
         private bool arrangeOverrideHasBeenCalled;
         private bool collapseOverrideHasBeenCalled;
 
-        private Vector3 SetMeasureOverrideToCalled(Vector3 input)
+        private Vector2 SetMeasureOverrideToCalled(Vector2 input)
         {
             measureOverrideHasBeenCalled = true;
-            return Vector3.Zero;
+            return Vector2.Zero;
         }
 
-        private Vector3 SetArrangeOverrideToCalled(Vector3 input)
+        private Vector2 SetArrangeOverrideToCalled(Vector2 input)
         {
             arrangeOverrideHasBeenCalled = true;
-            return Vector3.Zero;
+            return Vector2.Zero;
         }
 
         private void SetCollapseOverrideToCalled()
@@ -766,8 +705,8 @@ namespace Xenko.UI.Tests.Layering
             onArrageOverride += SetArrangeOverrideToCalled;
             onCollapsedOverride += SetCollapseOverrideToCalled;
 
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, parentIsCollapsed);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, parentIsCollapsed);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
 
@@ -778,11 +717,11 @@ namespace Xenko.UI.Tests.Layering
             InvalidateMeasure();
             Assert.False(IsMeasureValid);
             Assert.False(IsArrangeValid);
-            Measure(Vector3.Zero);
+            Measure(Vector2.Zero);
             Assert.True(IsMeasureValid);
             Assert.False(IsArrangeValid);
             Assert.True(measureOverrideHasBeenCalled);
-            Arrange(Vector3.Zero, parentIsCollapsed);
+            Arrange(Vector2.Zero, parentIsCollapsed);
             Assert.True(IsArrangeValid);
             Assert.True(IsMeasureValid);
             Assert.True(getArrangeHasBeenCalledVal());
@@ -797,11 +736,11 @@ namespace Xenko.UI.Tests.Layering
             InvalidateArrange();
             Assert.True(IsMeasureValid);
             Assert.False(IsArrangeValid);
-            Measure(Vector3.Zero);
+            Measure(Vector2.Zero);
             Assert.True(IsMeasureValid);
             Assert.False(IsArrangeValid);
             Assert.False(measureOverrideHasBeenCalled);
-            Arrange(Vector3.Zero, parentIsCollapsed);
+            Arrange(Vector2.Zero, parentIsCollapsed);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.True(getArrangeHasBeenCalledVal());
@@ -813,11 +752,11 @@ namespace Xenko.UI.Tests.Layering
             arrangeOverrideHasBeenCalled = false;
             collapseOverrideHasBeenCalled = false;
 
-            Measure(Vector3.Zero);
+            Measure(Vector2.Zero);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.False(measureOverrideHasBeenCalled);
-            Arrange(Vector3.Zero, parentIsCollapsed);
+            Arrange(Vector2.Zero, parentIsCollapsed);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.False(getArrangeHasBeenCalledVal());
@@ -829,11 +768,11 @@ namespace Xenko.UI.Tests.Layering
             arrangeOverrideHasBeenCalled = false;
             collapseOverrideHasBeenCalled = false;
 
-            Measure(Vector3.One); // check that measuring with a new value force the re-measurement but not re-arrangement
+            Measure(Vector2.One); // check that measuring with a new value force the re-measurement but not re-arrangement
             Assert.True(IsMeasureValid);
             Assert.False(IsArrangeValid);
             Assert.True(measureOverrideHasBeenCalled);
-            Arrange(Vector3.Zero, parentIsCollapsed);
+            Arrange(Vector2.Zero, parentIsCollapsed);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.False(getArrangeHasBeenCalledVal());
@@ -842,20 +781,20 @@ namespace Xenko.UI.Tests.Layering
             arrangeOverrideHasBeenCalled = false;
             collapseOverrideHasBeenCalled = false;
 
-            Measure(Vector3.One);
+            Measure(Vector2.One);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.False(measureOverrideHasBeenCalled);
-            Arrange(Vector3.One, parentIsCollapsed); // check that arranging with a new value force the re-arrangement
+            Arrange(Vector2.One, parentIsCollapsed); // check that arranging with a new value force the re-arrangement
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.True(getArrangeHasBeenCalledVal());
 
-            Measure(Vector3.One);
+            Measure(Vector2.One);
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.False(measureOverrideHasBeenCalled);
-            Arrange(Vector3.One, !parentIsCollapsed); // check that arranging with a new value of the parent collapse state force the re-arrangement
+            Arrange(Vector2.One, !parentIsCollapsed); // check that arranging with a new value of the parent collapse state force the re-arrangement
             Assert.True(IsMeasureValid);
             Assert.True(IsArrangeValid);
             Assert.True(getArrangeHasBeenCalledVal());
@@ -883,25 +822,18 @@ namespace Xenko.UI.Tests.Layering
 
             TestMeasureInvalidation(() => DefaultWidth = DefaultWidth+1);
             TestMeasureInvalidation(() => DefaultHeight = DefaultHeight+1);
-            TestMeasureInvalidation(() => DefaultDepth = DefaultDepth+1);
             TestMeasureInvalidation(() => Width = 1);
             TestMeasureInvalidation(() => Height = 1);
-            TestMeasureInvalidation(() => Depth = 1);
-            TestMeasureInvalidation(() => Size = new Vector3(1, 2, 3));
+            TestMeasureInvalidation(() => Size = new Vector2(1, 2));
             TestMeasureInvalidation(() => SetSize(0, 37));
-            TestMeasureInvalidation(() => MinimumWidth = MinimumDepth+1);
-            TestMeasureInvalidation(() => MinimumHeight = MinimumDepth+1);
-            TestMeasureInvalidation(() => MinimumDepth = MinimumDepth+1);
             TestMeasureInvalidation(() => MaximumWidth = 1);
             TestMeasureInvalidation(() => MaximumHeight = 1);
-            TestMeasureInvalidation(() => MaximumDepth = 1);
-            TestMeasureInvalidation(() => Margin = Thickness.UniformCuboid(1));
+            TestMeasureInvalidation(() => Margin = new Thickness(1));
 
             // - test the properties that are supposed to invalidate the object measurement
 
             TestArrangeInvalidation(() => HorizontalAlignment = HorizontalAlignment.Left);
             TestArrangeInvalidation(() => VerticalAlignment = VerticalAlignment.Bottom);
-            TestArrangeInvalidation(() => DepthAlignment = DepthAlignment.Center);
         }
 
         internal void TestMeasureInvalidation(Action changeProperty)
@@ -921,15 +853,15 @@ namespace Xenko.UI.Tests.Layering
 
         internal static void TestMeasureInvalidation(UIElement element, Action changeProperty)
         {
-            element.Measure(Vector3.Zero);
+            element.Measure(Vector2.Zero);
             changeProperty();
             Assert.False(element.IsMeasureValid);
         }
 
         internal static void TestArrangeInvalidation(UIElement element, Action changeProperty)
         {
-            element.Measure(Vector3.Zero);
-            element.Arrange(Vector3.Zero, false);
+            element.Measure(Vector2.Zero);
+            element.Arrange(Vector2.Zero, false);
             changeProperty();
             Assert.True(element.IsMeasureValid);
             Assert.False(element.IsArrangeValid);
@@ -937,8 +869,8 @@ namespace Xenko.UI.Tests.Layering
 
         internal static void TestNoInvalidation(UIElement element, Action changeProperty)
         {
-            element.Measure(Vector3.Zero);
-            element.Arrange(Vector3.Zero, false);
+            element.Measure(Vector2.Zero);
+            element.Arrange(Vector2.Zero, false);
             changeProperty();
             Assert.True(element.IsMeasureValid);
             Assert.True(element.IsArrangeValid);
@@ -958,7 +890,7 @@ namespace Xenko.UI.Tests.Layering
                 ArrangeHasBeenCalled = false;
             }
 
-            protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+            protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
             {
                 MeasureHasBeenCalled = true;
 
@@ -967,7 +899,7 @@ namespace Xenko.UI.Tests.Layering
                 return base.MeasureOverride(ref size);
             }
 
-            protected override Vector3 ArrangeOverride(ref Vector3 availableSizeWithoutMargins)
+            protected override Vector2 ArrangeOverride(ref Vector2 availableSizeWithoutMargins)
             {
                 ArrangeHasBeenCalled = true;
 
@@ -1049,8 +981,8 @@ namespace Xenko.UI.Tests.Layering
             var root = new MeasureArrangeCallChecker { Name = "root" }; root.Children.Add(elt1);
             var elements = new List<MeasureArrangeCallChecker> { root, elt1, elt2, elt3, elt4, elt5, elt6 };
             
-            root.Measure(Vector3.Zero);
-            root.Arrange(Vector3.Zero, false);
+            root.Measure(Vector2.Zero);
+            root.Arrange(Vector2.Zero, false);
             foreach (var element in elements)
                 element.Reset();
 
@@ -1064,7 +996,6 @@ namespace Xenko.UI.Tests.Layering
             //        i   i elt4 / elt5
             //            |
             //            i elt6
-            elt3.DefaultDepth = 333;
             AssertMeasureState(root, false, false);
             AssertMeasureState(elt1, false, false);
             AssertMeasureState(elt2, true, true);
@@ -1073,8 +1004,8 @@ namespace Xenko.UI.Tests.Layering
             AssertMeasureState(elt5, true, false);
             AssertMeasureState(elt6, true, false);
 
-            root.Measure(Vector3.Zero);
-            root.Arrange(Vector3.Zero, false);
+            root.Measure(Vector2.Zero);
+            root.Arrange(Vector2.Zero, false);
 
             AssetMeasureArrangeStateValid(elements);
             AssertMeasureCalls(root, true);
@@ -1107,8 +1038,8 @@ namespace Xenko.UI.Tests.Layering
             AssertArrangeState(elt5, true, false);
             AssertArrangeState(elt6, true, false);
 
-            root.Measure(Vector3.Zero);
-            root.Arrange(Vector3.Zero, false);
+            root.Measure(Vector2.Zero);
+            root.Arrange(Vector2.Zero, false);
 
             AssetMeasureArrangeStateValid(elements);
             AssertArrangeCalls(root, true);
@@ -1119,11 +1050,11 @@ namespace Xenko.UI.Tests.Layering
             AssertMeasureCalls(elt5, false);
             AssertMeasureCalls(elt6, false);
             
-            elt3.OnMeasureOverride += margins => Vector3.Zero;
-            elt3.OnArrangeOverride += margins => Vector3.Zero;
+            elt3.OnMeasureOverride += margins => Vector2.Zero;
+            elt3.OnArrangeOverride += margins => Vector2.Zero;
 
-            root.Measure(Vector3.Zero);
-            root.Arrange(Vector3.Zero, false);
+            root.Measure(Vector2.Zero);
+            root.Arrange(Vector2.Zero, false);
 
             foreach (var element in elements)
                 element.Reset();
@@ -1146,8 +1077,8 @@ namespace Xenko.UI.Tests.Layering
             AssertMeasureState(elt5, true, true);
             AssertMeasureState(elt6, true, true);
 
-            root.Measure(Vector3.One);
-            root.Arrange(Vector3.Zero, false);
+            root.Measure(Vector2.One);
+            root.Arrange(Vector2.Zero, false);
 
             AssetMeasureArrangeStateValid(elements);
             AssertUpdateMeasureCalls(root, true);
@@ -1179,8 +1110,8 @@ namespace Xenko.UI.Tests.Layering
             AssertMeasureState(elt5, true, true);
             AssertMeasureState(elt6, true, true);
 
-            root.Measure(Vector3.One);
-            root.Arrange(Vector3.One, false);
+            root.Measure(Vector2.One);
+            root.Arrange(Vector2.One, false);
 
             AssetMeasureArrangeStateValid(elements);
             AssertArrangeCalls(root, true);
@@ -1195,8 +1126,8 @@ namespace Xenko.UI.Tests.Layering
             // check that invalidation propagation works with visual parent too.
             var testVisualChildElement = new VisualChildTestClass();
 
-            testVisualChildElement.Measure(Vector3.One);
-            testVisualChildElement.Arrange(Vector3.One, false);
+            testVisualChildElement.Measure(Vector2.One);
+            testVisualChildElement.Arrange(Vector2.One, false);
             
             AssertMeasureState(testVisualChildElement, true, true);
             testVisualChildElement.InvalidateVisualChildMeasure();
@@ -1214,7 +1145,7 @@ namespace Xenko.UI.Tests.Layering
 
             public void InvalidateVisualChildMeasure()
             {
-                child.Orientation = Orientation.InDepth;
+                child.Orientation = Orientation.Horizontal;
             }
         }
     }

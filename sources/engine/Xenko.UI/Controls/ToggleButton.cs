@@ -137,7 +137,6 @@ namespace Xenko.UI.Controls
                     return;
 
                 state = value;
-                StateChanged?.Invoke(this, EventArgs.Empty);
 
                 switch (value)
                 {
@@ -165,8 +164,6 @@ namespace Xenko.UI.Controls
             get { return state == ToggleState.Checked; }
             set { State = value ? ToggleState.Checked : ToggleState.UnChecked; }
         }
-
-        public event EventHandler StateChanged;
 
         /// <summary>
         /// Occurs when a <see cref="ToggleButton"/> is checked.

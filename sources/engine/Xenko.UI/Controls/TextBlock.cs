@@ -201,7 +201,7 @@ namespace Xenko.UI.Controls
         }
 
         /// <inheritdoc/>
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             if (WrapText && !string.IsNullOrEmpty(text))
                 UpdateWrappedText(finalSizeWithoutMargins.X);
@@ -223,19 +223,18 @@ namespace Xenko.UI.Controls
         }
 
         /// <inheritdoc/>
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             if (string.IsNullOrEmpty(text))
             {
                 wrappedText = null;
-                return Vector3.Zero;
+                return Vector2.Zero;
             }
 
             if (WrapText)
                 UpdateWrappedText(availableSizeWithoutMargins.X);
 
-            var size = CalculateTextSize(new SpriteFont.StringProxy(TextToDisplay));
-            return new Vector3(size, 0);
+            return CalculateTextSize(new SpriteFont.StringProxy(TextToDisplay));
         }
 
         /// <summary>

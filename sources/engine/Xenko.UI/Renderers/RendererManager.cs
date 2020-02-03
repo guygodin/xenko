@@ -18,7 +18,7 @@ namespace Xenko.UI.Renderers
         private readonly Dictionary<Type, IElementRendererFactory> typesToUserFactories = new Dictionary<Type, IElementRendererFactory>();
 
         // Note: use Id instead of element instance in order to avoid to keep dead UIelement alive.
-        private readonly Dictionary<Guid, ElementRenderer> elementIdToRenderer = new Dictionary<Guid, ElementRenderer>();
+        private readonly HashSet<ElementRenderer> elementRenderers = new HashSet<ElementRenderer>();
 
         /// <summary> 
         /// Create a new instance of <see cref="RendererManager"/> with provided DefaultFactory
@@ -31,7 +31,8 @@ namespace Xenko.UI.Renderers
 
         public ElementRenderer GetRenderer(UIElement element)
         {
-            if (!elementIdToRenderer.TryGetValue(element.Id, out var elementRenderer))
+            var renderer = element.Renderer;
+            if (renderer == null)
             {
                 // try to get the renderer from the user registered class factory
                 if (typesToUserFactories.Count > 0)
@@ -41,8 +42,8 @@ namespace Xenko.UI.Renderers
                     {
                         if (typesToUserFactories.TryGetValue(currentType, out var factory))
                         {
-                            elementRenderer = factory.TryCreateRenderer(element);
-                            if (elementRenderer != null)
+                            renderer = factory.TryCreateRenderer(element);
+                            if (renderer != null)
                                 break;
                         }
 
@@ -51,20 +52,21 @@ namespace Xenko.UI.Renderers
                 }
 
                 // try to get the renderer from the default renderer factory.
-                if (elementRenderer == null)
+                if (renderer == null)
                 {
                     if (defaultFactory != null)
-                        elementRenderer = defaultFactory.TryCreateRenderer(element);
+                        renderer = defaultFactory.TryCreateRenderer(element);
 
-                    if (elementRenderer == null)
+                    if (renderer == null)
                         throw new InvalidOperationException($"No renderer found for element {element}");
                 }
 
                 // cache the renderer for future uses.
-                elementIdToRenderer[element.Id] = elementRenderer;
+                element.Renderer = renderer;
+                elementRenderers.Add(renderer);
             }
 
-            return elementRenderer;
+            return renderer;
         }
 
         public void RegisterRendererFactory(Type uiElementType, IElementRendererFactory factory)
@@ -83,17 +85,18 @@ namespace Xenko.UI.Renderers
             if (element == null) throw new ArgumentNullException(nameof(element));
             if (renderer == null) throw new ArgumentNullException(nameof(renderer));
 
-            elementIdToRenderer[element.Id] = renderer;
+            element.Renderer = renderer;
+            elementRenderers.Add(renderer);
         }
 
         public void Dispose()
         {
-            foreach (var renderer in elementIdToRenderer.Values)
+            foreach (var renderer in elementRenderers)
             {
                 if (!renderer.IsDisposed)
                     renderer.Dispose();
             }
-            elementIdToRenderer.Clear();
+            elementRenderers.Clear();
         }
     }
 }

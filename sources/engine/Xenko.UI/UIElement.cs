@@ -11,6 +11,7 @@ using Xenko.Core.Annotations;
 using Xenko.Core.Collections;
 using Xenko.Core.Mathematics;
 using Xenko.Games;
+using Xenko.UI.Renderers;
 
 namespace Xenko.UI
 {
@@ -34,11 +35,11 @@ namespace Xenko.UI
         protected const string LayoutCategory = "Layout";
         protected const string MiscCategory = "Misc";
 
-        protected const int Dims = 3;
+        protected const int Dims = 2;
 
+        internal ElementRenderer Renderer;
         internal Vector3 RenderSizeInternal;
         internal Matrix WorldMatrixInternal;
-        internal Matrix WorldMatrixPickingInternal;
         protected internal Thickness MarginInternal;
 
         private string name;
@@ -50,28 +51,26 @@ namespace Xenko.UI
         private bool isDirty;
         private float defaultWidth;
         private float defaultHeight;
-        private float defaultDepth;
         private float width = float.NaN;
         private float height = float.NaN;
-        private float depth = float.NaN;
         private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Stretch;
         private VerticalAlignment verticalAlignment = VerticalAlignment.Stretch;
-        private DepthAlignment depthAlignment = DepthAlignment.Front;
         private float maximumWidth = float.MaxValue;
         private float maximumHeight = float.MaxValue;
-        private float maximumDepth = float.MaxValue;
         private float minimumWidth;
         private float minimumHeight;
-        private float minimumDepth;
         private Matrix localMatrix = Matrix.Identity;
+        private Matrix localMatrixPicking = Matrix.Identity;
+        private Matrix worldMatrixPicking;
+        private bool localMatrixNotIdentity;
         private MouseOverState mouseOverState;
         private LayoutingContext layoutingContext;
 
         protected bool ArrangeChanged;
         protected bool LocalMatrixChanged;
 
-        private Vector3 previousProvidedMeasureSize = new Vector3(-1,-1,-1);
-        private Vector3 previousProvidedArrangeSize = new Vector3(-1,-1,-1);
+        private Vector2 previousProvidedMeasureSize = new Vector2(-1);
+        private Vector2 previousProvidedArrangeSize = new Vector2(-11);
         private bool previousIsParentCollapsed;
 
         /// <summary>
@@ -117,6 +116,16 @@ namespace Xenko.UI
             set
             {
                 localMatrix = value;
+                localMatrixNotIdentity = !value.IsIdentity;
+
+                // Picking (see XK-4689) - this fix relates to the inverted axis introduced in
+                //  UIRenderFeature.PickingUpdate(RenderUIElement renderUIElement, Viewport viewport, ref Matrix worldViewProj, GameTime drawTime)
+                localMatrixPicking = value;
+                localMatrixPicking.M13 *= -1;
+                localMatrixPicking.M31 *= -1;
+                localMatrixPicking.M23 *= -1;
+                localMatrixPicking.M32 *= -1;
+
                 LocalMatrixChanged = true;
             }
         }
@@ -181,6 +190,8 @@ namespace Xenko.UI
 
                 if (invalidateMeasure)
                     InvalidateMeasure();
+
+                IsDirty = true;
             }
         }
 
@@ -281,36 +292,16 @@ namespace Xenko.UI
         }
 
         /// <summary>
-        /// Gets or sets the user suggested depth of this element.
-        /// </summary>
-        /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
-        /// <userdoc>Depth of this element. If NaN, the default depth will be used instead.</userdoc>
-        [DataMember]
-        [DataMemberRange(0.0f, 3)]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(float.NaN)]
-        public float Depth
-        {
-            get => depth;
-            set
-            {
-                depth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
-                InvalidateMeasure();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the size of the element. Same as setting separately <see cref="Width"/>, <see cref="Height"/>, and <see cref="Depth"/>
+        /// Gets or sets the size of the element. Same as setting separately <see cref="Width"/>, and <see cref="Height"/>/>
         /// </summary>
         [DataMemberIgnore]
-        public Vector3 Size
+        public Vector2 Size
         {
-            get => new Vector3(Width, Height, Depth);
+            get => new Vector2(width, height);
             set
             {
                 Width = value.X;
                 Height = value.Y;
-                Depth = value.Z;
             }
         }
 
@@ -348,23 +339,6 @@ namespace Xenko.UI
                 if (value == verticalAlignment)
                     return;
                 verticalAlignment = value;
-                InvalidateArrange();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the depth alignment of this element.
-        /// </summary>
-        /// <userdoc>Depth alignment of this element.</userdoc>
-        [DataMember]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(DepthAlignment.Front)]
-        public DepthAlignment DepthAlignment
-        {
-            get => depthAlignment;
-            set
-            {
-                depthAlignment = value;
                 InvalidateArrange();
             }
         }
@@ -434,30 +408,6 @@ namespace Xenko.UI
         }
 
         /// <summary>
-        /// Gets or sets the minimum height of this element.
-        /// </summary>
-        /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
-        /// <userdoc>Minimum depth of this element.</userdoc>
-        [DataMember]
-        [DataMemberRange(0.0f, 3)]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(0.0f)]
-        public float MinimumDepth
-        {
-            get => minimumDepth;
-            set
-            {
-                if (float.IsNaN(value))
-                    return;
-                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
-                if (value == minimumDepth)
-                    return;
-                minimumDepth = value;
-                InvalidateMeasure();
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the maximum width of this element.
         /// </summary>
         /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
@@ -501,30 +451,6 @@ namespace Xenko.UI
                 if (value == maximumHeight)
                     return;
                 maximumHeight = value;
-                InvalidateMeasure();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum height of this element.
-        /// </summary>
-        /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
-        /// <userdoc>Maximum depth of this element.</userdoc>
-        [DataMember]
-        [DataMemberRange(0.0f, 3)]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(float.MaxValue)]
-        public float MaximumDepth
-        {
-            get => maximumDepth;
-            set
-            {
-                if (float.IsNaN(value))
-                    return;
-                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
-                if (value == maximumDepth)
-                    return;
-                maximumDepth = value;
                 InvalidateMeasure();
             }
         }
@@ -578,30 +504,6 @@ namespace Xenko.UI
         }
 
         /// <summary>
-        /// Gets or sets the default width of this element.
-        /// </summary>
-        /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
-        /// <userdoc>Default depth of this element.</userdoc>
-        [DataMember]
-        [DataMemberRange(0.0f, 3)]
-        [Display(category: LayoutCategory)]
-        [DefaultValue(0.0f)]
-        public float DefaultDepth
-        {
-            get => defaultDepth;
-            set
-            {
-                if (float.IsNaN(value))
-                    return;
-                value = MathUtil.Clamp(value, 0.0f, float.MaxValue);
-                if (value == defaultDepth)
-                    return;
-                defaultDepth = value;
-                InvalidateMeasure();
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the name of this element.
         /// </summary>
         /// <userdoc>Name of this element.</userdoc>
@@ -636,13 +538,12 @@ namespace Xenko.UI
             get => isDirty;
             set
             {
-                isDirty = value;
-                /*if (value != isDirty)
+                if (value != isDirty)
                 {
                     isDirty = value;
                     if (value)
                         PropagateIsDirtyToTopLevel();
-                }*/
+                }
             }
         }
 
@@ -654,14 +555,14 @@ namespace Xenko.UI
         /// </summary>
         /// <remarks>This value does not contain possible <see cref="Margin"/></remarks>
         [DataMemberIgnore]
-        public Vector3 DesiredSize { get; private set; }
+        public Vector2 DesiredSize { get; private set; }
 
         /// <summary>
         /// Gets the size that this element computed during the measure pass of the layout process.
         /// </summary>
         /// <remarks>This value contains possible <see cref="Margin"/></remarks>
         [DataMemberIgnore]
-        public Vector3 DesiredSizeWithMargins { get; private set; }
+        public Vector2 DesiredSizeWithMargins { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the computed size and position of child elements in this element's layout are valid.
@@ -858,10 +759,8 @@ namespace Xenko.UI
         {
             if (dimensionIndex == 0)
                 Width = value;
-            else if (dimensionIndex == 1)
-                Height = value;
             else
-                Depth = value;
+                Height = value;
         }
 
         /// <summary>
@@ -923,11 +822,6 @@ namespace Xenko.UI
         /// </summary>
         public float ActualHeight => RenderSize.Y;
 
-        /// <summary>
-        /// Gets the rendered depth of this element.
-        /// </summary>
-        public float ActualDepth => RenderSize.Z;
-
         /// <inheritdoc/>
         IEnumerable<IUIElementChildren> IUIElementChildren.Children => EnumerateChildren();
 
@@ -942,19 +836,19 @@ namespace Xenko.UI
             yield break;
         }
 
-        private unsafe bool Vector3BinaryEqual(ref Vector3 left, ref Vector3 right)
+        private unsafe bool Vector2BinaryEqual(ref Vector2 left, ref Vector2 right)
         {
-            fixed (Vector3* pVector3Left = &left)
-            fixed (Vector3* pVector3Right = &right)
+            fixed (Vector2* pVector2Left = &left)
+            fixed (Vector2* pVector2Right = &right)
             {
-                var pLeft = (int*)pVector3Left;
-                var pRight = (int*)pVector3Right;
+                var pLeft = (int*)pVector2Left;
+                var pRight = (int*)pVector2Right;
 
-                return pLeft[0] == pRight[0] && pLeft[1] == pRight[1] && pLeft[2] == pRight[2];
+                return pLeft[0] == pRight[0] && pLeft[1] == pRight[1];
             }
         }
 
-        public void Measure(Vector3 availableSizeWithMargins)
+        public void Measure(Vector2 availableSizeWithMargins)
         {
             Measure(ref availableSizeWithMargins);
         }
@@ -966,9 +860,9 @@ namespace Xenko.UI
         /// </summary>
         /// <param name="availableSizeWithMargins">The available space that a parent element can allocate a child element with its margins.
         /// A child element can request a larger space than what is available;  the provided size might be accommodated if scrolling is possible in the content model for the current element.</param>
-        public void Measure(ref Vector3 availableSizeWithMargins)
+        public void Measure(ref Vector2 availableSizeWithMargins)
         {
-            if (!ForceNextMeasure && Vector3BinaryEqual(ref availableSizeWithMargins, ref previousProvidedMeasureSize))
+            if (!ForceNextMeasure && Vector2BinaryEqual(ref availableSizeWithMargins, ref previousProvidedMeasureSize))
             {
                 IsMeasureValid = true;
                 ValidateChildrenMeasure();
@@ -983,7 +877,7 @@ namespace Xenko.UI
             // avoid useless computation if the element is collapsed
             if (IsCollapsed)
             {
-                DesiredSize = DesiredSizeWithMargins = Vector3.Zero;
+                DesiredSize = DesiredSizeWithMargins = Vector2.Zero;
                 return;
             }
 
@@ -997,10 +891,9 @@ namespace Xenko.UI
             var availableSizeWithoutMargins = CalculateSizeWithoutThickness(ref availableSizeWithMargins, ref MarginInternal);
 
             // clamp the available size for the element between the maximum and minimum width/height of the UIElement
-            availableSizeWithoutMargins = new Vector3(
-                Math.Max(MinimumWidth, Math.Min(MaximumWidth, !float.IsNaN(desiredSize.X) ? desiredSize.X : availableSizeWithoutMargins.X)),
-                Math.Max(MinimumHeight, Math.Min(MaximumHeight, !float.IsNaN(desiredSize.Y) ? desiredSize.Y : availableSizeWithoutMargins.Y)),
-                Math.Max(MinimumDepth, Math.Min(MaximumDepth, !float.IsNaN(desiredSize.Z) ? desiredSize.Z : availableSizeWithoutMargins.Z)));
+            availableSizeWithoutMargins = new Vector2(
+                MathUtil.Clamp(!float.IsNaN(desiredSize.X) ? desiredSize.X : availableSizeWithoutMargins.X, MinimumWidth, MaximumWidth),
+                MathUtil.Clamp(!float.IsNaN(desiredSize.Y) ? desiredSize.Y : availableSizeWithoutMargins.Y, MinimumHeight, MaximumHeight));
 
             // compute the desired size for the children
             var childrenDesiredSize = MeasureOverride(ref availableSizeWithoutMargins);
@@ -1019,18 +912,11 @@ namespace Xenko.UI
                 if (float.IsNaN(desiredSize.Y))
                     desiredSize.Y = DefaultHeight;
             }
-            if (float.IsNaN(desiredSize.Z))
-            {
-                desiredSize.Z = childrenDesiredSize.Z;
-                if (float.IsNaN(desiredSize.Z))
-                    desiredSize.Z = DefaultDepth;
-            }
 
             // clamp the desired size between the maximum and minimum width/height of the UIElement
-            desiredSize = new Vector3(
-                Math.Max(MinimumWidth, Math.Min(MaximumWidth, desiredSize.X)),
-                Math.Max(MinimumHeight, Math.Min(MaximumHeight, desiredSize.Y)),
-                Math.Max(MinimumDepth, Math.Min(MaximumDepth, desiredSize.Z)));
+            desiredSize = new Vector2(
+                MathUtil.Clamp(desiredSize.X, MinimumWidth, MaximumWidth),
+                MathUtil.Clamp(desiredSize.Y, MinimumHeight, MaximumHeight));
 
             // compute the desired size with margin
             var desiredSizeWithMargins = CalculateSizeWithThickness(ref desiredSize, ref MarginInternal);
@@ -1058,12 +944,12 @@ namespace Xenko.UI
         /// <param name="availableSizeWithoutMargins">The available size that this element can give to child elements.
         /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.</param>
         /// <returns>The size desired by the children</returns>
-        protected virtual Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected virtual Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
-            return Vector3.Zero;
+            return Vector2.Zero;
         }
 
-        public void Arrange(Vector3 finalSizeWithMargins, bool isParentCollapsed)
+        public void Arrange(Vector2 finalSizeWithMargins, bool isParentCollapsed)
         {
             Arrange(ref finalSizeWithMargins, isParentCollapsed);
         }
@@ -1074,9 +960,9 @@ namespace Xenko.UI
         /// </summary>
         /// <param name="finalSizeWithMargins">The final size that the parent computes for the child element with the margins.</param>
         /// <param name="isParentCollapsed">Boolean indicating if one of the parents of the element is currently collapsed.</param>
-        public void Arrange(ref Vector3 finalSizeWithMargins, bool isParentCollapsed)
+        public void Arrange(ref Vector2 finalSizeWithMargins, bool isParentCollapsed)
         {
-            if (!ForceNextArrange && Vector3BinaryEqual(ref finalSizeWithMargins, ref previousProvidedArrangeSize) && isParentCollapsed == previousIsParentCollapsed)
+            if (!ForceNextArrange && Vector2BinaryEqual(ref finalSizeWithMargins, ref previousProvidedArrangeSize) && isParentCollapsed == previousIsParentCollapsed)
             {
                 IsArrangeValid = true;
                 ValidateChildrenArrange();
@@ -1116,19 +1002,11 @@ namespace Xenko.UI
                 else
                     elementSize.Y = Math.Min(DesiredSize.Y, finalSizeWithoutMargins.Y);
             }
-            if (float.IsNaN(elementSize.Z))
-            {
-                if (DepthAlignment == DepthAlignment.Stretch)
-                    elementSize.Z = finalSizeWithoutMargins.Z;
-                else
-                    elementSize.Z = Math.Min(DesiredSize.Z, finalSizeWithoutMargins.Z);
-            }
 
             // clamp the element size between the maximum and minimum width/height of the UIElement
-            elementSize = new Vector3(
-                Math.Max(MinimumWidth, Math.Min(MaximumWidth, elementSize.X)),
-                Math.Max(MinimumHeight, Math.Min(MaximumHeight, elementSize.Y)),
-                Math.Max(MinimumDepth, Math.Min(MaximumDepth, elementSize.Z)));
+            elementSize = new Vector2(
+                MathUtil.Clamp(elementSize.X, MinimumWidth, MaximumWidth),
+                MathUtil.Clamp(elementSize.Y, MinimumHeight, MaximumHeight));
 
             // let ArrangeOverride decide of the final taken size
             elementSize = ArrangeOverride(ref elementSize);
@@ -1137,8 +1015,8 @@ namespace Xenko.UI
             var renderOffsets = CalculateAdjustmentOffsets(ref MarginInternal, ref finalSizeWithMargins, ref elementSize);
 
             // update UIElement internal variables
-            RenderSize = elementSize;
-            RenderOffsets = renderOffsets;
+            RenderSize = new Vector3(elementSize, 0f);
+            RenderOffsets = new Vector3(renderOffsets, 0f);
         }
 
         private void ValidateChildrenArrange()
@@ -1158,7 +1036,7 @@ namespace Xenko.UI
         /// </summary>
         /// <param name="finalSizeWithoutMargins">The final area within the parent that this element should use to arrange itself and its children.</param>
         /// <returns>The actual size used.</returns>
-        protected virtual Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected virtual Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             return finalSizeWithoutMargins;
         }
@@ -1168,8 +1046,8 @@ namespace Xenko.UI
         /// </summary>
         protected virtual void CollapseOverride()
         {
-            DesiredSize = Vector3.Zero;
-            DesiredSizeWithMargins = Vector3.Zero;
+            DesiredSize = Vector2.Zero;
+            DesiredSizeWithMargins = Vector2.Zero;
             RenderSize = Vector3.Zero;
             RenderOffsets = Vector3.Zero;
 
@@ -1263,27 +1141,7 @@ namespace Xenko.UI
         public virtual bool Intersects(ref Ray ray, out Vector3 intersectionPoint)
         {
             // does ray intersect element Oxy face?
-            var intersects = CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref RenderSizeInternal, out intersectionPoint);
-
-            // if element has depth also test other faces
-            if (ActualDepth > MathUtil.ZeroTolerance)
-            {
-                Vector3 intersection;
-                if (CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref RenderSizeInternal, 0, out intersection))
-                {
-                    intersects = true;
-                    if (intersection.Z > intersectionPoint.Z)
-                        intersectionPoint = intersection;
-                }
-                if (CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref RenderSizeInternal, 1, out intersection))
-                {
-                    intersects = true;
-                    if (intersection.Z > intersectionPoint.Z)
-                        intersectionPoint = intersection;
-                }
-            }
-
-            return intersects;
+            return CollisionHelper.RayIntersectsRectangle(ref ray, ref worldMatrixPicking, ref RenderSizeInternal, out intersectionPoint);
         }
 
         void IUIElementUpdate.Update(GameTime time)
@@ -1352,23 +1210,27 @@ namespace Xenko.UI
         /// <param name="parentWorldChanged">Boolean indicating if the world matrix provided by the parent changed</param>
         protected virtual void UpdateWorldMatrix(ref Matrix parentWorldMatrix, bool parentWorldChanged)
         {
-            if (parentWorldChanged || LocalMatrixChanged || ArrangeChanged)
+            if (parentWorldChanged || ArrangeChanged || LocalMatrixChanged)
             {
                 var localMatrixCopy = localMatrix;
 
                 // include rendering offsets into the local matrix.
-                localMatrixCopy.TranslationVector += RenderOffsets + RenderSize / 2;
+                var translation = RenderOffsets + RenderSize / 2;
+                localMatrixCopy.TranslationVector += translation;
 
                 // calculate the world matrix of UIElement
                 Matrix.Multiply(ref localMatrixCopy, ref parentWorldMatrix, out WorldMatrixInternal);
 
-                // Picking (see XK-4689) - this fix relates to the inverted axis introduced in
-                //  UIRenderFeature.PickingUpdate(RenderUIElement renderUIElement, Viewport viewport, ref Matrix worldViewProj, GameTime drawTime)
-                localMatrixCopy.M13 *= -1;
-                localMatrixCopy.M31 *= -1;
-                localMatrixCopy.M23 *= -1;
-                localMatrixCopy.M32 *= -1;
-                Matrix.Multiply(ref localMatrixCopy, ref parentWorldMatrix, out WorldMatrixPickingInternal);
+                if (localMatrixNotIdentity)
+                {
+                    localMatrixCopy = localMatrixPicking;
+                    localMatrixCopy.TranslationVector += translation;
+                    Matrix.Multiply(ref localMatrixCopy, ref parentWorldMatrix, out worldMatrixPicking);
+                }
+                else
+                {
+                    worldMatrixPicking = WorldMatrixInternal;
+                }
 
                 LocalMatrixChanged = false;
                 ArrangeChanged = false;
@@ -1381,12 +1243,11 @@ namespace Xenko.UI
         /// <param name="sizeWithoutMargins">The size without the thickness included</param>
         /// <param name="thickness">The thickness to add to the space</param>
         /// <returns>The size with the margins included</returns>
-        protected static Vector3 CalculateSizeWithThickness(ref Vector3 sizeWithoutMargins, ref Thickness thickness)
+        protected static Vector2 CalculateSizeWithThickness(ref Vector2 sizeWithoutMargins, ref Thickness thickness)
         {
-            return new Vector3(
+            return new Vector2(
                     Math.Max(0, sizeWithoutMargins.X + thickness.TotalWidth),
-                    Math.Max(0, sizeWithoutMargins.Y + thickness.TotalHeight),
-                    Math.Max(0, sizeWithoutMargins.Z + thickness.TotalDepth));
+                    Math.Max(0, sizeWithoutMargins.Y + thickness.TotalHeight));
         }
 
         /// <summary>
@@ -1395,28 +1256,27 @@ namespace Xenko.UI
         /// <param name="sizeWithMargins">The size with the thickness included</param>
         /// <param name="thickness">The thickness to remove in the space</param>
         /// <returns>The size with the margins not included</returns>
-        protected static Vector3 CalculateSizeWithoutThickness(ref Vector3 sizeWithMargins, ref Thickness thickness)
+        protected static Vector2 CalculateSizeWithoutThickness(ref Vector2 sizeWithMargins, ref Thickness thickness)
         {
-            return new Vector3(
+            return new Vector2(
                     Math.Max(0, sizeWithMargins.X - thickness.TotalWidth),
-                    Math.Max(0, sizeWithMargins.Y - thickness.TotalHeight),
-                    Math.Max(0, sizeWithMargins.Z - thickness.TotalDepth));
+                    Math.Max(0, sizeWithMargins.Y - thickness.TotalHeight));
         }
 
         /// <summary>
-        /// Computes the (X,Y,Z) offsets to position correctly the UI element given the total provided space to it.
+        /// Computes the (X,Y) offsets to position correctly the UI element given the total provided space to it.
         /// </summary>
         /// <param name="thickness">The thickness around the element to position.</param>
         /// <param name="providedSpace">The total space given to the child element by the parent</param>
         /// <param name="usedSpaceWithoutThickness">The space used by the child element without the thickness included in it.</param>
         /// <returns>The offsets</returns>
-        protected Vector3 CalculateAdjustmentOffsets(ref Thickness thickness, ref Vector3 providedSpace, ref Vector3 usedSpaceWithoutThickness)
+        protected Vector2 CalculateAdjustmentOffsets(ref Thickness thickness, ref Vector2 providedSpace, ref Vector2 usedSpaceWithoutThickness)
         {
             // compute the size of the element with the thickness included
             var usedSpaceWithThickness = CalculateSizeWithThickness(ref usedSpaceWithoutThickness, ref thickness);
 
             // set offset for left and stretch alignments
-            var offsets = new Vector3(thickness.Left, thickness.Top, thickness.Front);
+            var offsets = new Vector2(thickness.Left, thickness.Top);
 
             // align the element horizontally
             switch (HorizontalAlignment)
@@ -1439,18 +1299,6 @@ namespace Xenko.UI
                     break;
                 case VerticalAlignment.Bottom:
                     offsets.Y += providedSpace.Y - usedSpaceWithThickness.Y;
-                    break;
-            }
-
-            // align the element vertically
-            switch (DepthAlignment)
-            {
-                case DepthAlignment.Center:
-                case DepthAlignment.Stretch:
-                    offsets.Z += (providedSpace.Z - usedSpaceWithThickness.Z) / 2;
-                    break;
-                case DepthAlignment.Back:
-                    offsets.Z += providedSpace.Z - usedSpaceWithThickness.Z;
                     break;
             }
 

@@ -20,11 +20,7 @@ namespace Xenko.UI.Panels
         /// <summary>
         /// Indicate the first index of Vector3 to use to maximize depending on the stack panel orientation.
         /// </summary>
-        protected static readonly int[] OrientationToMaximizeIndex1 = { 1, 0, 0 };
-        /// <summary>
-        /// Indicate the second index of Vector3 to use to accumulate depending on the stack panel orientation.
-        /// </summary>
-        protected static readonly int[] OrientationToMaximizeIndex2 = { 2, 2, 1 };
+        protected static readonly int[] OrientationToMaximizeIndex1 = { 1, 0 };
         /// <summary>
         /// Indicate the axis along which the measure zone is infinite depending on the scroll owner scrolling mode.
         /// </summary>
@@ -33,13 +29,10 @@ namespace Xenko.UI.Panels
                 new int[0],
                 new []{ 0 },
                 new []{ 1 },
-                new []{ 2 },
                 new []{ 0, 1 },
-                new []{ 1, 2 },
-                new []{ 2, 0 },
             };
 
-        private Vector3 offset;
+        private Vector2 offset;
         private Orientation orientation = Orientation.Vertical;
 
         /// <summary>
@@ -64,7 +57,7 @@ namespace Xenko.UI.Panels
 
         private readonly FastCollection<UIElement> cachedVisibleChildren = new FastCollection<UIElement>();
 
-        private Vector3 extent;
+        private Vector2 extent;
 
         private readonly List<float> elementBounds = new List<float>();
 
@@ -189,7 +182,7 @@ namespace Xenko.UI.Panels
                 ++scrollPosition;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             Viewport = availableSizeWithoutMargins;
 
@@ -199,7 +192,6 @@ namespace Xenko.UI.Panels
 
             var accumulatorIndex = (int)Orientation;
             var maximizeIndex1 = OrientationToMaximizeIndex1[(int)Orientation];
-            var maximizeIndex2 = OrientationToMaximizeIndex2[(int)Orientation];
 
             // compute the size available to the children depending on the stack orientation
             var childAvailableSizeWithMargins = availableSizeWithoutMargins;
@@ -218,18 +210,17 @@ namespace Xenko.UI.Panels
                 child.Measure(ref childAvailableSizeWithMargins);
 
             // calculate the stack panel desired size
-            var desiredSize = Vector3.Zero;
+            var desiredSize = Vector2.Zero;
             foreach (var child in children)
             {
                 desiredSize[accumulatorIndex] += child.DesiredSizeWithMargins[accumulatorIndex];
                 desiredSize[maximizeIndex1] = Math.Max(desiredSize[maximizeIndex1], child.DesiredSizeWithMargins[maximizeIndex1]);
-                desiredSize[maximizeIndex2] = Math.Max(desiredSize[maximizeIndex2], child.DesiredSizeWithMargins[maximizeIndex2]);
             }
 
             return desiredSize;
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             visibleChildren.Clear(); // children's children may have changed we need to force the rearrangement.
 
@@ -297,7 +288,6 @@ namespace Xenko.UI.Panels
             // cache the accumulator and maximize indices 
             var accumulatorIndex = (int)Orientation;
             var maximizeIndex1 = OrientationToMaximizeIndex1[(int)Orientation];
-            var maximizeIndex2 = OrientationToMaximizeIndex2[(int)Orientation];
 
             // add the first element bound
             elementBounds.Add(0);
@@ -318,7 +308,6 @@ namespace Xenko.UI.Panels
                 // compute the size given to the child
                 var childSizeWithMargins = child.DesiredSizeWithMargins;
                 childSizeWithMargins[maximizeIndex1] = Viewport[maximizeIndex1];
-                childSizeWithMargins[maximizeIndex2] = Viewport[maximizeIndex2];
 
                 // arrange the child
                 child.Arrange(ref childSizeWithMargins, IsCollapsed);
@@ -336,11 +325,11 @@ namespace Xenko.UI.Panels
             return direction == Orientation;
         }
 
-        public Vector3 Extent => extent;
+        public Vector2 Extent => extent;
 
-        public Vector3 Offset => offset;
+        public Vector2 Offset => offset;
 
-        public Vector3 Viewport { get; private set; }
+        public Vector2 Viewport { get; private set; }
 
         public override Vector2 GetSurroudingAnchorDistances(Orientation direction, float position)
         {
@@ -390,7 +379,7 @@ namespace Xenko.UI.Panels
             ScrolllToElement(elementIndex);
         }
 
-        public void ScrollOf(Vector3 offsetsToApply)
+        public void ScrollOf(Vector2 offsetsToApply)
         {
             ScrollOf(offsetsToApply[(int)Orientation]);
         }
@@ -440,11 +429,11 @@ namespace Xenko.UI.Panels
             }
         }
 
-        public Vector3 ScrollBarPositions
+        public Vector2 ScrollBarPositions
         {
             get
             {
-                var positionRatio = Vector3.Zero;
+                var positionRatio = Vector2.Zero;
                 var scrollAxis = (int)Orientation;
 
                 if (Children.Count == 0)
@@ -597,7 +586,7 @@ namespace Xenko.UI.Panels
         /// </summary>
         private void AdjustOffsetsAndVisualChildren(float desiredNewScrollPosition)
         {
-            offset = Vector3.Zero;
+            offset = Vector2.Zero;
             var axis = (int)Orientation;
 
             if (ItemVirtualizationEnabled)
@@ -610,7 +599,7 @@ namespace Xenko.UI.Panels
                 if (elementBounds.Count < 2) // no children
                 {
                     scrollPosition = 0;
-                    offset = Vector3.Zero;
+                    offset = Vector2.Zero;
                 }
                 else
                 {

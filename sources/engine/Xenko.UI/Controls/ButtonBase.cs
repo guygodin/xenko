@@ -17,6 +17,8 @@ namespace Xenko.UI.Controls
     [Display(category: InputCategory)]
     public abstract class ButtonBase : ContentControl
     {
+        private bool isPressed;
+
         static ButtonBase()
         {
             EventManager.RegisterClassHandler(typeof(ButtonBase), ClickEvent, ClickClassHandler);
@@ -43,7 +45,17 @@ namespace Xenko.UI.Controls
         /// Gets a value that indicates whether the button is currently down.
         /// </summary>
         [DataMemberIgnore]
-        public virtual bool IsPressed { get; protected set; }
+        public virtual bool IsPressed
+        {
+            get { return isPressed; }
+            protected set
+            {
+                if (value == isPressed)
+                    return;
+                isPressed = value;
+                IsDirty = true;
+            }
+        }
 
         /// <summary>
         /// Occurs when a <see cref="Button"/> is clicked.

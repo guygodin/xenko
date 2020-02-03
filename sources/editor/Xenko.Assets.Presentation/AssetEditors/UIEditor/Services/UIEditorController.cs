@@ -142,7 +142,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Services
                             Name = DesignAreaRootElementName,
                             BackgroundColor = Color.WhiteSmoke * 0.5f, //FIXME: add an editor setting
                             BorderColor = Color.WhiteSmoke, // FIXME: add an editor setting
-                            BorderThickness = Thickness.UniformCuboid(2.0f), // FIXME: add an editor setting
+                            BorderThickness = new Thickness(2.0f), // FIXME: add an editor setting
                         }
                     },
                     IsBillboard = false,

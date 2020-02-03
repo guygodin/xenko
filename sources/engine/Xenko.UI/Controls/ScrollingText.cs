@@ -208,12 +208,12 @@ namespace Xenko.UI.Controls
             ScrollingOffset = -nextOffsetShift;
         }
 
-        protected override Vector3 MeasureOverride(ref Vector3 availableSizeWithoutMargins)
+        protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
         {
             return MeasureSize();
         }
 
-        protected override Vector3 ArrangeOverride(ref Vector3 finalSizeWithoutMargins)
+        protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)
         {
             elementWidth = finalSizeWithoutMargins.X;
 
@@ -228,12 +228,12 @@ namespace Xenko.UI.Controls
         /// Measure the size of the <see cref="ScrollingText"/> element.
         /// </summary>
         /// <returns>The size of the element</returns>
-        public Vector3 MeasureSize()
+        public Vector2 MeasureSize()
         {
             if (Font == null)
-                return Vector3.Zero;
+                return Vector2.Zero;
 
-            return new Vector3(Font.MeasureString(new string('A', (int)DesiredCharacterNumber)), 0);
+            return Font.MeasureString(new string('A', (int)DesiredCharacterNumber));
         }
     }
 }

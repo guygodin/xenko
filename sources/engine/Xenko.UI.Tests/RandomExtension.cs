@@ -14,16 +14,21 @@ namespace Xenko.UI.Tests
             return (float)random.NextDouble();
         }
 
+        public static Vector2 NextVector2(this Random random)
+        {
+            return new Vector2(random.NextFloat(), random.NextFloat());
+        }
+
         public static Vector3 NextVector3(this Random random)
         {
             return new Vector3(random.NextFloat(), random.NextFloat(), random.NextFloat());
         }
 
-        public static Thickness NextThickness(this Random random, float leftFactor, float topFactor, float backFactor, float rightFactor, float bottomFactor, float frontFactor)
+        public static Thickness NextThickness(this Random random, float leftFactor, float topFactor, float rightFactor, float bottomFactor)
         {
             return new Thickness(
-                random.NextFloat() * leftFactor, random.NextFloat() * topFactor, random.NextFloat() * backFactor,
-                random.NextFloat() * rightFactor, random.NextFloat() * bottomFactor, random.NextFloat() * frontFactor);
+                random.NextFloat() * leftFactor, random.NextFloat() * topFactor,
+                random.NextFloat() * rightFactor, random.NextFloat() * bottomFactor);
         }
     }
 }

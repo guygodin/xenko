@@ -63,10 +63,10 @@ namespace Xenko.UI.Tests.Layering
             Assert.Null(newChild.Parent);
 
             // check that adding or removing a child invalidate the measure
-            Measure(Vector3.Zero);
+            Measure(Vector2.Zero);
             Children.Add(newChild);
             Assert.False(IsMeasureValid);
-            Measure(Vector3.Zero);
+            Measure(Vector2.Zero);
             Children.Remove(newChild);
             Assert.False(IsMeasureValid);
 
@@ -97,10 +97,8 @@ namespace Xenko.UI.Tests.Layering
         {
             ResetState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // set the panel size to 1
-            Arrange(Vector3.One, false);
+            Arrange(Vector2.One, false);
 
             // test that the world matrix of the panel is correctly updated.
             var localMatrix = Matrix.Scaling(0.1f, 0.5f, 1f);
@@ -110,7 +108,7 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Matrix(0.1f,0,0,0, 0,0.4f,0,0, 0,0,0.4f,0, 0.5f, 0.4f, 0.2f,1), WorldMatrix);
 
             // add a child and set its local matrix
-            var child = new PanelTests { DepthAlignment = DepthAlignment.Stretch };
+            var child = new PanelTests();
             var childArrangementMatrix = Matrix.Translation(10, 20, 30);
             var childLocalMatrix = new Matrix(0,-1,0,0, 1,0,0,0, 0,0,1,0, 0,0,0,1);
             child.LocalMatrix = childLocalMatrix;
@@ -120,7 +118,7 @@ namespace Xenko.UI.Tests.Layering
             child.DependencyProperties.Set(PanelArrangeMatrixPropertyKey, childArrangementMatrix);
 
             // arrange the child (set its size to 1)
-            child.Arrange(Vector3.One, false);
+            child.Arrange(Vector2.One, false);
 
             // check that the value of the world matrix of the child is correctly updated too
             UpdateWorldMatrix(ref worldMatrix, true);
@@ -155,8 +153,8 @@ namespace Xenko.UI.Tests.Layering
             var worldMatrix = Matrix.Zero;
             var localMatrix = Matrix.Identity;
             
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             UpdateWorldMatrix(ref worldMatrix, false);
             
             worldMatrix.M11 = 2;
@@ -179,7 +177,7 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(localMatrix.M11, child.WorldMatrix.M11);
             
             InvalidateArrange();
-            Arrange(Vector3.Zero, false);
+            Arrange(Vector2.Zero, false);
             
             worldMatrix.M11 = 5;
             UpdateWorldMatrix(ref worldMatrix, false);
@@ -187,15 +185,15 @@ namespace Xenko.UI.Tests.Layering
 
             var secondButton = new Button();
             Children.Add(secondButton);
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             worldMatrix.M11 = 7;
             UpdateWorldMatrix(ref worldMatrix, false);
             Assert.Equal(worldMatrix.M11, child.WorldMatrix.M11);
 
             Children.Remove(secondButton);
-            Measure(Vector3.Zero);
-            Arrange(Vector3.Zero, false);
+            Measure(Vector2.Zero);
+            Arrange(Vector2.Zero, false);
             worldMatrix.M11 = 9;
             UpdateWorldMatrix(ref worldMatrix, false);
             Assert.Equal(worldMatrix.M11, child.WorldMatrix.M11);
@@ -241,63 +239,41 @@ namespace Xenko.UI.Tests.Layering
             // default state
             Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
 
             // horizontally 
             panel.ActivateAnchoring(Orientation.Horizontal, false);
 
             Assert.False(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
 
             panel.ActivateAnchoring(Orientation.Horizontal, true);
 
             Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
 
             // vertically
             panel.ActivateAnchoring(Orientation.Vertical, false);
 
             Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.False(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
 
             panel.ActivateAnchoring(Orientation.Vertical, true);
 
             Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
-
-            // in depth
-            panel.ActivateAnchoring(Orientation.InDepth, false);
-
-            Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
-            Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.False(panel.ShouldAnchor(Orientation.InDepth));
-
-            panel.ActivateAnchoring(Orientation.InDepth, true);
-
-            Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
-            Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
 
             // combination
             panel.ActivateAnchoring(Orientation.Horizontal, false);
             panel.ActivateAnchoring(Orientation.Vertical, false);
-            panel.ActivateAnchoring(Orientation.InDepth, false);
 
             Assert.False(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.False(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.False(panel.ShouldAnchor(Orientation.InDepth));
 
             panel.ActivateAnchoring(Orientation.Horizontal, true);
             panel.ActivateAnchoring(Orientation.Vertical, true);
-            panel.ActivateAnchoring(Orientation.InDepth, true);
 
             Assert.True(panel.ShouldAnchor(Orientation.Horizontal));
             Assert.True(panel.ShouldAnchor(Orientation.Vertical));
-            Assert.True(panel.ShouldAnchor(Orientation.InDepth));
         }
 
         /// <summary>
@@ -306,11 +282,11 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestSurroudingAnchor()
         {
-            var stackSize = new Vector3(100, 200, 300);
+            var stackSize = new Vector2(100, 200);
 
             var stackPanel = new PanelTests { Size = stackSize };
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             
             Assert.Equal(new Vector2( 0, 100), stackPanel.GetSurroudingAnchorDistances(Orientation.Horizontal, -1f));
             Assert.Equal(new Vector2( 0, 100), stackPanel.GetSurroudingAnchorDistances(Orientation.Horizontal, 0));
@@ -323,12 +299,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Vector2(-100, 100), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, 100));
             Assert.Equal(new Vector2(-200, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, 200));
             Assert.Equal(new Vector2(-200, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, 220));
-
-            Assert.Equal(new Vector2( 0, 300), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, -1f));
-            Assert.Equal(new Vector2( 0, 300), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 0));
-            Assert.Equal(new Vector2(-200, 100), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 200));
-            Assert.Equal(new Vector2(-300, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 300));
-            Assert.Equal(new Vector2(-300, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 330));
         }
     }
 }

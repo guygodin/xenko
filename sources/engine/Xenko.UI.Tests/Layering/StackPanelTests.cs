@@ -61,17 +61,15 @@ namespace Xenko.UI.Tests.Layering
             // set fixed size to the children
             childOne.Width = 1;
             childOne.Height = 2;
-            childOne.Depth = 3;
             childTwo.Width = 10;
             childTwo.Height = 20;
-            childTwo.Depth = 30;
 
             // add the children to the stack panel 
             Children.Add(childOne);
             Children.Add(childTwo);
 
             // arrange the stack panel and check children size
-            Arrange(1000 * rand.NextVector3(), true);
+            Arrange(1000 * rand.NextVector2(), true);
             Assert.Equal(Vector3.Zero, childOne.RenderSize);
             Assert.Equal(Vector3.Zero, childTwo.RenderSize);
         }
@@ -85,8 +83,8 @@ namespace Xenko.UI.Tests.Layering
             ResetState();
 
             // test that desired size is null if no children
-            Measure(1000 * rand.NextVector3());
-            Assert.Equal(Vector3.Zero, DesiredSize);
+            Measure(1000 * rand.NextVector2());
+            Assert.Equal(Vector2.Zero, DesiredSize);
 
             // Create and add children
             var child1 = new MeasureValidator();
@@ -99,7 +97,6 @@ namespace Xenko.UI.Tests.Layering
             // tests desired size depending on the orientation
             TestMeasureOverrideCore(Orientation.Horizontal);
             TestMeasureOverrideCore(Orientation.Vertical);
-            TestMeasureOverrideCore(Orientation.InDepth);
         }
         
         private void TestMeasureOverrideCore(Orientation orientation)
@@ -108,19 +105,19 @@ namespace Xenko.UI.Tests.Layering
             Orientation = orientation;
 
             // set children margins
-            Children[0].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
-            Children[1].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
-            Children[2].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
+            Children[0].Margin = rand.NextThickness(10, 11, 13, 14);
+            Children[1].Margin = rand.NextThickness(10, 11, 13, 14);
+            Children[2].Margin = rand.NextThickness(10, 11, 13, 14);
             
             // set an available size
-            var availablesizeWithMargins = 1000 * rand.NextVector3();
+            var availablesizeWithMargins = 1000 * rand.NextVector2();
             var availableSizeWithoutMargins = CalculateSizeWithoutThickness(ref availablesizeWithMargins, ref MarginInternal);
             
             // set the validator expected and return values
             foreach (MeasureValidator child in Children)
             {
                 // set the children desired size via the Measure override return value
-                child.ReturnedMeasuredValue = 100 * rand.NextVector3();
+                child.ReturnedMeasuredValue = 100 * rand.NextVector2();
 
                 // set the expected size for child provided size validation
                 var expectedSize = CalculateSizeWithoutThickness(ref availableSizeWithoutMargins, ref child.MarginInternal);
@@ -132,17 +129,16 @@ namespace Xenko.UI.Tests.Layering
             Measure(availablesizeWithMargins);
 
             // compute the children max desired sizes
-            var maximumDesiredSizeWithMargins = Vector3.Zero;
+            var maximumDesiredSizeWithMargins = Vector2.Zero;
             foreach (var child in Children)
             {
-                maximumDesiredSizeWithMargins = new Vector3(
+                maximumDesiredSizeWithMargins = new Vector2(
                     Math.Max(maximumDesiredSizeWithMargins.X, child.DesiredSizeWithMargins.X),
-                    Math.Max(maximumDesiredSizeWithMargins.Y, child.DesiredSizeWithMargins.Y),
-                    Math.Max(maximumDesiredSizeWithMargins.Z, child.DesiredSizeWithMargins.Z));
+                    Math.Max(maximumDesiredSizeWithMargins.Y, child.DesiredSizeWithMargins.Y));
             }
 
             // compute the children accumulated sizes
-            var acculumatedDesiredSizeWithMargins = Children.Aggregate(Vector3.Zero, (current, child) => current + child.DesiredSizeWithMargins);
+            var acculumatedDesiredSizeWithMargins = Children.Aggregate(Vector2.Zero, (current, child) => current + child.DesiredSizeWithMargins);
             
             // Checks the desired size
             switch (orientation)
@@ -150,17 +146,10 @@ namespace Xenko.UI.Tests.Layering
                 case Orientation.Horizontal:
                     Assert.Equal(acculumatedDesiredSizeWithMargins.X, DesiredSize.X);
                     Assert.Equal(maximumDesiredSizeWithMargins.Y, DesiredSize.Y);
-                    Assert.Equal(maximumDesiredSizeWithMargins.Z, DesiredSize.Z);
                     break;
                 case Orientation.Vertical:
                     Assert.Equal(maximumDesiredSizeWithMargins.X, DesiredSize.X);
                     Assert.Equal(acculumatedDesiredSizeWithMargins.Y, DesiredSize.Y);
-                    Assert.Equal(maximumDesiredSizeWithMargins.Z, DesiredSize.Z);
-                    break;
-                case Orientation.InDepth:
-                    Assert.Equal(maximumDesiredSizeWithMargins.X, DesiredSize.X);
-                    Assert.Equal(maximumDesiredSizeWithMargins.Y, DesiredSize.Y);
-                    Assert.Equal(acculumatedDesiredSizeWithMargins.Z, DesiredSize.Z);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(orientation));
@@ -175,31 +164,26 @@ namespace Xenko.UI.Tests.Layering
         {
             ResetState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // test that arrange set render size to provided size when there is no children
-            var providedSize = 1000 * rand.NextVector3();
+            var providedSize = 1000 * rand.NextVector2();
             var providedSizeWithoutMargins = CalculateSizeWithoutThickness(ref providedSize, ref MarginInternal);
             Measure(providedSize);
             Arrange(providedSize, false);
-            Assert.Equal(providedSizeWithoutMargins, RenderSize);
+            Assert.Equal(providedSizeWithoutMargins, (Vector2)RenderSize);
 
             // tests desired size depending on the orientation
             TestArrangeOverrideCore(Orientation.Horizontal);
             TestArrangeOverrideCore(Orientation.Vertical);
-            TestArrangeOverrideCore(Orientation.InDepth);
         }
         
         private void TestArrangeOverrideCore(Orientation orientation)
         {
             ResetState();
 
-            DepthAlignment = DepthAlignment.Stretch;
-
             // Create and add children
-            var child1 = new ArrangeValidator { DepthAlignment = DepthAlignment.Stretch };
-            var child2 = new ArrangeValidator { DepthAlignment = DepthAlignment.Stretch };
-            var child3 = new ArrangeValidator { DepthAlignment = DepthAlignment.Stretch };
+            var child1 = new ArrangeValidator();
+            var child2 = new ArrangeValidator();
+            var child3 = new ArrangeValidator();
             Children.Add(child1);
             Children.Add(child2);
             Children.Add(child3);
@@ -208,18 +192,18 @@ namespace Xenko.UI.Tests.Layering
             Orientation = orientation;
 
             // set children margins
-            Children[0].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
-            Children[1].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
-            Children[2].Margin = rand.NextThickness(10, 11, 12, 13, 14, 15);
+            Children[0].Margin = rand.NextThickness(10, 11, 13, 14);
+            Children[1].Margin = rand.NextThickness(10, 11, 13, 14);
+            Children[2].Margin = rand.NextThickness(10, 11, 13, 14);
 
             // set an available size
-            var availablesizeWithMargins = 1000 * rand.NextVector3();
+            var availablesizeWithMargins = 1000 * rand.NextVector2();
             var availableSizeWithoutMargins = CalculateSizeWithoutThickness(ref availablesizeWithMargins, ref MarginInternal);
 
             // set the arrange validator values
             foreach (ArrangeValidator child in Children)
             {
-                child.ReturnedMeasuredValue = 1000 * rand.NextVector3();
+                child.ReturnedMeasuredValue = 1000 * rand.NextVector2();
                 child.ExpectedArrangeValue = CalculateSizeWithoutThickness(ref availableSizeWithoutMargins, ref child.MarginInternal);
                 child.ExpectedArrangeValue[(int)Orientation] = child.ReturnedMeasuredValue[(int)Orientation];
             }
@@ -229,21 +213,21 @@ namespace Xenko.UI.Tests.Layering
             Arrange(availablesizeWithMargins, false);
             
             // compute the children accumulated sizes
-            var acculumatedDesiredSizeWithMarginsList = new List<Vector3>();
+            var acculumatedDesiredSizeWithMarginsList = new List<Vector2>();
             for (int i = 0; i < Children.Count; i++)
             {
-                var accumulatedVector = Vector3.Zero;
+                var accumulatedVector = Vector2.Zero;
                 for (int j = 0; j < i; j++)
                 {
-                    for(int dim = 0; dim<3; ++dim)
-                        accumulatedVector[dim] += Children[j].RenderSize[dim] + Children[j].Margin[dim] + Children[j].Margin[dim + 3];
+                    for(int dim = 0; dim<Dims; ++dim)
+                        accumulatedVector[dim] += Children[j].RenderSize[dim] + Children[j].Margin[dim] + Children[j].Margin[dim + Thickness.DimOffset];
                 }
 
                 acculumatedDesiredSizeWithMarginsList.Add(accumulatedVector);
             }
 
             // checks the stack arranged size
-            Assert.Equal(availableSizeWithoutMargins, RenderSize);
+            Assert.Equal(availableSizeWithoutMargins, (Vector2)RenderSize);
             
             // Checks the children arrange matrix
             for (int i = 0; i < Children.Count; i++)
@@ -258,9 +242,6 @@ namespace Xenko.UI.Tests.Layering
                     case Orientation.Vertical:
                         childOffsets.Y += acculumatedDesiredSizeWithMarginsList[i].Y;
                         break;
-                    case Orientation.InDepth:
-                        childOffsets.Z += acculumatedDesiredSizeWithMarginsList[i].Z;
-                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(orientation));
                 }
@@ -272,14 +253,14 @@ namespace Xenko.UI.Tests.Layering
         /// <summary>
         /// Test the invalidations generated object property changes.
         /// </summary>
-        [Fact]
+        /*[Fact]
         public void TestBasicInvalidations()
         {
             var stackPanel = new StackPanel();
 
             // - test the properties that are supposed to invalidate the object measurement
             UIElementLayeringTests.TestMeasureInvalidation(stackPanel, () => stackPanel.Orientation = Orientation.InDepth);
-        }
+        }*/
 
         /// <summary>
         /// Test for <see cref="StackPanel.CanScroll"/>
@@ -295,23 +276,23 @@ namespace Xenko.UI.Tests.Layering
 
         private void AssertCanScroll(StackPanel stackPanel)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < Dims; i++)
                 Assert.Equal(i==(int)stackPanel.Orientation, stackPanel.CanScroll((Orientation)i));
         }
 
         /// <summary>
         /// Test for <see cref="StackPanel.Extent"/>
         /// </summary>
-        [Theory, InlineData(Orientation.Horizontal), InlineData(Orientation.Vertical), InlineData(Orientation.InDepth)]
+        [Theory, InlineData(Orientation.Horizontal), InlineData(Orientation.Vertical)]
         public void TestExtent(Orientation direction)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, Orientation = direction };
 
-            Assert.Equal(Vector3.Zero, stackPanel.Extent);
+            Assert.Equal(Vector2.Zero, stackPanel.Extent);
 
             var child1 = new StackPanel { Size = childSize1 };
             var child2 = new StackPanel { Size = childSize2 };
@@ -321,7 +302,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             var exactReferenceExtent = stackSize;
             exactReferenceExtent[(int)direction] = 0;
@@ -333,7 +314,7 @@ namespace Xenko.UI.Tests.Layering
             // with virtualized items.
             stackPanel.ItemVirtualizationEnabled = true;
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             var childCount = 0;
             var approximatedSize = 0f;
@@ -354,15 +335,15 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestOffset()
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
-            var childSize4 = new Vector3(350, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
+            var childSize4 = new Vector2(350, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, Orientation = Orientation.Horizontal };
 
-            Assert.Equal(Vector3.Zero, stackPanel.Offset);
+            Assert.Equal(Vector2.Zero, stackPanel.Offset);
 
             var child1 = new StackPanel { Size = childSize1 };
             var child2 = new StackPanel { Size = childSize2 };
@@ -374,21 +355,21 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child3);
             stackPanel.Children.Add(child4);
 
-            var refenceOffset = Vector3.Zero;
+            var refenceOffset = Vector2.Zero;
 
             // non virtualized children
             stackPanel.ScrolllToElement(1);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             refenceOffset[0] -= childSize1.X;
             Assert.Equal(refenceOffset, stackPanel.Offset);
 
             stackPanel.ScrolllToElement(2.5f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             refenceOffset[0] -= childSize2.X + childSize3.X / 2;
             Assert.Equal(refenceOffset, stackPanel.Offset);
 
             stackPanel.ScrollToEnd(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             refenceOffset[0] = -childSize1.X - childSize2.X - childSize3.X - childSize4.X + stackPanel.Size.X;
             Assert.True((refenceOffset-stackPanel.Offset).Length() < 0.001);
 
@@ -396,21 +377,21 @@ namespace Xenko.UI.Tests.Layering
             refenceOffset[0] = 0;
             stackPanel.ScrolllToElement(0);
             stackPanel.ItemVirtualizationEnabled = true;
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(refenceOffset, stackPanel.Offset);
 
             refenceOffset[0] = 0;
             stackPanel.ScrolllToElement(1);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(refenceOffset, stackPanel.Offset);
 
             refenceOffset[0] = -childSize3.X / 2;
             stackPanel.ScrolllToElement(2.5f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(refenceOffset, stackPanel.Offset);
 
             stackPanel.ScrollToEnd(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             refenceOffset[0] = -childSize4.X + stackPanel.Size.X;
             Assert.True((refenceOffset-stackPanel.Offset).Length() < 0.001);
         }
@@ -421,11 +402,11 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollPosition(bool virtualizeChildren)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
-            var childSize4 = new Vector3(350, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
+            var childSize4 = new Vector2(350, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, Orientation = Orientation.Horizontal, ItemVirtualizationEnabled = virtualizeChildren};
 
@@ -443,27 +424,27 @@ namespace Xenko.UI.Tests.Layering
 
             float referencePosition = 0;
             stackPanel.ScrolllToElement(referencePosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(referencePosition, stackPanel.ScrollPosition);
 
             referencePosition = 1;
             stackPanel.ScrolllToElement(referencePosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(referencePosition, stackPanel.ScrollPosition);
 
             referencePosition = 2;
             stackPanel.ScrolllToElement(referencePosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(referencePosition, stackPanel.ScrollPosition);
 
             referencePosition = 2.3f;
             stackPanel.ScrolllToElement(referencePosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(referencePosition, stackPanel.ScrollPosition);
 
             stackPanel.ScrollToEnd(Orientation.Horizontal);
             referencePosition = 3 + (childSize4.X - stackSize.X) / childSize4.X;
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.True(Math.Abs(referencePosition - stackPanel.ScrollPosition) < MathUtil.ZeroTolerance);
         }
 
@@ -474,14 +455,14 @@ namespace Xenko.UI.Tests.Layering
         public void TestViewport(bool virtualizeChildren)
         {
             var random = new Random();
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
-            var childSize4 = new Vector3(350, 250, 350);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
+            var childSize4 = new Vector2(350, 250);
 
-            var stackPanel = new StackPanel { DepthAlignment = DepthAlignment.Stretch, ItemVirtualizationEnabled = virtualizeChildren };
+            var stackPanel = new StackPanel { ItemVirtualizationEnabled = virtualizeChildren };
 
-            Assert.Equal(Vector3.Zero, stackPanel.Viewport);
+            Assert.Equal(Vector2.Zero, stackPanel.Viewport);
 
             var child1 = new StackPanel { Size = childSize1 };
             var child2 = new StackPanel { Size = childSize2 };
@@ -493,24 +474,24 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child3);
             stackPanel.Children.Add(child4);
 
-            var referencePosition = Vector3.Zero;
+            var referencePosition = Vector2.Zero;
             stackPanel.Arrange(referencePosition, false);
             Assert.Equal(referencePosition, stackPanel.Viewport);
 
-            referencePosition = random.NextVector3();
+            referencePosition = random.NextVector2();
             stackPanel.Arrange(referencePosition, false);
             Assert.Equal(referencePosition, stackPanel.Viewport);
 
-            referencePosition = random.NextVector3();
+            referencePosition = random.NextVector2();
             stackPanel.ScrollToEnd(Orientation.Horizontal);
             stackPanel.ScrollToEnd(Orientation.Vertical);
             stackPanel.Children.Remove(child4);
             stackPanel.Arrange(referencePosition, false);
             Assert.Equal(referencePosition, stackPanel.Viewport);
 
-            var stackSize = new Vector3(100, 200, 300);
+            var stackSize = new Vector2(100, 200);
             stackPanel.Size = stackSize;
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(stackSize, stackPanel.Viewport);
         }
 
@@ -520,14 +501,14 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollBarPosition(bool virtualizeChildren)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, ItemVirtualizationEnabled = virtualizeChildren, Orientation = Orientation.Horizontal };
 
-            Assert.Equal(Vector3.Zero, stackPanel.ScrollBarPositions);
+            Assert.Equal(Vector2.Zero, stackPanel.ScrollBarPositions);
 
             var child1 = new StackPanel { Size = childSize1 };
             var child2 = new StackPanel { Size = childSize2 };
@@ -537,19 +518,19 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            var reference = Vector3.Zero;
+            var reference = Vector2.Zero;
             stackPanel.ScrollToBeginning(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(reference, stackPanel.ScrollBarPositions);
             
             reference[0] = 1;
             stackPanel.ScrollToEnd(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(reference, stackPanel.ScrollBarPositions);
 
 
             stackPanel.ScrolllToElement(1);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             if (virtualizeChildren)
             {
                 reference[0] = 1 / (2 + (childSize3.X - stackPanel.Size.X) / childSize3.X);
@@ -567,10 +548,10 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollToNeighborElement(bool virtualizeItems)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, ItemVirtualizationEnabled = virtualizeItems, Orientation = Orientation.Horizontal };
 
@@ -582,7 +563,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // pre-arranged
             stackPanel.ScrollToNextLine(Orientation.Horizontal);
@@ -601,35 +582,35 @@ namespace Xenko.UI.Tests.Layering
 
             // reset scrolling
             stackPanel.ScrollToBeginning(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // post arranged
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToNextLine(Orientation.Horizontal);
             Assert.Equal(0, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(1, stackPanel.ScrollPosition);
 
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToPreviousLine(Orientation.Horizontal);
             Assert.Equal(1, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(0, stackPanel.ScrollPosition);
 
             stackPanel.ScrolllToElement(1.6f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToPreviousLine(Orientation.Horizontal);
             Assert.Equal(1.6f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(1, stackPanel.ScrollPosition);
 
             stackPanel.ScrolllToElement(1.6f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToNextLine(Orientation.Horizontal);
             Assert.Equal(1.6f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Assert.Equal(2, stackPanel.ScrollPosition);
         }
 
@@ -639,10 +620,10 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollToNeighborScreen(bool virtualizeItems)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, ItemVirtualizationEnabled = virtualizeItems, Orientation = Orientation.Horizontal };
 
@@ -654,7 +635,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // pre-arranged
             stackPanel.ScrollToNextPage(Orientation.Horizontal);
@@ -673,35 +654,35 @@ namespace Xenko.UI.Tests.Layering
 
             // reset scrolling
             stackPanel.ScrollToBeginning(Orientation.Horizontal);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // post arranged
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToNextPage(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(0, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(1 + 1 / 3f, stackPanel.ScrollPosition);
 
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToPreviousPage(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(1 + 1 / 3f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(0, stackPanel.ScrollPosition);
 
             stackPanel.ScrolllToElement(1 + 2 / 3f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToPreviousPage(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(1 + 2 / 3f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(1, stackPanel.ScrollPosition);
 
             stackPanel.ScrolllToElement(1 + 2 / 3f);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToNextPage(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(1 + 2 / 3f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(2.2f, stackPanel.ScrollPosition);
         }
 
@@ -711,10 +692,10 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollToExtrema(bool virtualizeItems)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, ItemVirtualizationEnabled = virtualizeItems, Orientation = Orientation.Horizontal };
 
@@ -726,7 +707,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // pre-arranged
             stackPanel.ScrollToEnd(Orientation.Horizontal);
@@ -739,26 +720,26 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToEnd(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(0, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(2 + 3 / 5f, stackPanel.ScrollPosition);
 
             stackPanel.InvalidateArrange();
             stackPanel.ScrollToBeginning(Orientation.Horizontal);
             Utilities.AssertAreNearlyEqual(2 + 3 / 5f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(0, stackPanel.ScrollPosition);
         }
 
         /// <summary>
-        /// Test for the <see cref="StackPanel.ScrollOf(Xenko.Core.Mathematics.Vector3)"/>
+        /// Test for the <see cref="StackPanel.ScrollOf(Xenko.Core.Mathematics.Vector2)"/>
         /// </summary>
         [Theory, InlineData(false), InlineData(true)]
         public void TestScrollOf(bool virtualizeItems)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel
             {
@@ -776,7 +757,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // pre-arranged
             stackPanel.ScrollOf(childSize1);
@@ -789,13 +770,13 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.InvalidateArrange();
             stackPanel.ScrollOf(childSize1);
             Utilities.AssertAreNearlyEqual(1 + 1 / 3f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(1 + 2 / 3f, stackPanel.ScrollPosition);
 
             stackPanel.InvalidateArrange();
             stackPanel.ScrollOf(- 2 *childSize1);
             Utilities.AssertAreNearlyEqual(1 + 2 / 3f, stackPanel.ScrollPosition);
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
             Utilities.AssertAreNearlyEqual(1, stackPanel.ScrollPosition);
         }
 
@@ -805,10 +786,10 @@ namespace Xenko.UI.Tests.Layering
         [Theory, InlineData(false), InlineData(true)]
         public void TestSurroudingAnchor(bool virtualizeItems)
         {
-            var stackSize = new Vector3(100, 200, 300);
-            var childSize1 = new Vector3(50, 150, 250);
-            var childSize2 = new Vector3(150, 250, 350);
-            var childSize3 = new Vector3(250, 250, 350);
+            var stackSize = new Vector2(100, 200);
+            var childSize1 = new Vector2(50, 150);
+            var childSize2 = new Vector2(150, 250);
+            var childSize3 = new Vector2(250, 250);
 
             var stackPanel = new StackPanel { Size = stackSize, ItemVirtualizationEnabled = virtualizeItems, Orientation = Orientation.Horizontal };
 
@@ -820,7 +801,7 @@ namespace Xenko.UI.Tests.Layering
             stackPanel.Children.Add(child2);
             stackPanel.Children.Add(child3);
 
-            stackPanel.Arrange(Vector3.Zero, false);
+            stackPanel.Arrange(Vector2.Zero, false);
 
             // checks in the scrolling direction
 
@@ -844,10 +825,6 @@ namespace Xenko.UI.Tests.Layering
             Assert.Equal(new Vector2(0, 200), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, -1));
             Assert.Equal(new Vector2(-100, 100), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, 100));
             Assert.Equal(new Vector2(-200, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.Vertical, 500));
-
-            Assert.Equal(new Vector2(0, 300), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, -1));
-            Assert.Equal(new Vector2(-150, 150), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 150));
-            Assert.Equal(new Vector2(-300, 0), stackPanel.GetSurroudingAnchorDistances(Orientation.InDepth, 500));
         }
 
         /// <summary>
@@ -856,7 +833,7 @@ namespace Xenko.UI.Tests.Layering
         [Fact]
         public void TestItemVirtualizedMeasure()
         {
-            var measureSize = new Vector3(100, 200, 300);
+            var measureSize = new Vector2(100, 200);
 
             var stackPanel = new StackPanel { ItemVirtualizationEnabled = true, Orientation = Orientation.Vertical };
             stackPanel.Children.Add(new UniformGrid { Width = 10, Height = 40 });
@@ -865,7 +842,7 @@ namespace Xenko.UI.Tests.Layering
             
             stackPanel.Measure(measureSize);
 
-            Assert.Equal(new Vector3(30, 90, 0), stackPanel.DesiredSizeWithMargins);
+            Assert.Equal(new Vector2(30, 90), stackPanel.DesiredSizeWithMargins);
         }
     }
 }
