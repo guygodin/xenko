@@ -73,13 +73,14 @@ namespace Xenko.UI.Controls
         private float _rubberBandStartOffset;
 
         private ISpriteProvider _refreshImage;
+        private Vector3 _refreshImageTextureOffset;
         private Thickness _refreshImageMargin = new Thickness(3);
         private AnimatedImageElement _refreshElement;
         private Border _refreshBkgdElement;
         private Color _refreshBkgdColor = new Color(16, 16, 16);
         private float _refreshShowOffsetRequired;
         private float _refreshFrameDistanceRatio;
-        private bool _refreshEnabled = true;
+        private bool _isRefreshEnabled = true;
         private bool _isRefreshing;
         private bool _refreshingInitiated;
         private bool _refreshElementFixedAtTop;
@@ -253,7 +254,7 @@ namespace Xenko.UI.Controls
         [DataMember]
         [Display(category: BehaviorCategory)]
         [DefaultValue(true)]
-        public bool RubberBandEnabled { get; set; } = true;
+        public bool IsRubberBandEnabled { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the scrolling behavior on touches. True to allow the user to scroll by touching, false to forbid it.
@@ -281,12 +282,12 @@ namespace Xenko.UI.Controls
         [DataMember]
         [Display(category: RefreshCategory)]
         [DefaultValue(true)]
-        public bool RefreshEnabled
+        public bool IsRefreshEnabled
         {
-            get { return _refreshEnabled; }
+            get { return _isRefreshEnabled; }
             set
             {
-                _refreshEnabled = value;
+                _isRefreshEnabled = value;
                 if (!value)
                     IsRefreshing = false;
             }
@@ -543,7 +544,7 @@ namespace Xenko.UI.Controls
                         StopCurrentScrolling();
 
                         // raise Refresh event if released and still beyond refreshing offset
-                        if (_refreshingInitiated && _refreshEnabled && !IsRefreshing)
+                        if (_refreshingInitiated && _isRefreshEnabled && !IsRefreshing)
                         {
                             foreach (var index in _scrollModeToDirectionIndices)
                             {
@@ -942,7 +943,7 @@ namespace Xenko.UI.Controls
                     if ((!canScrollContent && isUserScrolling) || aboveLeftLimit || offset < minimumOffset + topOffset)
                     {
                         var newOffset = (aboveLeftLimit || !canScrollContent ? 0f : minimumOffset) + topOffset;
-                        if (RubberBandEnabled && isUserScrolling)
+                        if (IsRubberBandEnabled && isUserScrolling)
                         {
                             _rubberBandEntered = true;
                             _rubberBandStartOffset = newOffset;
@@ -992,7 +993,7 @@ namespace Xenko.UI.Controls
                     if (_rubberBandUpSpace && _refreshElement != null && _refreshElement.CanAnimate && !IsRefreshing)
                     {
                         // so it doesn't clip
-                        bool show = offset >= _refreshShowOffsetRequired && _refreshEnabled;
+                        bool show = offset >= _refreshShowOffsetRequired && _isRefreshEnabled;
                         if (show)
                         {
                             if (!_refreshingInitiated && offset >= RefreshingOffsetRequired)
@@ -1201,7 +1202,7 @@ namespace Xenko.UI.Controls
         {
             if (_refreshElement == null)
             {
-                if (!_refreshEnabled || _refreshImage == null)
+                if (!_isRefreshEnabled || _refreshImage == null)
                     return false;
 
                 _refreshBkgdElement = new Border
@@ -1216,8 +1217,6 @@ namespace Xenko.UI.Controls
                 _refreshElement = new AnimatedImageElement
                 {
                     StretchType = StretchType.None,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Top,
                     Visibility = Visibility.Hidden,
                     IsAnimating = false
                 };
@@ -1238,27 +1237,35 @@ namespace Xenko.UI.Controls
         {
             foreach (var index in _scrollModeToDirectionIndices)
             {
-                var size = _refreshImage.GetSprite().SizeInPixels;
+                // about 100 pixels in a direction for a full rotation of all frames (times a user-controller adjustment factor)
+                _refreshFrameDistanceRatio = _refreshImage.SpritesCount / 100f * RefreshFrameDistanceFactor;
+
+                // the sprite can be larger than the texture because of texture regions, which makes the texture not be centered within the sprite
+                // this is to get accurate centering of the spin image
+                var sprite = _refreshImage.GetSprite();
+                var sizeTexture = sprite.Texture.Size;
+                _refreshImageTextureOffset = new Vector3(sprite.SizeInPixels.X - sizeTexture.Width, sprite.SizeInPixels.Y - sizeTexture.Height, 0f) / 2f;
+
+                _refreshElement.Source = _refreshImage;
+                _refreshElement.Margin = _refreshImageMargin;
+                _refreshElement.HorizontalAlignment = index == 0 ? HorizontalAlignment.Left : HorizontalAlignment.Center;
+                _refreshElement.VerticalAlignment = index == 0 ? VerticalAlignment.Center : VerticalAlignment.Top;
+
+                _refreshElement.Measure(Vector2.Zero);
+                _refreshElement.Arrange(Vector2.Zero, false);
+
                 if (index == 0)
                 {
-                    _refreshShowOffsetRequired = size.X;
-                    _refreshBkgdElement.Width = size.X;
+                    _refreshShowOffsetRequired = _refreshElement.ActualWidth + _refreshElement.MarginInternal.TotalWidth;
+                    _refreshBkgdElement.Width = _refreshShowOffsetRequired;
                     _refreshBkgdElement.Height = ActualHeight;
                 }
                 else
                 {
-                    _refreshShowOffsetRequired = size.Y;
+                    _refreshShowOffsetRequired = _refreshElement.ActualHeight + _refreshElement.MarginInternal.TotalHeight;
                     _refreshBkgdElement.Width = ActualWidth;
-                    _refreshBkgdElement.Height = size.Y;
+                    _refreshBkgdElement.Height = _refreshShowOffsetRequired;
                 }
-
-                // about 100 pixels in a direction for a full rotation of all frames (times a user-controller adjustment factor)
-                _refreshFrameDistanceRatio = _refreshImage.SpritesCount / 100f * RefreshFrameDistanceFactor;
-
-                _refreshElement.Source = _refreshImage;
-                _refreshElement.Margin = _refreshImageMargin;
-                _refreshElement.Measure(Vector2.Zero);
-                _refreshElement.Arrange(Vector2.Zero, false);
 
                 _refreshBkgdElement.Measure(Vector2.Zero);
                 _refreshBkgdElement.Arrange(Vector2.Zero, false);
@@ -1330,20 +1337,20 @@ namespace Xenko.UI.Controls
 
         private void UpdateRefreshElementWorldMatrix(int index)
         {
-            var elemPosition = Vector3.Zero;
+            var elemPosition = _refreshImageTextureOffset;
             if (_refreshElementFixedAtTop)
             {
                 if (index == 0)
-                    elemPosition.Y = ActualWidth / -2f;
+                    elemPosition.Y += ActualWidth / -2f;
                 else
-                    elemPosition.Y = ActualHeight / -2f;
+                    elemPosition.Y += ActualHeight / -2f;
             }
             else
             {
                 if (index == 0)
-                    elemPosition.X = (_actualScrollOffsets.X - (ActualWidth + _refreshShowOffsetRequired)) / 2f;
+                    elemPosition.X += (_actualScrollOffsets.X - (ActualWidth + _refreshShowOffsetRequired)) / 2f;
                 else
-                    elemPosition.Y = (_actualScrollOffsets.Y - (ActualHeight + _refreshShowOffsetRequired)) / 2f;
+                    elemPosition.Y += (_actualScrollOffsets.Y - (ActualHeight + _refreshShowOffsetRequired)) / 2f;
             }
 
             var parentMatrix = WorldMatrix;
@@ -1356,7 +1363,7 @@ namespace Xenko.UI.Controls
         {
             base.OnPreviewTouchDown(args);
 
-            if (!_canScrollContent && !RubberBandEnabled)
+            if (!_canScrollContent && !IsRubberBandEnabled)
                 return;
 
             StopCurrentScrolling();
