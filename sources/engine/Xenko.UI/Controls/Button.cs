@@ -31,8 +31,6 @@ namespace Xenko.UI.Controls
 
             // this breaks the ability to set a Thickness(0) in GameStudio, since it will not deserialize a default Thickness(0), and hence Padding will stay at this value 
             Padding = new Thickness(10, 5, 10, 7);
-
-            MouseOverStateChanged += (sender, args) => InvalidateButtonImage();
         }
 
         /// <inheritdoc/>
@@ -45,7 +43,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 base.IsPressed = value;
-                InvalidateMeasure();
+                InvalidateButtonImage();
             }
         }
 
@@ -123,7 +121,7 @@ namespace Xenko.UI.Controls
             set
             {
                 imageStretchType = value;
-                InvalidateMeasure();
+                InvalidateButtonImage();
             }
         }
 
@@ -141,7 +139,7 @@ namespace Xenko.UI.Controls
             set
             {
                 imageStretchDirection = value;
-                InvalidateMeasure();
+                InvalidateButtonImage();
             }
         }
 
@@ -165,9 +163,36 @@ namespace Xenko.UI.Controls
             }
         }
 
-        internal ISpriteProvider ButtonImageProvider => IsEnabled ? (IsPressed ? PressedImage : (MouseOverState == MouseOverState.MouseOverElement && MouseOverImage != null ? MouseOverImage : NotPressedImage)) : NotPressedImage;
+        internal ISpriteProvider ButtonImageProvider
+        {
+            get
+            {
+                if (IsEnabled)
+                {
+                    if (IsPressed && PressedImage != null)
+                        return PressedImage;
+                    else if (MouseOverState == MouseOverState.MouseOverElement && MouseOverImage != null)
+                        return MouseOverImage;
+                }
+                return NotPressedImage;
+            }
+        }
 
-        internal Sprite ButtonImage => ButtonImageProvider?.GetSprite();
+        internal Sprite ButtonImage
+        {
+            get { return ButtonImageProvider?.GetSprite(); }
+        }
+
+        protected override void OnMouseOverStateChanged(MouseOverState oldValue, MouseOverState newValue)
+        {
+            base.OnMouseOverStateChanged(oldValue, newValue);
+            InvalidateButtonImage();
+
+            if (IsEnabled && !IsPressed && (oldValue == MouseOverState.MouseOverElement || newValue == MouseOverState.MouseOverElement))
+            {
+                IsDirty = true;
+            }
+        }
 
         /// <inheritdoc/>
         protected override Vector2 ArrangeOverride(ref Vector2 finalSizeWithoutMargins)

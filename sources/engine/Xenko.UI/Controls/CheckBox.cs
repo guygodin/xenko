@@ -143,5 +143,15 @@ namespace Xenko.UI.Controls
                 OnToggleImageInvalidated();
             }
         }
+
+        protected override void OnMouseOverStateChanged(MouseOverState oldValue, MouseOverState newValue)
+        {
+            base.OnMouseOverStateChanged(oldValue, newValue);
+
+            if (IsEnabled && !IsPressed && (oldValue == MouseOverState.MouseOverNone || newValue == MouseOverState.MouseOverNone))
+            {
+                IsDirty = true;
+            }
+        }
     }
 }

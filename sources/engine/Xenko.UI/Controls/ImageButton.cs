@@ -18,8 +18,12 @@ namespace Xenko.UI.Controls
         {
             Padding = new Thickness(0);
             base.Content = contentImageElement;
+        }
 
-            MouseOverStateChanged += (sender, args) => UpdateContentImage();
+        protected override void OnMouseOverStateChanged(MouseOverState oldValue, MouseOverState newValue)
+        {
+            base.OnMouseOverStateChanged(oldValue, newValue);
+            UpdateContentImage();
         }
 
         protected override void OnAspectImageInvalidated()
