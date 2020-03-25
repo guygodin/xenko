@@ -39,7 +39,9 @@ namespace Xenko.UI.Renderers
             {
                 var imageAxis = (int)image.Orientation;
                 var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
-                var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, (axis & imageAxis) == 1);
+                var shouldRotate180Degrees = (axis & imageAxis) == 1;
+
+                var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
 
                 Batch.DrawImage(image.Texture, ref worldMatrix, ref image.RegionInternal, ref slider.RenderSizeInternal, ref image.BordersInternal, ref color, context.DepthBias, imageOrientation);
                 context.DepthBias += 1;
@@ -62,9 +64,18 @@ namespace Xenko.UI.Renderers
                 var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
                 var halfSizeLeft = (slider.RenderSizeInternal[axis] - size[axis]) / 2;
                 var worldTranslation = GetAdjustedTranslation(isGaugeReverted ? halfSizeLeft - trackOffsets.Y : trackOffsets.X - halfSizeLeft, shouldRotate180Degrees);
-                worldMatrix.M41 += worldTranslation * worldMatrix[(axis << 2) + 0];
-                worldMatrix.M42 += worldTranslation * worldMatrix[(axis << 2) + 1];
-                worldMatrix.M43 += worldTranslation * worldMatrix[(axis << 2) + 2];
+                if (axis == 0)
+                {
+                    worldMatrix.M41 += worldTranslation * worldMatrix.M11;
+                    worldMatrix.M42 += worldTranslation * worldMatrix.M12;
+                    worldMatrix.M43 += worldTranslation * worldMatrix.M13;
+                }
+                else
+                {
+                    worldMatrix.M41 += worldTranslation * worldMatrix.M21;
+                    worldMatrix.M42 += worldTranslation * worldMatrix.M22;
+                    worldMatrix.M43 += worldTranslation * worldMatrix.M23;
+                }
 
                 var borders = image.BordersInternal;
                 var borderStartIndex = (imageAxis) + (slider.IsDirectionReversed? 2 : 0);
@@ -89,40 +100,43 @@ namespace Xenko.UI.Renderers
             }
 
             // draws the ticks
-            image = slider.TickImage?.GetSprite();
-            if (slider.AreTicksDisplayed && image?.Texture != null)
+            if (slider.AreTicksDisplayed)
             {
-                var imageAxis = (int)image.Orientation;
-                var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
-                var shouldRotate180Degrees = (axis & imageAxis) == 1;
-
-                var size = new Vector3();
-                size[axis] = image.SizeInPixels.X;
-                size[axisPrime] = image.SizeInPixels.Y;
-                if (trackIdealSize.HasValue)
-                    size[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
-
-                var startOffset = new Vector2(GetAdjustedTranslation(slider.TickOffset, shouldRotate180Degrees));
-                startOffset[axis] = GetAdjustedTranslation(- fullGaugeSize / 2, shouldRotate180Degrees);
-                if (trackIdealSize.HasValue)
-                    startOffset[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
-                
-                var stepOffset = GetAdjustedTranslation(fullGaugeSize / slider.TickFrequency, shouldRotate180Degrees);
-
-                var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
-                worldMatrix.M41 += startOffset[axis] * worldMatrix[(axis << 2) + 0] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 0];
-                worldMatrix.M42 += startOffset[axis] * worldMatrix[(axis << 2) + 1] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 1];
-                worldMatrix.M43 += startOffset[axis] * worldMatrix[(axis << 2) + 2] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 2];
-                
-                for (var i = 0; i < slider.TickFrequency + 1; i++)
+                image = slider.TickImage?.GetSprite();
+                if (image?.Texture != null)
                 {
-                    Batch.DrawImage(image.Texture, ref worldMatrix, ref image.RegionInternal, ref size, ref image.BordersInternal, ref color, context.DepthBias, imageOrientation, SwizzleMode.None, true);
+                    var imageAxis = (int)image.Orientation;
+                    var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
+                    var shouldRotate180Degrees = (axis & imageAxis) == 1;
 
-                    worldMatrix.M41 += stepOffset * worldMatrix[(axis << 2) + 0];
-                    worldMatrix.M42 += stepOffset * worldMatrix[(axis << 2) + 1];
-                    worldMatrix.M43 += stepOffset * worldMatrix[(axis << 2) + 2];
+                    var size = new Vector3();
+                    size[axis] = image.SizeInPixels.X;
+                    size[axisPrime] = image.SizeInPixels.Y;
+                    if (trackIdealSize.HasValue)
+                        size[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
+
+                    var startOffset = new Vector2(GetAdjustedTranslation(slider.TickOffset, shouldRotate180Degrees));
+                    startOffset[axis] = GetAdjustedTranslation(-fullGaugeSize / 2, shouldRotate180Degrees);
+                    if (trackIdealSize.HasValue)
+                        startOffset[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
+
+                    var stepOffset = GetAdjustedTranslation(fullGaugeSize / slider.TickFrequency, shouldRotate180Degrees);
+
+                    var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
+                    worldMatrix.M41 += startOffset[axis] * worldMatrix[(axis << 2) + 0] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 0];
+                    worldMatrix.M42 += startOffset[axis] * worldMatrix[(axis << 2) + 1] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 1];
+                    worldMatrix.M43 += startOffset[axis] * worldMatrix[(axis << 2) + 2] + startOffset[axisPrime] * worldMatrix[(axisPrime << 2) + 2];
+
+                    for (var i = 0; i < slider.TickFrequency + 1; i++)
+                    {
+                        Batch.DrawImage(image.Texture, ref worldMatrix, ref image.RegionInternal, ref size, ref image.BordersInternal, ref color, context.DepthBias, imageOrientation, SwizzleMode.None, true);
+
+                        worldMatrix.M41 += stepOffset * worldMatrix[(axis << 2) + 0];
+                        worldMatrix.M42 += stepOffset * worldMatrix[(axis << 2) + 1];
+                        worldMatrix.M43 += stepOffset * worldMatrix[(axis << 2) + 2];
+                    }
+                    context.DepthBias += 1;
                 }
-                context.DepthBias += 1;
             }
 
             //draws the thumb
@@ -142,9 +156,20 @@ namespace Xenko.UI.Renderers
                 var revertedRatio = isGaugeReverted ? 1 - sliderRatio : sliderRatio;
                 var offset = GetAdjustedTranslation((revertedRatio - 0.5f) * fullGaugeSize, shouldRotate180Degrees);
                 var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
-                worldMatrix.M41 += offset * worldMatrix[(axis << 2) + 0];
-                worldMatrix.M42 += offset * worldMatrix[(axis << 2) + 1];
-                worldMatrix.M43 += offset * worldMatrix[(axis << 2) + 2];
+                if (axis == 0)
+                {
+                    // * right
+                    worldMatrix.M41 += offset * worldMatrix.M11;
+                    worldMatrix.M42 += offset * worldMatrix.M12;
+                    worldMatrix.M43 += offset * worldMatrix.M13;
+                }
+                else
+                {
+                    // * up
+                    worldMatrix.M41 += offset * worldMatrix.M21;
+                    worldMatrix.M42 += offset * worldMatrix.M22;
+                    worldMatrix.M43 += offset * worldMatrix.M23;
+                }
 
                 Batch.DrawImage(image.Texture, ref worldMatrix, ref image.RegionInternal, ref size, ref image.BordersInternal, ref color, context.DepthBias, imageOrientation);
 

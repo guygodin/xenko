@@ -71,7 +71,10 @@ namespace Xenko.UI.Controls
                     this.value = CalculateClosestTick(this.value);
 
                 if (Math.Abs(oldValue - this.value) > MathUtil.ZeroTolerance)
+                {
                     RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+                    IsDirty = true;
+                }
             }
         }
 
@@ -202,7 +205,7 @@ namespace Xenko.UI.Controls
         [DataMember]
         [Display(category: AppearanceCategory)]
         [DefaultValue(false)]
-        public bool AreTicksDisplayed { get; set; } = false;
+        public bool AreTicksDisplayed { get; set; }
 
         /// <summary>
         /// Gets or sets the frequency of the ticks on the slider track.
@@ -269,7 +272,7 @@ namespace Xenko.UI.Controls
         [DataMember]
         [Display(category: BehaviorCategory)]
         [DefaultValue(false)]
-        public bool IsDirectionReversed { get; set; } = false;
+        public bool IsDirectionReversed { get; set; }
 
         /// <summary>
         /// Gets or sets the orientation of the slider.
@@ -344,10 +347,11 @@ namespace Xenko.UI.Controls
                 return base.MeasureOverride(ref availableSizeWithoutMargins);
 
             var idealSize = trackBackgroundSprite.SizeInPixels.Y;
-            var desiredSize = new Vector2(idealSize)
-            {
-                [(int)Orientation] = availableSizeWithoutMargins[(int)Orientation]
-            };
+            Vector2 desiredSize;
+            if (Orientation == Orientation.Horizontal)
+                desiredSize = new Vector2(availableSizeWithoutMargins.X, idealSize);
+            else
+                desiredSize = new Vector2(idealSize, availableSizeWithoutMargins.Y);
 
             return desiredSize;
         }
@@ -475,6 +479,17 @@ namespace Xenko.UI.Controls
             {
                 trackBackgroundSprite.SizeChanged += InvalidateMeasure;
                 trackBackgroundSprite.BorderChanged += InvalidateMeasure;
+            }
+        }
+
+        protected override void OnMouseOverStateChanged(MouseOverState oldValue, MouseOverState newValue)
+        {
+            base.OnMouseOverStateChanged(oldValue, newValue);
+
+            if (oldValue == MouseOverState.MouseOverElement || newValue == MouseOverState.MouseOverElement)
+            {
+                // update thumb image
+                IsDirty = true;
             }
         }
     }
