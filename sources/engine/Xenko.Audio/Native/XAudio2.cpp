@@ -1591,9 +1591,10 @@ extern "C" {
 			void __stdcall OnVoiceError(void* context, HRESULT error) override;
 		};
 
-		DLL_EXPORT_API xnAudioSource* xnAudioSourceCreate(xnAudioListener* listener, int sampleRate, int maxNBuffers, npBool mono, npBool spatialized, npBool streamed, npBool hrtf, float directionFactor, HrtfEnvironment environment)
+		DLL_EXPORT_API xnAudioSource* xnAudioSourceCreate(xnAudioListener* listener, int sampleRate, int maxNBuffers, npBool mono, npBool spatialized, npBool streamed, npBool canRateChange, npBool hrtf, float directionFactor, HrtfEnvironment environment)
 		{
 			(void)streamed;
+			(void)canRateChange;
 
 			auto res = new xnAudioSource;
 			res->hrtf_params_ = NULL;

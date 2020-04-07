@@ -50,7 +50,7 @@ namespace Xenko.Audio
             if (engine.State == AudioEngineState.Invalidated)
                 return;
 
-            Source = AudioLayer.SourceCreate(listener.Listener, sampleRate, dynamicSoundSource.MaxNumberOfBuffers, mono, spatialized, true, useHrtf, directionalFactor, environment);
+            Source = AudioLayer.SourceCreate(listener.Listener, sampleRate, dynamicSoundSource.MaxNumberOfBuffers, mono, spatialized, true, false, useHrtf, directionalFactor, environment);
             if (Source.Ptr == IntPtr.Zero)
             {
                 throw new Exception("Failed to create an AudioLayer Source");
@@ -73,7 +73,7 @@ namespace Xenko.Audio
             if (engine.State == AudioEngineState.Invalidated)
                 return;
 
-            Source = AudioLayer.SourceCreate(listener.Listener, staticSound.SampleRate, streamed ? CompressedSoundSource.NumberOfBuffers : 1, staticSound.Channels == 1, spatialized, streamed, useHrtf, directionalFactor, environment);
+            Source = AudioLayer.SourceCreate(listener.Listener, staticSound.SampleRate, streamed ? CompressedSoundSource.NumberOfBuffers : 1, staticSound.Channels == 1, spatialized, streamed, false, useHrtf, directionalFactor, environment);
             if (Source.Ptr == IntPtr.Zero)
             {
                 throw new Exception("Failed to create an AudioLayer Source");

@@ -280,7 +280,7 @@ extern "C" {
 					auto playedBuffer = source->streamBuffers.front();
 					source->streamBuffers.erase(source->streamBuffers.begin());
 
-					if(playedBuffer->type == EndOfStream)
+					if (playedBuffer->type == EndOfStream)
 					{
 						if (!source->looped)
 						{
@@ -294,7 +294,7 @@ extern "C" {
 							source->streamBuffers.clear();
 						}
 					}
-					else if(playedBuffer->type == EndOfLoop)
+					else if (playedBuffer->type == EndOfLoop)
 					{
 						SLmillisecond ms;
 						(*source->player)->GetPosition(source->player, &ms);
@@ -305,8 +305,8 @@ extern "C" {
 
 					source->freeBuffers.push_back(playedBuffer);
 				}
-				
-				source->buffersLock.Unlock();				
+
+				source->buffersLock.Unlock();
 			}
 		}
 
@@ -318,7 +318,7 @@ extern "C" {
 			//auto source = static_cast<xnAudioSource*>(pContext);
 		}
 
-		xnAudioSource* xnAudioSourceCreate(xnAudioListener* listener, int sampleRate, int maxNBuffers, npBool mono, npBool spatialized, npBool streamed, npBool hrtf, float directionFactor, int environment)
+		xnAudioSource* xnAudioSourceCreate(xnAudioListener* listener, int sampleRate, int maxNBuffers, npBool mono, npBool spatialized, npBool streamed, npBool canRateChange, npBool hrtf, float directionFactor, int environment)
 		{
 			(void)spatialized;
 
@@ -328,7 +328,7 @@ extern "C" {
 			res->sampleRate = sampleRate;
 			res->mono = mono;
 			res->streamed = streamed;
-			res->looped = false;
+			res->looped = false;			
 
 			SLDataFormat_PCM format;
 			format.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
@@ -346,19 +346,23 @@ extern "C" {
 			SLDataSink sink = { &outMix, NULL };
 			const SLInterfaceID ids[3] = { *SL_IID_BUFFERQUEUE_PTR, *SL_IID_VOLUME_PTR, *SL_IID_PLAYBACKRATE_PTR };
 			const SLboolean req[3] = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
-			auto result = (*listener->audioDevice->engine)->CreateAudioPlayer(listener->audioDevice->engine, &res->object, &audioSrc, &sink, 3, ids, req);
-			if (result != SL_RESULT_SUCCESS)
-			{
-				DEBUG_BREAK;
-				delete res;
-				return NULL;
-			}
 
-			res->canRateChange = true;
-			result = (*res->object)->Realize(res->object, SL_BOOLEAN_FALSE);
-			if (result != SL_RESULT_SUCCESS)
+			SLresult result = SL_RESULT_UNKNOWN_ERROR;
+			if (canRateChange)
 			{
-				res->canRateChange = false;
+				result = (*listener->audioDevice->engine)->CreateAudioPlayer(listener->audioDevice->engine, &res->object, &audioSrc, &sink, 3, ids, req);
+				if (result != SL_RESULT_SUCCESS)
+				{
+					DEBUG_BREAK;
+					delete res;
+					return NULL;
+				}
+
+				res->canRateChange = true;
+				result = (*res->object)->Realize(res->object, SL_BOOLEAN_FALSE);
+			}
+			if (result != SL_RESULT_SUCCESS)
+			{				
 				result = (*listener->audioDevice->engine)->CreateAudioPlayer(listener->audioDevice->engine, &res->object, &audioSrc, &sink, 2, ids, req);
 				if (result != SL_RESULT_SUCCESS)
 				{
@@ -366,6 +370,7 @@ extern "C" {
 					delete res;
 					return NULL;
 				}
+				res->canRateChange = false;
 				result = (*res->object)->Realize(res->object, SL_BOOLEAN_FALSE);
 				if (result != SL_RESULT_SUCCESS)
 				{
@@ -571,7 +576,7 @@ extern "C" {
 
 			source->buffersLock.Lock();
 
-			if(!source->freeBuffers.empty())
+			if (!source->freeBuffers.empty())
 			{
 				freeBuffer = source->freeBuffers.back();
 				source->freeBuffers.pop_back();

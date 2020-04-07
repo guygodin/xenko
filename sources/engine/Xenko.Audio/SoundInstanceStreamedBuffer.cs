@@ -43,7 +43,7 @@ namespace Xenko.Audio
 
             //Create the AudioLayer source
             Source = AudioLayer.SourceCreate(listener.Listener, soundStreamedBuffer.SampleRate, streamedSource.MaxNumberOfBuffers, 
-                soundStreamedBuffer.Channels == 1, spatialized, true, useHrtf, directionalFactor, environment);
+                soundStreamedBuffer.Channels == 1, spatialized, true, false, useHrtf, directionalFactor, environment);
 
             if (Source.Ptr == IntPtr.Zero)
                 throw new Exception("Failed to create an AudioLayer Source");
