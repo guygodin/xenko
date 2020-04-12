@@ -15,8 +15,10 @@
 #include "../../../../deps/OpenSLES/OpenSLES.h"
 #include "../../../../deps/OpenSLES/OpenSLES_Android.h"
 #include "../../Xenko.Native/XenkoNative.h"
+#include "ConcurrentQueue.h"
 
-extern "C" {
+extern "C"
+{
 	class SpinLock
 	{
 	public:
@@ -26,8 +28,8 @@ extern "C" {
 		}
 
 		void Lock()
-		{			
-			while(!__sync_bool_compare_and_swap(&mLocked, false, true)) {}
+		{
+			while (!__sync_bool_compare_and_swap(&mLocked, false, true)) {}
 		}
 
 		void Unlock()
@@ -135,9 +137,8 @@ extern "C" {
 			SLVolumeItf volume;
 			SLPlaybackRateItf playRate;
 
-			tinystl::vector<xnAudioBuffer*> streamBuffers;
-			tinystl::vector<xnAudioBuffer*> freeBuffers;
-			SpinLock buffersLock;
+			ConcurrentQueue<xnAudioBuffer*> streamBuffers;
+			ConcurrentQueue<xnAudioBuffer*> freeBuffers;
 		};
 
 #define DEBUG_BREAK debugtrap()
@@ -272,14 +273,10 @@ extern "C" {
 			}
 			else
 			{
-				source->buffersLock.Lock();
-
 				//release the next buffer
-				if (!source->streamBuffers.empty())
+				xnAudioBuffer* playedBuffer = nullptr;
+				if (source->streamBuffers.TryDequeue(playedBuffer))
 				{
-					auto playedBuffer = source->streamBuffers.front();
-					source->streamBuffers.erase(source->streamBuffers.begin());
-
 					if (playedBuffer->type == EndOfStream)
 					{
 						if (!source->looped)
@@ -287,11 +284,11 @@ extern "C" {
 							(*source->player)->SetPlayState(source->player, SL_PLAYSTATE_STOPPED);
 
 							//flush buffers
-							for (auto buffer : source->streamBuffers)
+							xnAudioBuffer* buffer;
+							while (source->streamBuffers.TryDequeue(buffer))
 							{
-								source->freeBuffers.push_back(buffer);
+								source->freeBuffers.Enqueue(buffer);
 							}
-							source->streamBuffers.clear();
 						}
 					}
 					else if (playedBuffer->type == EndOfLoop)
@@ -303,10 +300,8 @@ extern "C" {
 						source->streamPositionDiff = time;
 					}
 
-					source->freeBuffers.push_back(playedBuffer);
+					source->freeBuffers.Enqueue(playedBuffer);
 				}
-
-				source->buffersLock.Unlock();
 			}
 		}
 
@@ -328,7 +323,9 @@ extern "C" {
 			res->sampleRate = sampleRate;
 			res->mono = mono;
 			res->streamed = streamed;
-			res->looped = false;			
+			res->looped = false;
+			res->streamBuffers.SetCapacity(maxNBuffers);
+			res->freeBuffers.SetCapacity(maxNBuffers);
 
 			SLDataFormat_PCM format;
 			format.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
@@ -482,15 +479,18 @@ extern "C" {
 
 		void xnAudioSourceSetRange(xnAudioSource* source, double startTime, double stopTime)
 		{
-			if (source->streamed) return;
+			if (source->streamed)
+				return;
+
+			xnAudioBuffer* first = source->streamBuffers.First();
 
 			//OpenAL is kinda bad and offers only starting offset...
 			//As result we need to rewrite the buffer
 			if (startTime == 0 && stopTime == 0)
 			{
 				//cancel the offsetting
-				source->subLength = source->streamBuffers[0]->dataLength;
-				source->subDataPtr = source->streamBuffers[0]->dataPtr;
+				source->subLength = first->dataLength;
+				source->subDataPtr = first->dataPtr;
 
 				(*source->queue)->Clear(source->queue);
 				(*source->queue)->Enqueue(source->queue, (void*)source->subDataPtr, source->subLength);
@@ -501,18 +501,18 @@ extern "C" {
 				auto sampleStart = int(double(source->sampleRate) * (source->mono ? 1.0 : 2.0) * startTime);
 				auto sampleStop = int(double(source->sampleRate) * (source->mono ? 1.0 : 2.0) * stopTime);
 
-				if (sampleStart > source->streamBuffers[0]->dataLength / sizeof(short))
+				if (sampleStart > first->dataLength / sizeof(short))
 				{
 					return; //the starting position must be less then the total length of the buffer
 				}
 
-				if (sampleStop > source->streamBuffers[0]->dataLength / sizeof(short)) //if the end point is more then the length of the buffer fix the value
+				if (sampleStop > first->dataLength / sizeof(short)) //if the end point is more then the length of the buffer fix the value
 				{
-					sampleStop = source->streamBuffers[0]->dataLength / sizeof(short);
+					sampleStop = first->dataLength / sizeof(short);
 				}
 
 				source->subLength = (sampleStop - sampleStart) * sizeof(short);
-				source->subDataPtr = source->streamBuffers[0]->dataPtr + sampleStart * sizeof(short);
+				source->subDataPtr = first->dataPtr + sampleStart * sizeof(short);
 
 				(*source->queue)->Clear(source->queue);
 				(*source->queue)->Enqueue(source->queue, (void*)source->subDataPtr, source->subLength);
@@ -527,7 +527,8 @@ extern "C" {
 
 		void xnAudioSourceSetPitch(xnAudioSource* source, float pitch)
 		{
-			if (!source->canRateChange) return;
+			if (!source->canRateChange)
+				return;
 
 			source->pitch = pitch;
 
@@ -538,51 +539,37 @@ extern "C" {
 
 		void xnAudioSourceSetBuffer(xnAudioSource* source, xnAudioBuffer* buffer)
 		{
-			if (source->streamed) return;
+			if (source->streamed)
+				return;
 
-			source->buffersLock.Lock();
-
-			source->streamBuffers.clear();
-			source->streamBuffers.push_back(buffer);
+			source->streamBuffers.Clear();
+			source->streamBuffers.Enqueue(buffer);
 			source->subLength = buffer->dataLength;
-			source->subDataPtr = buffer->dataPtr;		
+			source->subDataPtr = buffer->dataPtr;
 
 			(*source->queue)->Enqueue(source->queue, buffer->dataPtr, buffer->dataLength);
-
-			source->buffersLock.Unlock();
 		}
 
 		void xnAudioSourceQueueBuffer(xnAudioSource* source, xnAudioBuffer* buffer, short* pcm, int bufferSize, BufferType type)
 		{
-			if (!source->streamed) return;
+			if (!source->streamed)
+				return;
 
 			buffer->type = type;
 			buffer->dataLength = bufferSize;
 			memcpy(buffer->dataPtr, pcm, bufferSize);
 
-			source->buffersLock.Lock();
-
-			source->streamBuffers.push_back(buffer);
+			source->streamBuffers.Enqueue(buffer);
 			(*source->queue)->Enqueue(source->queue, buffer->dataPtr, buffer->dataLength);
-
-			source->buffersLock.Unlock();
 		}
 
 		xnAudioBuffer* xnAudioSourceGetFreeBuffer(xnAudioSource* source)
 		{
-			if (!source->streamed) return NULL;
+			if (!source->streamed)
+				return nullptr;
 
-			xnAudioBuffer* freeBuffer = NULL;
-
-			source->buffersLock.Lock();
-
-			if (!source->freeBuffers.empty())
-			{
-				freeBuffer = source->freeBuffers.back();
-				source->freeBuffers.pop_back();
-			}
-
-			source->buffersLock.Unlock();
+			xnAudioBuffer* freeBuffer = nullptr;
+			source->freeBuffers.TryDequeue(freeBuffer);
 
 			return freeBuffer;
 		}
@@ -604,16 +591,12 @@ extern "C" {
 
 			if (source->streamed)
 			{
-				source->buffersLock.Lock();
-
 				//flush buffers
-				for (auto buffer : source->streamBuffers)
+				xnAudioBuffer* buffer = nullptr;
+				while (source->streamBuffers.TryDequeue(buffer))
 				{
-					source->freeBuffers.push_back(buffer);
+					source->freeBuffers.Enqueue(buffer);
 				}
-				source->streamBuffers.clear();
-
-				source->buffersLock.Unlock();
 			}
 		}
 

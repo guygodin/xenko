@@ -70,4 +70,7 @@
   <ItemGroup />
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <ItemGroup>
+    <XenkoNativeHFile Remove="Native\ConcurrentQueue.h" />
+  </ItemGroup>
 </Project>
