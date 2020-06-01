@@ -287,6 +287,9 @@ namespace Xenko.Graphics
                     case PixelFormat.ASTC_RGBA_4X4_SRgb:
                         inputFormat = PixelFormat.ASTC_RGBA_4X4;
                         break;
+                    case PixelFormat.ASTC_RGBA_6X6_SRgb:
+                        inputFormat = PixelFormat.ASTC_RGBA_6X6;
+                        break;
                     case PixelFormat.R8G8B8A8_UNorm_SRgb:
                         inputFormat = PixelFormat.R8G8B8A8_UNorm;
                         break;
@@ -662,6 +665,20 @@ namespace Xenko.Graphics
                 case PixelFormat.ASTC_RGBA_4X4_SRgb:
                     internalFormat = (PixelInternalFormat)All.CompressedSrgb8Alpha8Astc4X4Khr;
                     format = (PixelFormatGl)All.CompressedSrgb8Alpha8Astc4X4Khr;
+                    compressed = true;
+                    pixelSize = 2;
+                    type = PixelType.UnsignedByte;
+                    break;
+                case PixelFormat.ASTC_RGBA_6X6:
+                    internalFormat = (PixelInternalFormat)All.CompressedRgbaAstc6X6Khr;
+                    format = (PixelFormatGl)All.CompressedRgbaAstc6X6Khr;
+                    compressed = true;
+                    pixelSize = 2;
+                    type = PixelType.UnsignedByte;
+                    break;
+                case PixelFormat.ASTC_RGBA_6X6_SRgb:
+                    internalFormat = (PixelInternalFormat)All.CompressedSrgb8Alpha8Astc6X6Khr;
+                    format = (PixelFormatGl)All.CompressedSrgb8Alpha8Astc6X6Khr;
                     compressed = true;
                     pixelSize = 2;
                     type = PixelType.UnsignedByte;

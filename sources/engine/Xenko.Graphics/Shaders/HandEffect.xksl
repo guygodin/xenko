@@ -1,0 +1,104 @@
+
+shader HandEffect : ShaderBase
+{
+	// -------------------------------------
+    // Streams
+    // -------------------------------------
+    stage stream float4 Position : POSITION;
+	stage stream float3 Normal : NORMAL;
+	stage stream int2 BlendIndices : BLENDINDICES;
+	stage stream float2 BlendWeights : BLENDWEIGHTS;
+
+    cbuffer PerDraw
+    {
+        stage matrix MatrixTransform;
+        stage matrix View;
+        stage matrix Joints[25];
+    }
+	
+    stage float Opacity = 1.0f;
+	stage float3 SpecularLightDirection = float3(0.0f, 1.0f, 0.0f);
+    [Color]
+	stage float3 SpecularLightColor = float3(0.01f, 0.0075f, 0.006f);
+    [Color]
+	stage float3 AmbientLightColor = float3(0.001f, 0.001f, 0.001f);
+    [Color]
+	stage float3 GlowColor = float3(0.0f, 0.0f, 0.0f);
+
+	stage stream float3 ShadingEye;
+	stage stream float3 ShadingNormal;
+
+	float3 Multiply(float3 v, matrix m)
+	{
+		return float3(m[0].x * v.x + m[1].x * v.y + m[2].x * v.z,
+					  m[0].y * v.x + m[1].y * v.y + m[2].y * v.z,
+					  m[0].z * v.x + m[1].z * v.y + m[2].z * v.z);
+	}
+
+	float3 TransposeMultiply(float3 v, matrix m)
+	{
+		return float3(m[0].x * v.x + m[0].y * v.y + m[0].z * v.z,
+					  m[1].x * v.x + m[1].y * v.y + m[1].z * v.z,
+					  m[2].x * v.x + m[2].y * v.y + m[2].z * v.z);
+	}
+
+    // -------------------------------------
+    // VertexShader
+    // -------------------------------------
+    stage override void VSMain()
+    {
+		float4 localPos1 = mul(streams.Position, Joints[streams.BlendIndices.x]);
+		float4 localPos2 = mul(streams.Position, Joints[streams.BlendIndices.y]);
+		float4 localPos = (localPos1 * streams.BlendWeights.x) + (localPos2 * streams.BlendWeights.y);
+
+		streams.ShadingPosition = mul(localPos, MatrixTransform);
+
+		float3 eye = TransposeMultiply(-View[3].xyz, View);
+		streams.ShadingEye = normalize(eye - mul(streams.Position, MatrixTransform).xyz);
+
+		float3 localNormal1 = Multiply(streams.Normal, Joints[streams.BlendIndices.x]);
+		float3 localNormal2 = Multiply(streams.Normal, Joints[streams.BlendIndices.y]);
+		float3 localNormal = (localNormal1 * streams.BlendWeights.x) + (localNormal2 * streams.BlendWeights.y);
+		
+		streams.ShadingNormal = normalize(Multiply(localNormal, MatrixTransform));
+    }
+
+	float Pow5(float x)
+	{
+		float x2 = x * x;
+		return x2 * x2 * x;
+	}
+
+	float Pow16(float x)
+	{
+		float x2 = x * x;
+		float x4 = x2 * x2;
+		float x8 = x4 * x4;
+		float x16 = x8 * x8;
+		return x16;
+	}
+
+    // -------------------------------------
+    // PixelShader
+    // -------------------------------------
+    stage override void PSMain()
+    {
+        float3 eyeDir = normalize(streams.ShadingEye);
+		float3 normal = normalize(streams.ShadingNormal);
+
+        float nDotL = max(dot(normal, SpecularLightDirection), 0.0);
+		float3 diffuseValue = float3(0.03f, 0.03f, 0.03f) * nDotL;
+
+		float3 h = normalize(SpecularLightDirection + eyeDir);
+		float nDotH = max(dot(normal, h), 0.0f);
+		float3 specularValue = Pow16(nDotH) * SpecularLightColor;
+
+		float vDotN = dot(eyeDir, normal);
+		float fresnel = clamp(Pow5(1.0f - vDotN), 0.0f, 1.0f);
+		float3 fresnelValue = GlowColor * fresnel;
+
+		float4 controllerColor = float4(AmbientLightColor + diffuseValue + specularValue + fresnelValue, 1.0f);
+
+		streams.ColorTarget = controllerColor * Opacity;
+    }
+};

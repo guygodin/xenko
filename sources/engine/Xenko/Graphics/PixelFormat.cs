@@ -564,5 +564,7 @@ namespace Xenko.Graphics
 
         ASTC_RGBA_4X4 = unchecked((int)1130),
         ASTC_RGBA_4X4_SRgb = unchecked((int)1131),
+        ASTC_RGBA_6X6 = unchecked((int)1132),
+        ASTC_RGBA_6X6_SRgb = unchecked((int)1133),
     }
 }

@@ -152,6 +152,8 @@ namespace Xenko.Graphics
                 case PixelFormat.ETC2_RGBA_SRgb:
                 case PixelFormat.ASTC_RGBA_4X4:
                 case PixelFormat.ASTC_RGBA_4X4_SRgb:
+                case PixelFormat.ASTC_RGBA_6X6:
+                case PixelFormat.ASTC_RGBA_6X6_SRgb:
                     return 8;
 
                 case PixelFormat.ETC2_RGB_A1:
@@ -347,6 +349,9 @@ namespace Xenko.Graphics
                 case PixelFormat.ASTC_RGBA_4X4:
                 case PixelFormat.ASTC_RGBA_4X4_SRgb:
                     return Math.Max(1, (height + 3) / 4);
+                case PixelFormat.ASTC_RGBA_6X6:
+                case PixelFormat.ASTC_RGBA_6X6_SRgb:
+                    return Math.Max(1, (height + 5) / 6);
 
                 default:
                     return height;
@@ -610,6 +615,8 @@ namespace Xenko.Graphics
                 PixelFormat.BC7_UNorm_SRgb,
                 PixelFormat.ASTC_RGBA_4X4,
                 PixelFormat.ASTC_RGBA_4X4_SRgb,
+                PixelFormat.ASTC_RGBA_6X6,
+                PixelFormat.ASTC_RGBA_6X6_SRgb,
             }, 8);
 
             // Init compressed formats
@@ -661,6 +668,8 @@ namespace Xenko.Graphics
                     PixelFormat.ATC_RGBA_Interpolated,
                     PixelFormat.ASTC_RGBA_4X4,
                     PixelFormat.ASTC_RGBA_4X4_SRgb,
+                    PixelFormat.ASTC_RGBA_6X6,
+                    PixelFormat.ASTC_RGBA_6X6_SRgb,
                 }, compressedFormats);
 
             // Init srgb formats
@@ -680,6 +689,7 @@ namespace Xenko.Graphics
                     PixelFormat.ETC2_RGBA_SRgb,
                     PixelFormat.ETC2_RGB_SRgb,
                     PixelFormat.ASTC_RGBA_4X4_SRgb,
+                    PixelFormat.ASTC_RGBA_6X6_SRgb,
                 }, srgbFormats);
 
             // Init srgb formats
@@ -763,6 +773,8 @@ namespace Xenko.Graphics
                 { PixelFormat.ETC2_RGB, PixelFormat.ETC2_RGB_SRgb },
                 { PixelFormat.ASTC_RGBA_4X4_SRgb, PixelFormat.ASTC_RGBA_4X4 },
                 { PixelFormat.ASTC_RGBA_4X4, PixelFormat.ASTC_RGBA_4X4_SRgb },
+                { PixelFormat.ASTC_RGBA_6X6_SRgb, PixelFormat.ASTC_RGBA_6X6 },
+                { PixelFormat.ASTC_RGBA_6X6, PixelFormat.ASTC_RGBA_6X6_SRgb },
             };
         }
 

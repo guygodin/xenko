@@ -49,11 +49,7 @@ namespace Xenko.Graphics
                 if ((offset < 0) || ((offset + typeSize) > vertexStride))
                 {
                     throw new ArgumentException("VertexElementOutsideStride");
-                }
-                if ((offset & 3) != 0)
-                {
-                    throw new ArgumentException("VertexElementOffsetNotMultipleFour");
-                }
+                }                
                 for (int k = 0; k < j; k++)
                 {
                     if (elements[j].SemanticName == elements[k].SemanticName && elements[j].SemanticIndex == elements[k].SemanticIndex)

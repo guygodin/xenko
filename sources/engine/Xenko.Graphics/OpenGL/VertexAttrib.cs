@@ -125,10 +125,16 @@ namespace Xenko.Graphics
                     return new ElementFormat(VertexAttribPointerType.Byte, 4);
                 case PixelFormat.R8G8B8A8_UInt:
                     return new ElementFormat(VertexAttribPointerType.UnsignedByte, 4);
+                case PixelFormat.R10G10B10A2_UInt:
+                    return new ElementFormat(VertexAttribPointerType.Int2101010Rev, 1);
                 case PixelFormat.R16G16B16A16_SInt:
                     return new ElementFormat(VertexAttribPointerType.Short, 4);
                 case PixelFormat.R16G16B16A16_UInt:
                     return new ElementFormat(VertexAttribPointerType.UnsignedShort, 4);
+                case PixelFormat.R32G32B32A32_SInt:
+                    return new ElementFormat(VertexAttribPointerType.Int, 4);
+                case PixelFormat.R32G32B32A32_UInt:
+                    return new ElementFormat(VertexAttribPointerType.UnsignedInt, 4);
                 case PixelFormat.R32_Float:
                     return new ElementFormat(VertexAttribPointerType.Float, 1);
                 case PixelFormat.R32G32_Float:
@@ -148,7 +154,9 @@ namespace Xenko.Graphics
                 case PixelFormat.R8G8_SNorm:
                     return new ElementFormat(VertexAttribPointerType.Byte, 2, true);
                 case PixelFormat.R8G8B8A8_SNorm:
-                    return new ElementFormat(VertexAttribPointerType.Byte, 4, true);
+                    return new ElementFormat(VertexAttribPointerType.Byte, 4, true);                
+                case PixelFormat.R10G10B10A2_UNorm:
+                    return new ElementFormat(VertexAttribPointerType.Int2101010Rev, 4, true);
                 case PixelFormat.R16_UNorm:
                     return new ElementFormat(VertexAttribPointerType.UnsignedShort, 1, true);
                 case PixelFormat.R16G16_UNorm:
@@ -160,13 +168,13 @@ namespace Xenko.Graphics
                 case PixelFormat.R16G16_SNorm:
                     return new ElementFormat(VertexAttribPointerType.Short, 2, true);
                 case PixelFormat.R16G16B16A16_SNorm:
-                    return new ElementFormat(VertexAttribPointerType.Short, 4, true);
+                    return new ElementFormat(VertexAttribPointerType.Short, 4, true);                
 #if XENKO_GRAPHICS_API_OPENGLES
                 // HALF_FLOAT for OpenGL ES 2.x (OES extension)
                 case PixelFormat.R16G16B16A16_Float:
-                    return new ElementFormat((VertexAttribPointerType)0x8D61, 4); // HALF_FLOAT_OES
+                    return new ElementFormat((VertexAttribPointerType)0x8D61, 8); // HALF_FLOAT_OES
                 case PixelFormat.R16G16_Float:
-                    return new ElementFormat((VertexAttribPointerType)0x8D61, 2); // HALF_FLOAT_OES
+                    return new ElementFormat((VertexAttribPointerType)0x8D61, 4); // HALF_FLOAT_OES
 #else
                 // HALF_FLOAT for OpenGL and OpenGL ES 3.x (also used for OpenGL ES 2.0 under 3.0 emulator)
                 case PixelFormat.R16G16B16A16_Float:

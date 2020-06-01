@@ -644,6 +644,13 @@ namespace Xenko.Graphics
             return width > 0 ? width : 1;
         }
 
+        public static void CalculateMipSliceSize(PixelFormat format, int width, int height, int mipLevel, out int rowPitch, out int slicePitch)
+        {
+            width = CalculateMipSize(width, mipLevel);
+            height = CalculateMipSize(height, mipLevel);
+            ComputePitch(format, width, height, out rowPitch, out slicePitch, out var widthCount, out var heightCount);
+        }
+
         /// <summary>
         /// Loads an image from the specified pointer.
         /// </summary>
@@ -837,7 +844,9 @@ namespace Xenko.Graphics
             {
                 int minWidth = 1;
                 int minHeight = 1;
-                int bpb = 8;
+                int bpb = 16;
+                int blockWidth = 4;
+                int blockHeight = 4;
 
                 switch (fmt)
                 {
@@ -867,13 +876,15 @@ namespace Xenko.Graphics
                         minHeight = 8;
                         bpb = 4;
                         break;
-                    default:
-                        bpb = 16;
+                    case PixelFormat.ASTC_RGBA_6X6:
+                    case PixelFormat.ASTC_RGBA_6X6_SRgb:
+                        blockWidth = 6;
+                        blockHeight = 6;
                         break;
                 }
 
-                widthCount = Math.Max(1, (Math.Max(minWidth, width) + 3)) / 4;
-                heightCount = Math.Max(1, (Math.Max(minHeight, height) + 3)) / 4;
+                widthCount = Math.Max(1, Math.Max(minWidth, width) + blockWidth - 1) / blockWidth;
+                heightCount = Math.Max(1, Math.Max(minHeight, height) + blockHeight - 1) / blockHeight;
                 rowPitch = widthCount * bpb;
 
                 slicePitch = rowPitch * heightCount;

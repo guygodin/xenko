@@ -166,6 +166,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Update="Shaders\HandEffect.cs">
+      <DependentUpon>HandEffect.xksl</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Update="Shaders\SpriteBatch.cs">
       <DependentUpon>SpriteBatch.xkfx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -335,6 +341,10 @@
     <None Update="Shaders\EmissiveSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\HandEffect.xksl">
+      <Generator>XenkoShaderKeyGenerator</Generator>
+      <LastGenOutput>HandEffect.cs</LastGenOutput>
     </None>
     <None Update="Shaders\LightSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
