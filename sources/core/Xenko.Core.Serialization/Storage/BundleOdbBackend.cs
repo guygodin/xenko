@@ -33,6 +33,7 @@ namespace Xenko.Core.Storage
         /// The default directory where bundle are stored.
         /// </summary>
         private readonly string vfsBundleDirectory;
+        private readonly string vfsRuntimeBundleDirectory;
 
         private readonly Dictionary<ObjectId, ObjectLocation> objects = new Dictionary<ObjectId, ObjectLocation>();
 
@@ -58,13 +59,22 @@ namespace Xenko.Core.Storage
 
         public string BundleDirectory { get { return vfsBundleDirectory; } }
 
-        public BundleOdbBackend(string vfsRootUrl)
+        public BundleOdbBackend(string vfsRootUrl, string vfsRuntimeUrl = "")
         {
-            vfsBundleDirectory = vfsRootUrl + "/bundles/";
+            var bundlesDir = "/bundles/";
+            vfsBundleDirectory = vfsRootUrl + bundlesDir;
 
             if (!VirtualFileSystem.DirectoryExists(vfsBundleDirectory))
                 VirtualFileSystem.CreateDirectory(vfsBundleDirectory);
 
+            if (!string.IsNullOrEmpty(vfsRuntimeUrl))
+            {
+                vfsRuntimeBundleDirectory = vfsRuntimeUrl + bundlesDir;
+
+                if (!VirtualFileSystem.DirectoryExists(vfsRuntimeBundleDirectory))
+                    VirtualFileSystem.CreateDirectory(vfsRuntimeBundleDirectory);
+            }
+            
             BundleResolve += DefaultBundleResolve;
         }
 
@@ -84,8 +94,19 @@ namespace Xenko.Core.Storage
         {
             // Try to find [bundleName].bundle
             var bundleFile = VirtualFileSystem.Combine(vfsBundleDirectory, bundleName + BundleExtension);
-            if (VirtualFileSystem.FileExists(bundleFile))
+            if (!VirtualFileSystem.FileExists(bundleFile))
+            {
+                //Check for it in our runtime directory (for DLC).
+                var runtimeBundle = VirtualFileSystem.Combine(vfsRuntimeBundleDirectory, bundleName + BundleExtension);
+                if (VirtualFileSystem.FileExists(runtimeBundle))
+                {
+                    return Task.FromResult(runtimeBundle);
+                }
+            }
+            else
+            {
                 return Task.FromResult(bundleFile);
+            }   
 
             return Task.FromResult<string>(null);
         }

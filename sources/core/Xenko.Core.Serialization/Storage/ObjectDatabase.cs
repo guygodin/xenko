@@ -57,7 +57,7 @@ namespace Xenko.Core.Storage
 
             ContentIndexMap.WriteableContentIndexMap = backendWrite.ContentIndexMap;
 
-            BundleBackend = new BundleOdbBackend(vfsMainUrl);
+            BundleBackend = new BundleOdbBackend(vfsMainUrl, vfsAdditionalUrl);
 
             // Try to open "default" pack file synchronously
             if (loadDefaultBundle)
