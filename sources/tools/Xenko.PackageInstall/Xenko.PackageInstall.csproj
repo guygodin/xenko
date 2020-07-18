@@ -4,7 +4,6 @@
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\tools\</OutputPath>
     <AssemblyName>packageinstall</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,9 +34,19 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\prerequisites\BuildTools2017\vs_buildtools.exe">
+    <None Include="..\..\prerequisites\BuildTools2019\vs_buildtools.exe">
       <Link>vs_buildtools.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\..\prerequisites\install-prerequisites.exe" Condition="Exists('..\..\prerequisites\install-prerequisites.exe')">
+      <Link>install-prerequisites.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="vs_Setup.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="..\..\targets\Xenko.Core.Sign.targets" />
 </Project>

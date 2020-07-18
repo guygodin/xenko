@@ -1,0 +1,6 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="_XenkoSignExecutable" BeforeTargets="CopyFilesToOutputDirectory">
+    <SignFile Condition="'$(XenkoSignTool)' == 'true' And '$(XenkoProjectType)' != 'Cpp'" CertificateThumbprint="afdef4272babe6f9ce781d44cf8688c1c81cadd6" SigningTarget="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" TimestampUrl="http://timestamp.globalsign.com/scripts/timstamp.dll" />
+    <SignFile Condition="'$(XenkoSignTool)' == 'true' And '$(XenkoProjectType)' == 'Cpp'" CertificateThumbprint="afdef4272babe6f9ce781d44cf8688c1c81cadd6" SigningTarget="$(OutputPath)$(TargetName)$(TargetExt)" TimestampUrl="http://timestamp.globalsign.com/scripts/timstamp.dll" />
+  </Target>
+</Project>

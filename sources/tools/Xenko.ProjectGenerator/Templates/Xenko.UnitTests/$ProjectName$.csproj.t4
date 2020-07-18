@@ -21,7 +21,6 @@ var needSigning = true;
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <AndroidUseLatestPlatformSdk></AndroidUseLatestPlatformSdk>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
-    <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
     <AndroidStoreUncompressedFileExtensions />
     <MandroidI18n />
     <JavaMaximumHeapSize />
@@ -45,7 +44,6 @@ var needSigning = true;
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoPlatform><#= curPlatform #></XenkoPlatform>
     <XenkoBuildProfile>$(XenkoPlatform)</XenkoBuildProfile>
-    <XenkoDir>$(MSBuildThisFileDirectory)<#= Properties.XenkoSdkRelativeDir #></XenkoDir>
     <XenkoAssemblySign><#= needSigning.ToString().ToLowerInvariant() #></XenkoAssemblySign>
     <XenkoGraphicsApi Condition="'$(XenkoGraphicsApi)' == ''"><#= curPlatform.GetDefaultGraphicsPlatform() #></XenkoGraphicsApi>
     <XenkoOutputFolder>Tests\$(XenkoGraphicsApi)\$(AssemblyName)</XenkoOutputFolder>
@@ -84,7 +82,7 @@ var needSigning = true;
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 <# } else { #>
-  <Import Condition="'$(XenkoRuntime)' == ''" Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Condition="'$(XenkoNETRuntime)' == ''" Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 <# } #>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
     Other similar extension points exist, see Microsoft.Common.targets.

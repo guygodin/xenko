@@ -121,7 +121,7 @@ namespace Xenko.Starter
         {
             // Force the format of the window color buffer (avoid conversions)
             // TODO: PDX-364: depth format is currently hard coded (need to investigate how it can be transmitted)
-            var windowColorBufferFormat = Format.Rgba8888;
+            /*var windowColorBufferFormat = Format.Rgba8888;
             
             // Set the main view of the Game
             var context = PlatformAndroid.Context;
@@ -147,7 +147,7 @@ namespace Xenko.Starter
             mainLayout.AddView(GameView);
 
             // Create the Game context
-            GameContext = new GameContextAndroid(GameView, FindViewById<RelativeLayout>(Resource.Id.EditTextLayout));
+            GameContext = new GameContextAndroid(GameView, FindViewById<RelativeLayout>(Resource.Id.EditTextLayout));*/
         }
 
         protected override void OnPause()

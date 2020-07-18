@@ -43,9 +43,9 @@ namespace Xenko.Assets.Presentation.SceneEditor
         /// <inheritdoc/>
         protected override void InitializeCore()
         {
-            perDrawData = ((RootEffectRenderFeature)rootRenderFeature).CreateDrawCBufferOffsetSlot(MaterialFrontBackBlendShaderKeys.ColorFront.Name);
+            perDrawData = ((RootEffectRenderFeature)RootRenderFeature).CreateDrawCBufferOffsetSlot(MaterialFrontBackBlendShaderKeys.ColorFront.Name);
 
-            renderEffectKey = ((RootEffectRenderFeature)rootRenderFeature).RenderEffectKey;
+            renderEffectKey = ((RootEffectRenderFeature)RootRenderFeature).RenderEffectKey;
         }
 
         /// <inheritdoc/>
@@ -60,9 +60,9 @@ namespace Xenko.Assets.Presentation.SceneEditor
                 AlphaBlend = 0.1f * blendValue
             };
 
-            foreach (var renderNode in ((RootEffectRenderFeature)rootRenderFeature).RenderNodes)
+            foreach (var renderNode in ((RootEffectRenderFeature)RootRenderFeature).RenderNodes)
             {
-                var perDrawLayout = renderNode.RenderEffect.Reflection.PerDrawLayout;
+                var perDrawLayout = renderNode.RenderEffect.Reflection?.PerDrawLayout;
                 if (perDrawLayout == null)
                     continue;
 
@@ -81,7 +81,7 @@ namespace Xenko.Assets.Presentation.SceneEditor
             base.ProcessPipelineState(context, renderNodeReference, ref renderNode, renderObject, pipelineState);
 
             // Check if this is a wireframe rendering
-            var perDrawLayout = renderNode.RenderEffect.Reflection.PerDrawLayout;
+            var perDrawLayout = renderNode.RenderEffect.Reflection?.PerDrawLayout;
             if (perDrawLayout == null)
                 return;
 

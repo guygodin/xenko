@@ -11,6 +11,7 @@ using Xenko.Core.Reflection;
 using Xenko.Core.Serialization.Contents;
 using Xenko.Core.VisualStudio;
 using Xenko.Core.Yaml.Serialization;
+using Xenko.Core.Serialization;
 
 namespace Xenko.Core.Assets
 {
@@ -289,6 +290,14 @@ namespace Xenko.Core.Assets
             lock (RegistryLock)
             {
                 var currentType = contentType;
+                if (UrlReferenceHelper.IsGenericUrlReferenceType(currentType))
+                {
+                    currentType = UrlReferenceHelper.GetTargetContentType(currentType);
+                }
+                else if (UrlReferenceHelper.IsUrlReferenceType(contentType))
+                {
+                    return GetPublicTypes().Where(t => IsAssetType(t)).ToList();
+                }
                 List<Type> assetTypes;
                 return ContentToAssetTypes.TryGetValue(currentType, out assetTypes) ? new List<Type>(assetTypes) : new List<Type>();
             }
@@ -542,7 +551,8 @@ namespace Xenko.Core.Assets
                                 {
                                     var packageUpgrader = (PackageUpgrader)Activator.CreateInstance(type);
                                     packageUpgrader.Attribute = packageUpgraderAttribute;
-                                    RegisteredPackageUpgraders[packageUpgraderAttribute.PackageName] = packageUpgrader;
+                                    foreach (var packageName in packageUpgraderAttribute.PackageNames)
+                                        RegisteredPackageUpgraders[packageName] = packageUpgrader;
                                 }
                                 catch (Exception ex)
                                 {

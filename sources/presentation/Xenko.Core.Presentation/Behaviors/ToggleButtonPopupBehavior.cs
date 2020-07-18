@@ -2,7 +2,7 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using Xenko.Core.Annotations;
 
 namespace Xenko.Core.Presentation.Behaviors
@@ -28,8 +28,8 @@ namespace Xenko.Core.Presentation.Behaviors
         {
             if (!mouseDownOccurred)
             {
-                // Discard the event if the mouse down didn't occur on this control.
-                e.Handled = true;
+                // Stop capturing mouse so that a click somewhere else doesn't reopen the popup
+                AssociatedObject.ReleaseMouseCapture();
             }
             mouseDownOccurred = false;
         }

@@ -82,14 +82,16 @@ namespace NShader
             try
             {
                 var remoteCommands = XenkoCommandsProxy.GetProxy();
+                if (remoteCommands == null)
+                    return;
                 var location = new RawSourceSpan()
                 {
                     File = this.Source.GetFilePath(),
                     Column = column + 1,
                     Line = line + 1
                 };
-                var result = remoteCommands.AnalyzeAndGoToDefinition(text, location);
-
+                var projectFile = langService.LocateProject(location.File);
+                var result = langService.AnalyzeAndGoToDefinition(projectFile, text, location);
                 langService.OutputAnalysisAndGotoLocation(result, TextView);
             }
             catch (Exception)

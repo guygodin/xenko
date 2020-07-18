@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using System.Windows.Media;
 using Xenko.Core.Assets.Editor.ViewModel;
 using Xenko.Core.Annotations;
@@ -314,7 +314,7 @@ namespace Xenko.Core.Assets.Editor.View.Behaviors
             }
             object data = null;
             var container = GetContainer(originalSource);
-            var itemsToDrag = GetItemsToDrag(container).Where(x => !(x is IIsEditableViewModel) || ((IIsEditableViewModel)x).IsEditable).ToList();
+            var itemsToDrag = GetItemsToDrag(container).ToList();
             if (itemsToDrag.Count > 0)
             {
                 var dragContainer = new DragContainer(itemsToDrag);

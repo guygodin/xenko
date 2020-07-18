@@ -253,9 +253,9 @@ namespace Xenko.Graphics
             drawInfo.UnitZWorld = worldViewProjection.Row3;
             Vector4.Transform(ref vector4LeftTop, ref worldViewProjection, out drawInfo.LeftTopCornerWorld);
 
-            var elementInfo = new ElementInfo(4, 6, ref drawInfo, depthBias);
+            var elementInfo = new ElementInfo(4, 6, in drawInfo, depthBias);
 
-            Draw(whiteTexture, ref elementInfo);
+            Draw(whiteTexture, in elementInfo);
         }
 
         /// <summary>
@@ -324,9 +324,9 @@ namespace Xenko.Graphics
             drawInfo.UnitZWorld = worldViewProjection.Row3;
             Vector4.Transform(ref vector4LeftTop, ref worldViewProjection, out drawInfo.LeftTopCornerWorld);
 
-            var elementInfo = new ElementInfo(8, 6 * 6, ref drawInfo, depthBias);
+            var elementInfo = new ElementInfo(8, 6 * 6, in drawInfo, depthBias);
 
-            Draw(whiteTexture, ref elementInfo);
+            Draw(whiteTexture, in elementInfo);
         }
 
         /// <summary>
@@ -336,19 +336,19 @@ namespace Xenko.Graphics
         /// <param name="worldMatrix">The world matrix of the element</param>
         /// <param name="sourceRectangle">The rectangle indicating the source region of the texture to use</param>
         /// <param name="elementSize">The size of the ui element</param>
-        /// <param name="borderSize">The size of the borders in the texture in pixels (left/right/top/bottom)</param>
+        /// <param name="borderSize">The size of the borders in the texture in pixels (left/top/right/bottom)</param>
         /// <param name="color">The color to apply to the texture image.</param>
         /// <param name="depthBias">The depth bias of the ui element</param>
         /// <param name="imageOrientation">The rotation to apply on the image uv</param>
         /// <param name="swizzle">Swizzle mode indicating the swizzle use when sampling the texture in the shader</param>
         /// <param name="snapImage">Indicate if the image needs to be snapped or not</param>
-        public void DrawImage(Texture texture, ref Matrix worldMatrix, ref RectangleF sourceRectangle, ref Vector3 elementSize, ref Vector4 borderSize, 
+        public void DrawImage(Texture texture, ref Matrix worldMatrix, ref RectangleF sourceRectangle, ref Vector3 elementSize, ref Vector4 borderSize,
             ref Color color, int depthBias, ImageOrientation imageOrientation = ImageOrientation.AsIs, SwizzleMode swizzle = SwizzleMode.None, bool snapImage = false)
         {
             if (texture == null) throw new ArgumentNullException(nameof(texture));
 
             // Skip items with null size
-            if (elementSize.Length() < MathUtil.ZeroTolerance)
+            if (elementSize.LengthSquared() < MathUtil.ZeroTolerance)
                 return;
 
             // Calculate the information needed to draw.
@@ -356,37 +356,22 @@ namespace Xenko.Graphics
             {
                 Source =
                 {
-                    X = sourceRectangle.X / texture.ViewWidth, 
-                    Y = sourceRectangle.Y / texture.ViewHeight, 
-                    Width = sourceRectangle.Width / texture.ViewWidth, 
+                    X = sourceRectangle.X / texture.ViewWidth,
+                    Y = sourceRectangle.Y / texture.ViewHeight,
+                    Width = sourceRectangle.Width / texture.ViewWidth,
                     Height = sourceRectangle.Height / texture.ViewHeight,
                 },
                 DepthBias = depthBias,
                 ColorScale = color,
-                ColorAdd = new Color(0, 0, 0, 0),
+                ColorAdd = Color.Zero,
                 Swizzle = swizzle,
                 SnapImage = snapImage,
+                Primitive = borderSize == Vector4.Zero ? PrimitiveType.Rectangle : PrimitiveType.BorderRectangle,
+                BorderSize = new Vector4(borderSize.X / sourceRectangle.Width, borderSize.Y / sourceRectangle.Height, borderSize.Z / sourceRectangle.Width, borderSize.W / sourceRectangle.Height),
             };
 
-            int verticesPerElement, indicesPerElement;
-
-            if (borderSize != Vector4.Zero)
-            {
-                drawInfo.Primitive = PrimitiveType.BorderRectangle;
-                verticesPerElement = 16; // 4 rows x 4 columns points
-                indicesPerElement = 54; // 9 quads * 6 indeces/quad
-
-                drawInfo.BorderSize = new Vector4(borderSize.X / sourceRectangle.Width, borderSize.Y / sourceRectangle.Height, borderSize.Z / sourceRectangle.Width, borderSize.W / sourceRectangle.Height);
-
-                var rotatedSize = imageOrientation == ImageOrientation.AsIs ? elementSize : new Vector3(elementSize.Y, elementSize.X, 0);
-                drawInfo.VertexShift = new Vector4(borderSize.X / rotatedSize.X, borderSize.Y / rotatedSize.Y, 1f - borderSize.Z / rotatedSize.X, 1f - borderSize.W / rotatedSize.Y);
-            }
-            else
-            {
-                drawInfo.Primitive = PrimitiveType.Rectangle;
-                verticesPerElement = 4;
-                indicesPerElement = 6;
-            }
+            var rotatedSize = imageOrientation == ImageOrientation.AsIs ? elementSize : new Vector3(elementSize.Y, elementSize.X, 0);
+            drawInfo.VertexShift = new Vector4(borderSize.X / rotatedSize.X, borderSize.Y / rotatedSize.Y, 1f - borderSize.Z / rotatedSize.X, 1f - borderSize.W / rotatedSize.Y);
 
             var matrix = worldMatrix;
             matrix.M11 *= elementSize.X;
@@ -395,18 +380,9 @@ namespace Xenko.Graphics
             matrix.M21 *= elementSize.Y;
             matrix.M22 *= elementSize.Y;
             matrix.M23 *= elementSize.Y;
-            if (elementSize.Z != 0f)
-            {
-                matrix.M31 *= elementSize.Z;
-                matrix.M32 *= elementSize.Z;
-                matrix.M33 *= elementSize.Z;
-            }
-            else
-            {
-                matrix.M31 = 0f;
-                matrix.M32 = 0f;
-                matrix.M33 = 0f;
-            }
+            matrix.M31 *= elementSize.Z;
+            matrix.M32 *= elementSize.Z;
+            matrix.M33 *= elementSize.Z;
 
             Matrix worldViewProjection;
             Matrix.Multiply(ref matrix, ref viewProjectionMatrix, out worldViewProjection);
@@ -424,12 +400,21 @@ namespace Xenko.Graphics
             }
             Vector4.Transform(ref leftTopCorner, ref worldViewProjection, out drawInfo.LeftTopCornerWorld);
 
-            var elementInfo = new ElementInfo(verticesPerElement, indicesPerElement, ref drawInfo, depthBias);
+            var verticesPerElement = 4;
+            var indicesPerElement = 6;
+            if (drawInfo.Primitive == PrimitiveType.BorderRectangle)
+            {
+                verticesPerElement = 16;
+                indicesPerElement = 54;
+            }
 
-            Draw(texture, ref elementInfo);
+            var elementInfo = new ElementInfo(verticesPerElement, indicesPerElement, in drawInfo, depthBias);
+
+            Draw(texture, in elementInfo);
         }
 
-        internal void DrawCharacter(Texture texture, ref Matrix worldViewProjectionMatrix, ref RectangleF sourceRectangle, ref Color color, int depthBias, SwizzleMode swizzle)
+
+        internal void DrawCharacter(Texture texture, in Matrix worldViewProjectionMatrix, in RectangleF sourceRectangle, in Color color, int depthBias, SwizzleMode swizzle)
         {
             if (texture == null) throw new ArgumentNullException(nameof(texture));
 
@@ -454,9 +439,9 @@ namespace Xenko.Graphics
                 LeftTopCornerWorld = worldViewProjectionMatrix.Row4,
             };
 
-            var elementInfo = new ElementInfo(4, 6, ref drawInfo, depthBias);
+            var elementInfo = new ElementInfo(4, 6, in drawInfo, depthBias);
 
-            Draw(texture, ref elementInfo);
+            Draw(texture, in elementInfo);
         }
 
         internal void DrawString(SpriteFont font, string text, ref SpriteFont.InternalUIDrawCommand drawCommand)
@@ -476,19 +461,27 @@ namespace Xenko.Graphics
             // transform the world matrix into the world view project matrix
             Matrix.MultiplyTo(ref worldMatrix, ref viewProjectionMatrix, out drawCommand.Matrix);
 
-            // do not snap static fonts when real/virtual resolution does not match.
             if (font.FontType == SpriteFontType.SDF)
             {
                 drawCommand.SnapText = false;
                 float scaling = drawCommand.RequestedFontSize / font.Size;
                 drawCommand.RealVirtualResolutionRatio = 1 / new Vector2(scaling, scaling);
             }
-            else if ((font.FontType == SpriteFontType.Static)) 
+            if (font.FontType == SpriteFontType.Static)
             {
-                if ((drawCommand.RealVirtualResolutionRatio.X != 1 || drawCommand.RealVirtualResolutionRatio.Y != 1))
-                    drawCommand.SnapText = false;   // we don't want snapping of the resolution of the screen does not match virtual resolution. (character alignment problems)
-
                 drawCommand.RealVirtualResolutionRatio = Vector2.One; // ensure that static font are not scaled internally
+            }
+            if (font.FontType == SpriteFontType.Dynamic || font.FontType == SpriteFontType.Static)
+            {
+                // do not snap static fonts when real/virtual resolution does not match.
+                if (drawCommand.RealVirtualResolutionRatio.X != 1 || drawCommand.RealVirtualResolutionRatio.Y != 1)
+                    drawCommand.SnapText = false;   // we don't want snapping of the resolution of the screen does not match virtual resolution. (character alignment problems)
+            }
+            if (font.FontType == SpriteFontType.Dynamic)
+            {
+                // Dynamic: use virtual resolution (otherwise requested size might change on every camera move, esp. if UI is in 3D)
+                // TODO: some step function to have LOD without regenerating on every small change?
+                drawCommand.RealVirtualResolutionRatio = Vector2.One;
             }
 
             // snap draw start position to prevent characters to be drawn in between two pixels

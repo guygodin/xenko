@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Isam.Esent.Interop;
 using Xenko.Core.Assets;
 using Xenko.Core.Assets.Quantum;
 using Xenko.Core;
@@ -187,8 +186,8 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.ViewModels
                     }
 
                     // FIXME: review if this is fine doing it that way or if we need to do it the same way as when moving elements around
-                    childrenNode.Remove(child, new Index(index));
-                    childrenNode.Add(child, new Index(newIndex));
+                    childrenNode.Remove(child, new NodeIndex(index));
+                    childrenNode.Add(child, new NodeIndex(newIndex));
                     Editor.UndoRedoService.SetName(transaction, $"Move {UIEditorBaseViewModel.GetDisplayName(child)}");
                 }
             }

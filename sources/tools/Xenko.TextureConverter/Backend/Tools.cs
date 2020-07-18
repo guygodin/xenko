@@ -29,7 +29,9 @@ namespace Xenko.TextureConverter
             {
                 int minWidth = 1;
                 int minHeight = 1;
-                int bpb = 8;
+                int bpb = 16;
+                int blockWidth = 4;
+                int blockHeight = 4;
 
                 switch (fmt)
                 {
@@ -42,30 +44,15 @@ namespace Xenko.TextureConverter
                     case PixelFormat.ETC1:
                         bpb = 8;
                         break;
-                    case PixelFormat.PVRTC_4bpp_RGB:
-                    case PixelFormat.PVRTC_4bpp_RGB_SRgb:
-                    case PixelFormat.PVRTC_4bpp_RGBA:
-                    case PixelFormat.PVRTC_4bpp_RGBA_SRgb:
-                    case PixelFormat.PVRTC_II_4bpp:
-                        minWidth = 8;
-                        minHeight = 8;
-                        break;
-                    case PixelFormat.PVRTC_2bpp_RGB:
-                    case PixelFormat.PVRTC_2bpp_RGB_SRgb:
-                    case PixelFormat.PVRTC_2bpp_RGBA:
-                    case PixelFormat.PVRTC_2bpp_RGBA_SRgb:
-                    case PixelFormat.PVRTC_II_2bpp:
-                        minWidth = 16;
-                        minHeight = 8;
-                        bpb = 4;
-                        break;
-                    default:
-                        bpb = 16;
+                    case PixelFormat.ASTC_RGBA_6X6:
+                    case PixelFormat.ASTC_RGBA_6X6_SRgb:
+                        blockWidth = 6;
+                        blockHeight = 6;
                         break;
                 }
 
-                widthCount = Math.Max(1, (Math.Max(minWidth, width) + 3)) / 4;
-                heightCount = Math.Max(1, (Math.Max(minHeight, height) + 3)) / 4;
+                widthCount = Math.Max(1, Math.Max(minWidth, width) + blockWidth - 1) / blockWidth;
+                heightCount = Math.Max(1, Math.Max(minHeight, height) + blockHeight - 1) / blockHeight;
                 rowPitch = widthCount * bpb;
 
                 slicePitch = rowPitch * heightCount;

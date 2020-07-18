@@ -15,6 +15,7 @@ namespace Xenko.Physics
     {
         public CharacterComponent()
         {
+            Orientation = Quaternion.Identity;
             StepHeight = 0.1f;
             ProcessCollisions = true;
         }
@@ -28,8 +29,8 @@ namespace Xenko.Physics
             {
                 throw new InvalidOperationException("Attempted to call a Physics function that is avaliable only when the Entity has been already added to the Scene.");
             }
-
-            KinematicCharacter.Jump(ref jumpDirection);
+            BulletSharp.Math.Vector3 bV3 = jumpDirection;
+            KinematicCharacter.Jump(ref bV3);
         }
 
         /// <summary>
@@ -41,9 +42,7 @@ namespace Xenko.Physics
             {
                 throw new InvalidOperationException("Attempted to call a Physics function that is avaliable only when the Entity has been already added to the Scene.");
             }
-
-            var zeroV = Vector3.Zero; //passing zero will jump on Up Axis
-            KinematicCharacter.Jump(ref zeroV);
+            KinematicCharacter.Jump();
         }
 
         /// <summary>
@@ -80,8 +79,11 @@ namespace Xenko.Physics
             set
             {
                 fallSpeed = value;
-                
-                KinematicCharacter?.SetFallSpeed(value);
+
+                if (KinematicCharacter != null)
+                {
+                    KinematicCharacter.FallSpeed = fallSpeed;
+                }
             }
         }
 
@@ -121,7 +123,7 @@ namespace Xenko.Physics
         /// Gets or sets if this character jump speed
         /// </summary>
         /// <value>
-        /// true, false
+        /// A float representing character jump speed in Xenko world units
         /// </value>
         /// <userdoc>
         /// The speed of the jump
@@ -137,23 +139,27 @@ namespace Xenko.Physics
             {
                 jumpSpeed = value;
 
-                KinematicCharacter?.SetJumpSpeed(value);
+                if (KinematicCharacter != null)
+                {
+                    KinematicCharacter.JumpSpeed = jumpSpeed;
+                }
             }
         }
 
-        private float gravity = -10.0f;
+        private Vector3 gravity = new Vector3(0.0f, -10.0f, 0.0f);
 
         /// <summary>
-        /// Gets or sets if this character gravity
+        /// Gets or sets if this character is affected by any gravity
         /// </summary>
         /// <value>
-        /// true, false
+        /// A Vector3 representing directional gravity in Xenko world units
         /// </value>
         /// <userdoc>
         /// The gravity force applied to this character
         /// </userdoc>
+        [Display("Gravity")]
         [DataMember(95)]
-        public float Gravity
+        public Vector3 Gravity
         {
             get
             {
@@ -165,7 +171,7 @@ namespace Xenko.Physics
 
                 if (KinematicCharacter != null)
                 {
-                    KinematicCharacter.Gravity = new Vector3(0.0f, value, 0.0f);
+                    KinematicCharacter.Gravity = value;
                 }
             }
         }
@@ -176,7 +182,7 @@ namespace Xenko.Physics
         /// <value>
         /// <c>true</c> if this instance is grounded; otherwise, <c>false</c>.
         /// </value>
-        public bool IsGrounded => KinematicCharacter?.OnGround() ?? false;
+        public bool IsGrounded => KinematicCharacter?.OnGround ?? false;
 
         /// <summary>
         /// Teleports the specified target position.
@@ -193,7 +199,8 @@ namespace Xenko.Physics
             var entityPos = Entity.Transform.Position;
             var physPos = PhysicsWorldTransform.TranslationVector;
             var diff = physPos - entityPos;
-            KinematicCharacter.Warp(targetPosition + diff);
+            BulletSharp.Math.Vector3 bV3 = targetPosition + diff;
+            KinematicCharacter.Warp(ref bV3);
         }
 
         /// <summary>
@@ -255,7 +262,8 @@ namespace Xenko.Physics
 
             NativeCollisionObject.ContactProcessingThreshold = !Simulation.CanCcd ? 1e18f : 1e30f;
 
-            KinematicCharacter = new BulletSharp.KinematicCharacterController((BulletSharp.PairCachingGhostObject)NativeCollisionObject, (BulletSharp.ConvexShape)ColliderShape.InternalShape, StepHeight, Vector3.UnitY);
+            BulletSharp.Math.Vector3 unitY = new BulletSharp.Math.Vector3(0f, 1f, 0f);
+            KinematicCharacter = new BulletSharp.KinematicCharacterController((BulletSharp.PairCachingGhostObject)NativeCollisionObject, (BulletSharp.ConvexShape)ColliderShape.InternalShape, StepHeight, ref unitY);
 
             base.OnAttach();
 

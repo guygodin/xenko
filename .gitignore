@@ -43,15 +43,13 @@ bin/
 Bin/
 ipch/
 obj/
+.vs/
 Cache/
 /doc/xenko_doc_output/
-/.vs
-/build/.vs
 /build/Xenko.version
 /build/Xenko.*VC.db
 /tools
 /externals/
-/sources/launcher/
 /sources/tools/Xenko.ShaderKeyGenerator/build/
 /sources/tools/Xenko.ProjectGenerator/build/
 /sources/tools/SLConverter/BuildRelease/Package/SLConverter-*.pdf

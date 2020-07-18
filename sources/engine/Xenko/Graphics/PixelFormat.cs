@@ -531,22 +531,6 @@ namespace Xenko.Graphics
         /// </summary>
         BC7_UNorm_SRgb = unchecked((int)99),
 
-        /// <summary>
-        /// <dd> <p>A block-compression format. For information about block-compression formats, see Texture Block Compression in PowerVC Texture Compression.</p> </dd>
-        /// </summary>
-
-        PVRTC_2bpp_RGB = unchecked((int)1024),
-        PVRTC_2bpp_RGBA = unchecked((int)1025),
-        PVRTC_4bpp_RGB = unchecked((int)1026),
-        PVRTC_4bpp_RGBA = unchecked((int)1027),
-        PVRTC_II_2bpp = unchecked((int)1028),
-        PVRTC_II_4bpp = unchecked((int)1029),
-
-        PVRTC_2bpp_RGB_SRgb = unchecked((int)1030),
-        PVRTC_2bpp_RGBA_SRgb = unchecked((int)1031),
-        PVRTC_4bpp_RGB_SRgb = unchecked((int)1032),
-        PVRTC_4bpp_RGBA_SRgb = unchecked((int)1033),
-
         ETC1 = unchecked((int)1088),
         ETC2_RGB = unchecked((int)1089),
         ETC2_RGBA = unchecked((int)1090),

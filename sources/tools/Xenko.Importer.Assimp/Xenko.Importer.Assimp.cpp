@@ -1168,10 +1168,10 @@ private:
 		{
 			auto lMaterial = scene->mMaterials[i];
 			
-			std::string materialName = "";
 			aiString aiName;
-			if (lMaterial->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS)
-				materialName = std::string(aiName.C_Str());
+			auto materialName = (lMaterial->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS)
+				? std::string(aiName.C_Str())
+				: "Material";
 			baseNames.push_back(materialName);
 		}
 
@@ -1450,6 +1450,19 @@ public:
 			auto scene = Initialize(inputFilename, outputFilename, &importer,
 				aiProcess_SortByPType
 					| aiProcess_RemoveRedundantMaterials);
+
+			// If scene is null, something went wrong inside Assimp
+			if (scene == nullptr)
+			{
+				if (strlen(importer.GetErrorString()) > 0)
+				{
+					// Extract error details from Assimp
+					auto error = gcnew String(importer.GetErrorString());
+					Logger->Error(String::Format("Assimp: {0}", error),
+						CallerInfo::Get(__FILEW__, __FUNCTIONW__, __LINE__));
+				}
+				return nullptr;
+			}
 
 			std::map<aiMaterial*, std::string> materialNames;
 			std::map<aiMesh*, std::string> meshNames;

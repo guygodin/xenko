@@ -384,7 +384,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
         }
 
         [Obsolete]
-        protected virtual void OnAssetPropertyChanged(string propertyName, IGraphNode node, Index index, object oldValue, object newValue)
+        protected virtual void OnAssetPropertyChanged(string propertyName, IGraphNode node, NodeIndex index, object oldValue, object newValue)
         {
             clearArchetypeCommand.IsEnabled = Asset.Archetype != null;
         }
@@ -402,7 +402,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
 
         protected virtual bool ShouldConstructPropertyMember([NotNull] IMemberNode member) => true;
 
-        protected virtual bool ShouldConstructPropertyItem([NotNull] IObjectNode collection, Index index) => true;
+        protected virtual bool ShouldConstructPropertyItem([NotNull] IObjectNode collection, NodeIndex index) => true;
 
         protected virtual bool ShouldListenToTargetNode(IMemberNode member, IGraphNode targetNode) => true;
 
@@ -441,7 +441,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
             if (Session.IsInFixupAssetContext)
                 return;
 
-            var index = (e as ItemChangeEventArgs)?.Index ?? Index.Empty;
+            var index = (e as ItemChangeEventArgs)?.Index ?? NodeIndex.Empty;
             var assetNodeChange = (IAssetNodeChangeEventArgs)e;
             var node = (IAssetNode)e.Node;
             var memberName = (node as IMemberNode)?.Name;
@@ -513,7 +513,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 package.Assets.Remove(AssetItem);
                 package = newPackage;
 
-                var newAssetItem = new AssetItem(newUrl, AssetItem.Asset) { SourceFolder = AssetItem.SourceFolder, SourceProject = AssetItem.SourceProject };
+                var newAssetItem = new AssetItem(newUrl, AssetItem.Asset) { SourceFolder = AssetItem.SourceFolder };
                 AssetItem = newAssetItem;
                 package.Assets.Add(AssetItem);
             }
@@ -628,7 +628,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
         {
             if (CanDerive)
             {
-                var targetDirectory = FindValidCreationLocation(assetItem.Asset.GetType(), directory, Session.CurrentPackage);
+                var targetDirectory = FindValidCreationLocation(assetItem.Asset.GetType(), directory, Session.CurrentProject);
 
                 if (targetDirectory == null)
                     return;
@@ -707,7 +707,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
 
         bool IPropertyProviderViewModel.ShouldConstructMember(IMemberNode member) => ShouldConstructPropertyMember(member);
 
-        bool IPropertyProviderViewModel.ShouldConstructItem(IObjectNode collection, Index index) => ShouldConstructPropertyItem(collection, index);
+        bool IPropertyProviderViewModel.ShouldConstructItem(IObjectNode collection, NodeIndex index) => ShouldConstructPropertyItem(collection, index);
 
         AssetViewModel IAssetPropertyProviderViewModel.RelatedAsset => this;
 

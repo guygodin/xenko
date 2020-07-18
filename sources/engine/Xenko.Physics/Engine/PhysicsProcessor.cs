@@ -44,6 +44,8 @@ namespace Xenko.Physics
 
         internal void RenderColliderShapes(bool enabled)
         {
+            debugShapeRendering.Enabled = enabled;
+
             colliderShapesRendering = enabled;
 
             if (!colliderShapesRendering)
@@ -111,7 +113,7 @@ namespace Xenko.Physics
 
             if (colliderShapesRendering)
             {
-                component.AddDebugEntity(debugScene);
+                component.AddDebugEntity(debugScene, Simulation.ColliderShapesRenderGroup);
             }
 
             elements.Add(component);
@@ -167,8 +169,8 @@ namespace Xenko.Physics
 
             ((IReferencable)physicsSystem).AddReference();
 
-            debugShapeRendering = Services.GetService<PhysicsShapesRenderingService>();
-            if (debugShapeRendering == null)
+            // Check if PhysicsShapesRenderingService is created (and check if rendering is enabled with IGraphicsDeviceService)
+            if (Services.GetService<Graphics.IGraphicsDeviceService>() != null && Services.GetService<PhysicsShapesRenderingService>() == null)
             {
                 debugShapeRendering = new PhysicsShapesRenderingService(Services);
                 var gameSystems = Services.GetSafeServiceAs<IGameSystemCollection>();

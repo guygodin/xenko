@@ -13,13 +13,13 @@ namespace Xenko.Core.VisualStudio
 {
     public class IDEInfo
     {
-        public IDEInfo(string version, string displayName, string installationPath, bool complete = true)
+        public IDEInfo(Version version, string displayName, string installationPath, bool complete = true)
         {
             if (version == null) throw new ArgumentNullException(nameof(version));
 
             Complete = complete;
             DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
-            Version = new Version(version);
+            Version = version;
             InstallationPath = installationPath ?? throw new ArgumentNullException(nameof(installationPath));
         }
 
@@ -79,42 +79,29 @@ namespace Xenko.Core.VisualStudio
     public enum VSIXInstallerVersion
     {
         None,
-        VS2015,
-        VS2017AndFutureVersions,
+        VS2019AndFutureVersions,
     }
 
     public static class VisualStudioVersions
     {
         // ReSharper disable once InconsistentNaming
         private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
-        private static readonly Lazy<List<IDEInfo>> IDEInfos = new Lazy<List<IDEInfo>>(BuildIDEInfos);
+        private static Lazy<List<IDEInfo>> IDEInfos = new Lazy<List<IDEInfo>>(BuildIDEInfos);
 
-        public static IDEInfo DefaultIDE = new IDEInfo("0.0", "Default IDE", string.Empty);
+        public static IDEInfo DefaultIDE = new IDEInfo(new Version("0.0"), "Default IDE", string.Empty);
 
         public static IEnumerable<IDEInfo> AvailableVisualStudioInstances => IDEInfos.Value.Where(x => x.HasDevenv);
 
         public static IEnumerable<IDEInfo> AvailableBuildTools => IDEInfos.Value.Where(x => x.HasBuildTools);
 
+        public static void Refresh()
+        {
+            IDEInfos = new Lazy<List<IDEInfo>>(BuildIDEInfos);
+        }
+
         private static List<IDEInfo> BuildIDEInfos()
         {
             var ideInfos = new List<IDEInfo>();
-
-            // Visual Studio 14.0 (2015)
-            var localMachine32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
-            using (var subkey = localMachine32.OpenSubKey($@"SOFTWARE\Microsoft\{"VisualStudio"}\{"14.0"}"))
-            {
-                var path = (string)subkey?.GetValue("InstallDir");
-
-                var vs14InstallPath = (path != null) ? Path.Combine(path, "devenv.exe") : null;
-                if (vs14InstallPath != null && File.Exists(vs14InstallPath))
-                {
-                    var vsixInstallerPath = Path.Combine(path, "VSIXInstaller.exe");
-                    if (!File.Exists(vsixInstallerPath))
-                        vsixInstallerPath = null;
-
-                    ideInfos.Add(new IDEInfo("14.0", "Visual Studio 2015", path) { DevenvPath = vs14InstallPath, VsixInstallerVersion = VSIXInstallerVersion.VS2015, VsixInstallerPath = vsixInstallerPath });
-                }
-            }
 
             // Visual Studio 15.0 (2017) and later
             try
@@ -137,8 +124,13 @@ namespace Xenko.Core.VisualStudio
                         if (inst2 == null)
                             continue;
 
+                        // Only deal with VS2019+
+                        if (!Version.TryParse(inst2.GetInstallationVersion(), out var version)
+                            || version.Major < 16)
+                            continue;
+
                         var installationPath = inst2.GetInstallationPath();
-                        var buildToolsPath = Path.Combine(installationPath, "MSBuild", "15.0", "Bin");
+                        var buildToolsPath = Path.Combine(installationPath, "MSBuild", "Current", "Bin");
                         if (!Directory.Exists(buildToolsPath))
                             buildToolsPath = null;
                         var idePath = Path.Combine(installationPath, "Common7", "IDE");
@@ -156,6 +148,17 @@ namespace Xenko.Core.VisualStudio
                             var nickname = inst2.GetProperties().GetValue("nickname") as string;
                             if (!string.IsNullOrEmpty(nickname))
                                 displayName = $"{displayName} ({nickname})";
+                            else
+                            {
+                                var installationName = inst2.GetInstallationName();
+                                // In case of Preview, we have:
+                                // "installationName": "VisualStudioPreview/16.4.0-pre.6.0+29519.161"
+                                // "channelId": "VisualStudio.16.Preview"
+                                if (installationName.Contains("Preview"))
+                                {
+                                    displayName = displayName + " (Preview)";
+                                }
+                            }
                         }
                         catch (COMException)
                         {
@@ -172,11 +175,11 @@ namespace Xenko.Core.VisualStudio
                             continue;
                         }
 
-                        var ideInfo = new IDEInfo(inst2.GetInstallationVersion(), displayName, installationPath, inst2.IsComplete())
+                        var ideInfo = new IDEInfo(version, displayName, installationPath, inst2.IsComplete())
                         {
                             BuildToolsPath = buildToolsPath,
                             DevenvPath = devenvPath,
-                            VsixInstallerVersion = VSIXInstallerVersion.VS2017AndFutureVersions,
+                            VsixInstallerVersion = VSIXInstallerVersion.VS2019AndFutureVersions,
                             VsixInstallerPath = vsixInstallerPath,
                         };
 

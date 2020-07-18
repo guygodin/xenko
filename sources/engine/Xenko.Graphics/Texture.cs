@@ -288,6 +288,29 @@ namespace Xenko.Graphics
         }
 
         /// <summary>
+        /// Resource options for DirectX 11 textures.
+        /// </summary>
+        public TextureOptions Options
+        {
+            get
+            {
+                return textureDescription.Options;
+            }
+        }
+
+        /// <summary>
+        /// The shared handle if created with TextureOption.Shared or TextureOption.SharedNthandle, IntPtr.Zero otherwise.
+        /// </summary>
+        public IntPtr SharedHandle { get; private set; } = IntPtr.Zero;
+
+#if XENKO_GRAPHICS_API_DIRECT3D11
+        /// <summary>
+        /// Gets the name of the shared Nt handle when created with TextureOption.SharedNthandle.
+        /// </summary>
+        public string SharedNtHandleName { get; private set; } = string.Empty; 
+#endif
+
+        /// <summary>
         /// Gets a value indicating whether this instance is a render target.
         /// </summary>
         /// <value><c>true</c> if this instance is render target; otherwise, <c>false</c>.</value>
@@ -930,11 +953,7 @@ namespace Xenko.Graphics
             int subResourceIndex = this.GetSubResourceIndex(arraySlice, mipSlice);
 
             // If this texture is declared as default usage, we use UpdateSubresource that supports sub resource region.
-#if XENKO_GRAPHICS_API_OPENGLES
-            if (this.Usage == GraphicsResourceUsage.Default || (this.Usage == GraphicsResourceUsage.Dynamic && GraphicsDevice.IsOpenGLES2))
-#else
             if (this.Usage == GraphicsResourceUsage.Default)
-#endif
             {
                 // If using a specific region, we need to handle this case
                 if (region.HasValue)

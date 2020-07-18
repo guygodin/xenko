@@ -777,6 +777,7 @@ namespace Xenko.UI
         [CanBeNull]
         public UIElement VisualParent { get; protected set; }
 
+
         /// <summary>
         /// Get a enumerable to the visual children of the <see cref="UIElement"/>.
         /// </summary>
@@ -872,6 +873,7 @@ namespace Xenko.UI
             ForceNextMeasure = false;
             IsMeasureValid = true;
             IsArrangeValid = false;
+            RequiresMouseOverUpdate = true;
             previousProvidedMeasureSize = availableSizeWithMargins;
 
             // avoid useless computation if the element is collapsed
@@ -974,6 +976,7 @@ namespace Xenko.UI
             ArrangeChanged = true;
             previousIsParentCollapsed = isParentCollapsed;
             previousProvidedArrangeSize = finalSizeWithMargins;
+            RequiresMouseOverUpdate = true;
 
             // special to avoid useless computation if the element is collapsed
             if (IsCollapsed || isParentCollapsed)

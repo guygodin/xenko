@@ -356,7 +356,6 @@ namespace Xenko.Rendering.Compositing
                         using (context.SaveViewportAndRestore())
                         {
                             context.RenderSystem.Views.Add(context.RenderView);
-                            context.RenderView.SceneInstance = commonView.SceneInstance;
                             context.RenderView.LightingView = commonView;
                             context.ViewportState.Viewport0 = new Viewport(0, 0, VRSettings.VRDevice.ActualRenderFrameSize.Width / 2.0f, VRSettings.VRDevice.ActualRenderFrameSize.Height);
 
@@ -652,8 +651,8 @@ namespace Xenko.Rendering.Compositing
 
                             for (var i = 0; i < 2; i++)
                             {
-#if XENKO_GRAPHICS_API_DIRECT3D11 && XENKO_PLATFORM_UWP
-                                if (drawContext.GraphicsDevice.Presenter is WindowsMixedRealityGraphicsPresenter graphicsPresenter)
+#if XENKO_PLATFORM_UWP
+                                if (GraphicsDevice.Platform == GraphicsPlatform.Direct3D11 && drawContext.GraphicsDevice.Presenter is WindowsMixedRealityGraphicsPresenter graphicsPresenter)
                                 {
                                     isWindowsMixedReality = true;
 

@@ -171,7 +171,7 @@ namespace Xenko.Assets.Presentation.ViewModel
             }
             foreach (var index in invalidIndices)
             {
-                childrenNode.Remove(Asset.ChildrenIds[index], new Index(index));
+                childrenNode.Remove(Asset.ChildrenIds[index], new NodeIndex(index));
             }
 
             if (Parent?.isInitialized == true)
@@ -251,7 +251,7 @@ namespace Xenko.Assets.Presentation.ViewModel
                             foreach (var scene in e.OldItems.Cast<SceneViewModel>())
                             {
                                 scene.Parent = null;
-                                childrenNode.Remove(scene.Id, new Index(e.OldStartingIndex));
+                                childrenNode.Remove(scene.Id, new NodeIndex(e.OldStartingIndex));
                             }
                         }
                         if (e.NewItems?.Count > 0)
@@ -265,7 +265,7 @@ namespace Xenko.Assets.Presentation.ViewModel
                                     scene.Parent?.Children.Remove(scene);
                                     scene.Parent = this;
                                 }
-                                childrenNode.Add(scene.Id, new Index(index++));
+                                childrenNode.Add(scene.Id, new NodeIndex(index++));
                             }
                         }
                         break;
@@ -389,7 +389,7 @@ namespace Xenko.Assets.Presentation.ViewModel
                 return;
 
             // TODO: find a better (faster?) way to access the game settings view model
-            var gameSettings = Session.CurrentPackage.AllAssets.OfType<GameSettingsViewModel>().FirstOrDefault();
+            var gameSettings = Session.CurrentProject?.AllAssets.OfType<GameSettingsViewModel>().FirstOrDefault();
             if (gameSettings == null)
                 return;
             gameSettings.DefaultScene = this;
@@ -400,7 +400,7 @@ namespace Xenko.Assets.Presentation.ViewModel
             // Cannot set scene as default if
             // 1. session does not have a current package (not executable game)
             // 2. scene is not reachable from the main package (not a dependency), i.e. not in Package.AllAssets
-            SetAsDefaultCommand.IsEnabled = Session.CurrentPackage != null && Session.CurrentPackage.AllAssets.OfType<SceneViewModel>().Contains(this);
+            SetAsDefaultCommand.IsEnabled = Session.CurrentProject?.AllAssets.OfType<SceneViewModel>().Contains(this) ?? false;
         }
     }
 }

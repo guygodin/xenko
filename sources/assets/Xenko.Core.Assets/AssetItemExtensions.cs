@@ -17,7 +17,7 @@ namespace Xenko.Core.Assets
         public static string GetProjectInclude([NotNull] this AssetItem assetItem)
         {
             var assetFullPath = assetItem.FullPath;
-            var projectFullPath = assetItem.SourceProject;
+            var projectFullPath = (assetItem.Package.Container as SolutionProject)?.FullPath;
             return assetFullPath.MakeRelative(projectFullPath.GetFullDirectory()).ToWindowsPath();
         }
 
@@ -29,7 +29,7 @@ namespace Xenko.Core.Assets
         [NotNull]
         public static UFile GetGeneratedAbsolutePath([NotNull] this AssetItem assetItem)
         {
-            return new UFile(new UFile(assetItem.FullPath).GetFullPathWithoutExtension() + ".cs");
+            return new UFile(assetItem.FullPath + ".cs");
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Xenko.Core.Assets
         /// <returns></returns>
         public static string GetGeneratedInclude([NotNull] this AssetItem assetItem)
         {
-            return Path.ChangeExtension(GetProjectInclude(assetItem), ".cs");
+            return GetProjectInclude(assetItem) + ".cs";
         }
     }
 }

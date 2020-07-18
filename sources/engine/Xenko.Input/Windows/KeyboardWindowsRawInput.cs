@@ -1,7 +1,7 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && (XENKO_UI_WINFORMS || XENKO_UI_WPF)
+#if XENKO_INPUT_RAWINPUT
 using System;
 
 namespace Xenko.Input
@@ -10,7 +10,7 @@ namespace Xenko.Input
     {
         public KeyboardWindowsRawInput(InputSourceWindowsRawInput source)
         {
-            // Raw input is usually prefered above other keyboards
+            // Raw input is usually preferred above other keyboards
             Priority = 100;
             Source = source;
         }

@@ -89,15 +89,23 @@ namespace Xenko.Audio
         }
 
         /// <summary>
-        /// Decodes compressed celt data into PCM 16 bit shorts
+        /// Reset decoder state.
         /// </summary>
-        /// <param name="inputBufferPtr">The input buffer</param>
-        /// <param name="inputBufferSize">The size of the valid bytes in the input buffer</param>
-        /// <param name="outputSamples">The output buffer, the size of frames should be the same amount that is contained in the input buffer</param>
-        /// <returns></returns>
-        public unsafe int Decode(IntPtr inputBufferPtr, int inputBufferSize, IntPtr outputSamples)
+        public void ResetDecoder()
         {
-            return xnCeltDecodeShort(celtPtr, (byte*)inputBufferPtr, inputBufferSize, (short*)outputSamples, BufferSize);
+            xnCeltResetDecoder(celtPtr);
+        }
+
+        /// <summary>
+        /// Gets the delay between encoder and decoder (in number of samples). This should be skipped at the beginning of a decoded stream.
+        /// </summary>
+        /// <returns></returns>
+        public int GetDecoderSampleDelay()
+        {
+            var delay = 0;
+            if (xnCeltGetDecoderSampleDelay(celtPtr, ref delay) != 0)
+                delay = 0;
+            return delay;
         }
 
         /// <summary>
@@ -164,6 +172,14 @@ namespace Xenko.Audio
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]
         private static extern void xnCeltDestroy(IntPtr celt);
+
+        [SuppressUnmanagedCodeSecurity]
+        [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int xnCeltResetDecoder(IntPtr celt);
+
+        [SuppressUnmanagedCodeSecurity]
+        [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int xnCeltGetDecoderSampleDelay(IntPtr celt, ref int delay);
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]

@@ -11,7 +11,7 @@
     <FbxSdkVersion>2019.0</FbxSdkVersion>
     <FbxSdkUrl>https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2019-0</FbxSdkUrl>
     <FbxSdkDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Autodesk FBX SDK $(FbxSdkVersion)', 'Install_Dir', null, RegistryView.Registry32))</FbxSdkDir>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <FbxLibVersionDir>vs2015\</FbxLibVersionDir>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
@@ -36,6 +36,7 @@
     <ProjectGuid>{0467D515-FD66-4B8A-A128-CB642C2ED03F}</ProjectGuid>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>Xenko.Importer.FBX</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
@@ -63,11 +64,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(OutputPath)</OutDir>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(OutputPath)</OutDir>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(FbxSdkDir)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
@@ -200,6 +203,10 @@
       <Project>{c121a566-555e-42b9-9b0a-1696529a9088}</Project>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\engine\Xenko.Rendering\Xenko.Rendering.csproj">
+      <Project>{ad4fdc24-b64d-4ed7-91aa-62c9eda12fa4}</Project>
+      <Private>False</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj">
       <Project>{0e916ab7-5a6c-4820-8ab1-aa492fe66d68}</Project>
       <Private>False</Private>
@@ -242,6 +249,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="BulletSharp">
+      <HintPath>..\..\..\deps\BulletPhysics\BulletSharp.NetStandard.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>

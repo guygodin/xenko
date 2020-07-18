@@ -1,15 +1,15 @@
 <Project>
   <PropertyGroup>
     <XenkoAssemblySign>true</XenkoAssemblySign>
+    <XenkoRuntime>true</XenkoRuntime>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
   </PropertyGroup>
   <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
-    <TargetFramework>$(TargetFramework)</TargetFramework>
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
@@ -23,11 +23,11 @@
   <Choose>
     <When Condition=" '$(XenkoGraphicsApi)' == 'Vulkan' ">
       <Choose>
-        <When Condition=" '$(XenkoPlatform)' == 'Windows'">
+        <When Condition=" '$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'macOS' ">
           <ItemGroup>
             <Reference Include="SharpVulkan">
               <SpecificVersion>False</SpecificVersion>
-              <HintPath>$(XenkoDependenciesDir)\SharpVulkan\Windows\SharpVulkan.dll</HintPath>
+              <HintPath>$(XenkoDependenciesDir)\SharpVulkan\$(XenkoPlatform)\SharpVulkan.dll</HintPath>
             </Reference>
           </ItemGroup>
         </When>
@@ -46,16 +46,23 @@
     <When Condition="$(XenkoUI.Contains('SDL'))">
       <ItemGroup>
         <XenkoNativeLib Include="$(XenkoDependenciesDir)\SDL2\$(XenkoPlatform)\**\*SDL2*">
-          <Link>..\%(RecursiveDir)%(Filename)%(Extension)</Link>
+          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
           <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </XenkoNativeLib>
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup Condition=" '$(XenkoPlatform)' == 'macOS' Or '$(XenkoGraphicsApi)' == 'Vulkan' ">
+    <XenkoNativeLib Include="$(XenkoDependenciesDir)\MoltenVK\$(XenkoPlatform)\**\*.*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+  </ItemGroup>
   <ItemGroup>
     <XenkoNativeLib Include="$(XenkoDependenciesDir)\freetype\$(XenkoPlatform)\**\*.*">
-      <Link>..\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
       <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoNativeLib>
@@ -70,9 +77,9 @@
     <Reference Include="SharpFont">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(XenkoDependenciesDir)SharpFont\Portable\SharpFont.dll</HintPath>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <!-- Files for Direct3D  -->
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
@@ -226,35 +233,13 @@
       <DependentUpon>UIEffectShader.xksl</DependentUpon>
     </Compile>
   </ItemGroup>
-  <!-- Files for Null device -->
   <ItemGroup>
-    <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\core\Xenko.Core.IO\Xenko.Core.IO.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\core\Xenko.Core.Serialization\Xenko.Core.Serialization.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\core\Xenko.Core.Mathematics\Xenko.Core.Mathematics.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Xenko.Native\Xenko.Native.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Xenko.Shaders\Xenko.Shaders.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Xenko\Xenko.csproj">
-      <Private>False</Private>
-    </ProjectReference>
-    <PackageReference Include="SharpDX.Direct3D11" Version="4.0.1" Condition="'$(XenkoGraphicsApi)' == 'Direct3D11'" />
-    <PackageReference Include="SharpDX.Direct3D12" Version="4.0.1" Condition="'$(XenkoGraphicsApi)' == 'Direct3D12'" />
-    <PackageReference Include="SharpDX.D3DCompiler" Version="4.0.1" Condition="'$(XenkoGraphicsApi)' == 'Direct3D11' Or '$(XenkoGraphicsApi)' == 'Direct3D12'" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <ProjectReference Include="..\Xenko.Native\Xenko.Native.csproj" />
+    <ProjectReference Include="..\Xenko.Shaders\Xenko.Shaders.csproj" />
+    <ProjectReference Include="..\Xenko\Xenko.csproj" />
+    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
+    <PackageReference Include="SharpDX.Direct3D12" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
+    <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FrameworkResources.resx">
@@ -263,7 +248,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="Shaders.Bytecodes\CompileShaders.cmd" />
     <None Include="Shaders.Bytecodes\Graphics.xkpkg" />
@@ -338,6 +322,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="OpenTK-1.1">
+      <HintPath>..\..\..\deps\OpenTK\Android\OpenTK-1.1.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Shaders\EmissiveSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
@@ -351,7 +340,12 @@
       <LastGenOutput>LightSpriteEffect.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Update="SDL2-CS">
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
   <Import Project="..\Xenko.Shared\Refactor\Xenko.Refactor.projitems" Label="Shared" />
   <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
 </Project>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xenko.Core.Assets.Editor.Components.Transactions;
 #if DEBUG
 using System.Diagnostics;
@@ -64,7 +65,7 @@ namespace Xenko.GameStudio
             try
             {
                 // Add session-specific information in this try/catch block
-                var gameSettingsAsset = SessionViewModel.Instance?.CurrentPackage?.Package.GetGameSettingsAsset();
+                var gameSettingsAsset = SessionViewModel.Instance?.CurrentProject?.Package.GetGameSettingsAsset();
                 if (gameSettingsAsset != null)
                 {
                     crashReport["DefaultGraphicProfile"] = gameSettingsAsset.GetOrCreate<RenderingSettings>().DefaultGraphicsProfile.ToString();
@@ -170,6 +171,18 @@ namespace Xenko.GameStudio
             }
 
             crashReport["Log"] = nonFatalReport.ToString();
+
+            // Try to anonymize reports
+            // It also makes it easier to copy and paste paths
+            for (var i = 0; i < crashReport.Data.Count; i++)
+            {
+                var data = crashReport.Data[i].Item2;
+
+                data = Regex.Replace(data, Regex.Escape(Environment.GetEnvironmentVariable("USERPROFILE")), Regex.Escape("%USERPROFILE%"), RegexOptions.IgnoreCase);
+                data = Regex.Replace(data, $@"\b{Regex.Escape(Environment.GetEnvironmentVariable("USERNAME"))}\b", Regex.Escape("%USERNAME%"), RegexOptions.IgnoreCase);
+
+                crashReport.Data[i] = Tuple.Create(crashReport.Data[i].Item1, data);
+            }
 
             var reporter = new CrashReportForm(crashReport, new ReportSettings());
             var result = reporter.ShowDialog();

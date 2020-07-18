@@ -7,15 +7,16 @@ Xenko is a MIT-licensed opensource project, supported by generous [sponsors and 
 
 Thank you everybody for your generous contributions!
 
-## Sponsor
+## Gold Sponsor
 
-* Chance McDonald
+* [TurboPlay](http://www.turboplay.com/)
+* [vvvv.org](https://vvvv.org/)
 
 ## Super Backers
 
-* Robert Campbell
-* [vvvv.org](https://vvvv.org/)
-* Jason Kinzer
+* [Marshmallow Laser Feast](http://www.marshmallowlaserfeast.com/)
+* [Félix Dion-Robidoux](http://www.fdrobidoux.com)
+* Adisibio
 
 ## Backers
 
@@ -25,20 +26,24 @@ Thank you everybody for your generous contributions!
 * Ravn Ivarson
 * Guy Godin
 * Princess Peach
-* Andreas Schüle
 * Wes Clyburn
-* Adisibio
-* Nathan Warden
-* Empty Keys
-* Dmitry Terentev
-* Shane
-* Chris Beckwith
+* [Empty Keys](http://emptykeys.com/)
 * Harald Mühleder
-* Szymon Kobalczyk
 * Philippe Monteil
 * Cobalt
 * Matthias Hölzl
-* Ryan Galkowski
+* Thomas Tang
+* Beliar
+* Marko Viitanen
+* [Sven-Bertil Blom](https://github.com/svenberra)
+* [Natan Sinigaglia](https://github.com/vvvv-dottore)
+* [Jarmo](https://github.com/devjarmo)
+* [Eideren](https://github.com/Eideren)
+* Berwyn
+* Boris Callens
+* Jarrett K Robertson
+* Daniel Keenan
+* Jorn Theunissen
 
 ## Mini Backers
 

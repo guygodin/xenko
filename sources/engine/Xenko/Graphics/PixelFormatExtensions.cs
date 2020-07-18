@@ -138,16 +138,6 @@ namespace Xenko.Graphics
                 case PixelFormat.BC7_UNorm_SRgb:
                     return 8;  // or 0
 
-                case PixelFormat.PVRTC_2bpp_RGBA:
-                case PixelFormat.PVRTC_4bpp_RGBA:
-                case PixelFormat.PVRTC_2bpp_RGBA_SRgb:
-                case PixelFormat.PVRTC_4bpp_RGBA_SRgb:
-                    return 8;
-
-                case PixelFormat.PVRTC_II_2bpp:
-                case PixelFormat.PVRTC_II_4bpp:
-                    return 8;  // or 0
-
                 case PixelFormat.ETC2_RGBA:
                 case PixelFormat.ETC2_RGBA_SRgb:
                 case PixelFormat.ASTC_RGBA_4X4:
@@ -158,12 +148,6 @@ namespace Xenko.Graphics
 
                 case PixelFormat.ETC2_RGB_A1:
                     return 1;
-
-                case PixelFormat.ATC_RGBA_Explicit:
-                    return 4;
-
-                case PixelFormat.ATC_RGBA_Interpolated:
-                    return 8;
             }
             return 0;
         }
@@ -323,16 +307,6 @@ namespace Xenko.Graphics
                 case PixelFormat.BC7_Typeless:
                 case PixelFormat.BC7_UNorm:
                 case PixelFormat.BC7_UNorm_SRgb:
-                case PixelFormat.PVRTC_2bpp_RGB:
-                case PixelFormat.PVRTC_2bpp_RGBA:
-                case PixelFormat.PVRTC_4bpp_RGB:
-                case PixelFormat.PVRTC_4bpp_RGBA:
-                case PixelFormat.PVRTC_2bpp_RGB_SRgb:
-                case PixelFormat.PVRTC_2bpp_RGBA_SRgb:
-                case PixelFormat.PVRTC_4bpp_RGB_SRgb:
-                case PixelFormat.PVRTC_4bpp_RGBA_SRgb:
-                case PixelFormat.PVRTC_II_2bpp:
-                case PixelFormat.PVRTC_II_4bpp:
                 case PixelFormat.ETC1:
                 case PixelFormat.ETC2_RGB:
                 case PixelFormat.ETC2_RGB_SRgb:
@@ -643,16 +617,6 @@ namespace Xenko.Graphics
                     PixelFormat.BC7_Typeless,
                     PixelFormat.BC7_UNorm,
                     PixelFormat.BC7_UNorm_SRgb,
-                    PixelFormat.PVRTC_2bpp_RGB,
-                    PixelFormat.PVRTC_2bpp_RGBA,
-                    PixelFormat.PVRTC_4bpp_RGB,
-                    PixelFormat.PVRTC_4bpp_RGBA,
-                    PixelFormat.PVRTC_2bpp_RGB_SRgb,
-                    PixelFormat.PVRTC_2bpp_RGBA_SRgb,
-                    PixelFormat.PVRTC_4bpp_RGB_SRgb,
-                    PixelFormat.PVRTC_4bpp_RGBA_SRgb,
-                    PixelFormat.PVRTC_II_2bpp,
-                    PixelFormat.PVRTC_II_4bpp,
                     PixelFormat.ETC1,
                     PixelFormat.ETC2_RGB,
                     PixelFormat.ETC2_RGB_SRgb,
@@ -682,10 +646,6 @@ namespace Xenko.Graphics
                     PixelFormat.B8G8R8A8_UNorm_SRgb,
                     PixelFormat.B8G8R8X8_UNorm_SRgb,
                     PixelFormat.BC7_UNorm_SRgb,
-                    PixelFormat.PVRTC_2bpp_RGB_SRgb,
-                    PixelFormat.PVRTC_2bpp_RGBA_SRgb,
-                    PixelFormat.PVRTC_4bpp_RGB_SRgb,
-                    PixelFormat.PVRTC_4bpp_RGBA_SRgb,
                     PixelFormat.ETC2_RGBA_SRgb,
                     PixelFormat.ETC2_RGB_SRgb,
                     PixelFormat.ASTC_RGBA_4X4_SRgb,
@@ -759,14 +719,6 @@ namespace Xenko.Graphics
                 { PixelFormat.B8G8R8X8_UNorm, PixelFormat.B8G8R8X8_UNorm_SRgb },
                 { PixelFormat.BC7_UNorm_SRgb, PixelFormat.BC7_UNorm },
                 { PixelFormat.BC7_UNorm, PixelFormat.BC7_UNorm_SRgb },
-                { PixelFormat.PVRTC_2bpp_RGB_SRgb, PixelFormat.PVRTC_2bpp_RGB },
-                { PixelFormat.PVRTC_2bpp_RGB, PixelFormat.PVRTC_2bpp_RGB_SRgb },
-                { PixelFormat.PVRTC_2bpp_RGBA_SRgb, PixelFormat.PVRTC_2bpp_RGBA },
-                { PixelFormat.PVRTC_2bpp_RGBA, PixelFormat.PVRTC_2bpp_RGBA_SRgb },
-                { PixelFormat.PVRTC_4bpp_RGB_SRgb, PixelFormat.PVRTC_4bpp_RGB },
-                { PixelFormat.PVRTC_4bpp_RGB, PixelFormat.PVRTC_4bpp_RGB_SRgb },
-                { PixelFormat.PVRTC_4bpp_RGBA_SRgb, PixelFormat.PVRTC_4bpp_RGBA },
-                { PixelFormat.PVRTC_4bpp_RGBA, PixelFormat.PVRTC_4bpp_RGBA_SRgb },
                 { PixelFormat.ETC2_RGBA_SRgb, PixelFormat.ETC2_RGBA },
                 { PixelFormat.ETC2_RGBA, PixelFormat.ETC2_RGBA_SRgb },
                 { PixelFormat.ETC2_RGB_SRgb, PixelFormat.ETC2_RGB },

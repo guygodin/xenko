@@ -383,7 +383,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 var directory = location as DirectoryBaseViewModel;
                 if (packageCategory != null && includeSubDirectoriesOfSelected)
                 {
-                    selectedDirectories.AddRange(packageCategory.Content.Select(x => x.AssetMountPoint));
+                    selectedDirectories.AddRange(packageCategory.Content.Select(x => x.AssetMountPoint).NotNull());
                 }
                 if (package != null)
                 {
@@ -473,7 +473,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
             base.Destroy();
         }
 
-        public async Task<List<AssetViewModel>> RunAssetTemplate(ITemplateDescriptionViewModel template, IEnumerable<UFile> files)
+        public async Task<List<AssetViewModel>> RunAssetTemplate(ITemplateDescriptionViewModel template, IEnumerable<UFile> files, PropertyContainer? customParameters = null)
         {
             if (template == null)
                 return new List<AssetViewModel>();
@@ -492,7 +492,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
             }
             var assetType = templateDescription.GetAssetType();
             // If the mount point of the current folder does not support this type of asset, try to select the first mount point that support it.
-            directory = AssetViewModel.FindValidCreationLocation(assetType, directory, Session.CurrentPackage);
+            directory = AssetViewModel.FindValidCreationLocation(assetType, directory, Session.CurrentProject);
 
             if (directory == null)
                 return new List<AssetViewModel>();
@@ -503,7 +503,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 name = templateDescription.DefaultOutputName ?? templateDescription.AssetTypeName;
             }
 
-            return await InvokeAddAssetTemplate(loggerResult, name, directory, templateDescription, files);
+            return await InvokeAddAssetTemplate(loggerResult, name, directory, templateDescription, files, customParameters);
         }
 
         private async Task ShowAddAssetDialog()
@@ -528,8 +528,8 @@ namespace Xenko.Core.Assets.Editor.ViewModel
         {
             switch (directory)
             {
-                case ProjectViewModel project:
-                    return project.RootNamespace;
+                case ProjectCodeViewModel projectCode:
+                    return projectCode.Project.RootNamespace;
                 case var directoryWithParent when directoryWithParent.Parent != null:
                     return $"{ComputeNamespace(directoryWithParent.Parent)}.{directoryWithParent.Name}";
                 default:
@@ -537,7 +537,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
             }
         }
 
-        private async Task<List<AssetViewModel>> InvokeAddAssetTemplate(LoggerResult logger, string name, DirectoryBaseViewModel directory, TemplateAssetDescription templateDescription, IEnumerable<UFile> files)
+        private async Task<List<AssetViewModel>> InvokeAddAssetTemplate(LoggerResult logger, string name, DirectoryBaseViewModel directory, TemplateAssetDescription templateDescription, IEnumerable<UFile> files, PropertyContainer? customParameters)
         {
             List<AssetViewModel> newAssets = new List<AssetViewModel>();
 
@@ -549,6 +549,14 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 Logger = logger,
                 Namespace = ComputeNamespace(directory),
             };
+
+            if (customParameters.HasValue)
+            {
+                foreach (var tag in customParameters.Value)
+                {
+                    parameters.Tags[tag.Key] = tag.Value;
+                }
+            }
 
             var generator = TemplateManager.FindTemplateGenerator(parameters);
             if (generator == null)
@@ -963,7 +971,7 @@ namespace Xenko.Core.Assets.Editor.ViewModel
 
             var updatedAssets = new List<AssetItem>();
             var root = directory.Root;
-            var project = root as ProjectViewModel;
+            var project = (root as ProjectCodeViewModel)?.Project;
             foreach (var assetItem in pastedAssets)
             {
                 // Perform allowed asset types validation
@@ -980,7 +988,6 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 {
                     // Link source project
                     assetItem.SourceFolder = project.Package.RootDirectory;
-                    assetItem.SourceProject = project.ProjectPath.ToWindowsPath();
                 }
 
                 // Resolve folders to paste collisions with those existing in a directory

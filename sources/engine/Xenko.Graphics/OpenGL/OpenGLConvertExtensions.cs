@@ -252,11 +252,11 @@ namespace Xenko.Graphics
                         goto unsupported;
                     case PixelFormat.D32_Float:
                         goto unsupported;
-                    unsupported:
+unsupported:
                         throw new NotSupportedException($"Texture format {inputFormat} not supported with OpenGL ES 2.0");
 
-                    // NOTE: We always allow PixelFormat.D24_UNorm_S8_UInt.
-                    // If it is not supported we will fall back to separate D24/D16 and S8 resources when creating a texture.
+                        // NOTE: We always allow PixelFormat.D24_UNorm_S8_UInt.
+                        // If it is not supported we will fall back to separate D24/D16 and S8 resources when creating a texture.
                 }
             }
 #endif
@@ -266,18 +266,6 @@ namespace Xenko.Graphics
             {
                 switch (inputFormat)
                 {
-                    case PixelFormat.PVRTC_2bpp_RGB_SRgb:
-                        inputFormat = PixelFormat.PVRTC_2bpp_RGB;
-                        break;
-                    case PixelFormat.PVRTC_2bpp_RGBA_SRgb:
-                        inputFormat = PixelFormat.PVRTC_2bpp_RGBA;
-                        break;
-                    case PixelFormat.PVRTC_4bpp_RGB_SRgb:
-                        inputFormat = PixelFormat.PVRTC_4bpp_RGB;
-                        break;
-                    case PixelFormat.PVRTC_4bpp_RGBA_SRgb:
-                        inputFormat = PixelFormat.PVRTC_4bpp_RGBA;
-                        break;
                     case PixelFormat.ETC2_RGB_SRgb:
                         inputFormat = PixelFormat.ETC2_RGB;
                         break;
@@ -758,5 +746,5 @@ namespace Xenko.Graphics
         }
     }
 }
- 
+
 #endif
