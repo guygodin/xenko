@@ -429,21 +429,29 @@ extern "C"
 				return NULL;
 			}
 
-			result = (*res->player)->RegisterCallback(res->player, PlayerCallback, res);
+			// GG: Not needed as the callback doesn't do anything
+			/*result = (*res->player)->RegisterCallback(res->player, PlayerCallback, res);
 			if (result != SL_RESULT_SUCCESS)
 			{
 				DEBUG_BREAK;
 				delete res;
 				return NULL;
+			}*/
+
+			// GG: Added HRTF check
+			if (hrtf)
+			{
+				result = (*res->player)->SetCallbackEventsMask(res->player, SL_PLAYEVENT_HEADMOVING);
+				if (result != SL_RESULT_SUCCESS)
+				{
+					DEBUG_BREAK;
+					delete res;
+					return NULL;
+				}
 			}
 
-			result = (*res->player)->SetCallbackEventsMask(res->player, SL_PLAYEVENT_HEADMOVING);
-			if (result != SL_RESULT_SUCCESS)
-			{
-				DEBUG_BREAK;
-				delete res;
-				return NULL;
-			}
+			// GG: Hogs the CPU if not set to paused and sound doesn't get to play
+			(*res->player)->SetPlayState(res->player, SL_PLAYSTATE_PAUSED);
 
 			listener->audioDevice->deviceLock.Lock();
 
