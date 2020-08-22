@@ -30,6 +30,7 @@ namespace Xenko.UI.Renderers
             typeToRenderers[typeof(ScrollBar)] = new DefaultScrollBarRenderer(services);
             typeToRenderers[typeof(ScrollingText)] = new DefaultScrollingTextRenderer(services);
             typeToRenderers[typeof(Slider)] = new DefaultSliderRenderer(services);
+            typeToRenderers[typeof(LimitSlider)] = new DefaultLimitSliderRenderer(services);
             typeToRenderers[typeof(TextBlock)] = new DefaultTextBlockRenderer(services);
             typeToRenderers[typeof(ToggleButton)] = new DefaultToggleButtonRenderer(services);
             typeToRenderers[typeof(CheckBox)] = new DefaultCheckBoxRenderer(services);

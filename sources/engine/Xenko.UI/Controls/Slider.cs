@@ -33,6 +33,10 @@ namespace Xenko.UI.Controls
         private float tickOffset = 10.0f;
         private ISpriteProvider trackBackgroundImageSource;
         private Sprite trackBackgroundSprite;
+        private ISpriteProvider mouseOverTrackBackgroundImageSource;
+        private Sprite mouseOverTrackBackgroundSprite;
+        private ISpriteProvider mouseDownTrackBackgroundImageSource;
+        private Sprite mouseDownTrackBackgroundSprite;
 
         static Slider()
         {
@@ -151,6 +155,46 @@ namespace Xenko.UI.Controls
 
                 trackBackgroundImageSource = value;
                 OnTrackBackgroundSpriteChanged(trackBackgroundImageSource?.GetSprite());
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the image to display as Track background when mosue is over.
+        /// </summary>
+        /// <userdoc>The image to display as Track background when mouse is over.</userdoc>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        [DefaultValue(null)]
+        public ISpriteProvider MouseOverTrackBackgroundImage
+        {
+            get { return mouseOverTrackBackgroundImageSource; }
+            set
+            {
+                if (mouseOverTrackBackgroundImageSource == value)
+                    return;
+
+                mouseOverTrackBackgroundImageSource = value;
+                OnMouseOverTrackBackgroundSpriteChanged(mouseOverTrackBackgroundImageSource?.GetSprite());
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the image to display as Track background when mosue is over.
+        /// </summary>
+        /// <userdoc>The image to display as Track background when mouse is over.</userdoc>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        [DefaultValue(null)]
+        public ISpriteProvider MouseDownTrackBackgroundImage
+        {
+            get { return mouseDownTrackBackgroundImageSource; }
+            set
+            {
+                if (mouseDownTrackBackgroundImageSource == value)
+                    return;
+
+                mouseDownTrackBackgroundImageSource = value;
+                OnMouseDownTrackBackgroundSpriteChanged(mouseDownTrackBackgroundImageSource?.GetSprite());
             }
         }
 
@@ -454,6 +498,11 @@ namespace Xenko.UI.Controls
             {
                 OnTrackBackgroundSpriteChanged(currentSprite);
             }
+            var currentMouseOverSprite = trackBackgroundImageSource?.GetSprite();
+            if (mouseOverTrackBackgroundSprite != currentMouseOverSprite)
+            {
+                OnMouseOverTrackBackgroundSpriteChanged(currentMouseOverSprite);
+            }
         }
 
         private void CoerceMaximum(float newValue)
@@ -482,15 +531,58 @@ namespace Xenko.UI.Controls
             }
         }
 
+        private void OnMouseOverTrackBackgroundSpriteChanged(Sprite currentMouseOverSprite)
+        {
+            if (mouseOverTrackBackgroundSprite != null)
+            {
+                mouseOverTrackBackgroundSprite.SizeChanged -= InvalidateMeasure;
+                mouseOverTrackBackgroundSprite.BorderChanged -= InvalidateMeasure;
+            }
+            mouseOverTrackBackgroundSprite = currentMouseOverSprite;
+            InvalidateMeasure();
+            if (mouseOverTrackBackgroundSprite != null)
+            {
+                mouseOverTrackBackgroundSprite.SizeChanged += InvalidateMeasure;
+                mouseOverTrackBackgroundSprite.BorderChanged += InvalidateMeasure;
+            }
+        }
+
+        private void OnMouseDownTrackBackgroundSpriteChanged(Sprite currentMouseDownSprite)
+        {
+            if (mouseDownTrackBackgroundSprite != null)
+            {
+                mouseDownTrackBackgroundSprite.SizeChanged -= InvalidateMeasure;
+                mouseDownTrackBackgroundSprite.BorderChanged -= InvalidateMeasure;
+            }
+            mouseDownTrackBackgroundSprite = currentMouseDownSprite;
+            InvalidateMeasure();
+            if (mouseDownTrackBackgroundSprite != null)
+            {
+                mouseDownTrackBackgroundSprite.SizeChanged += InvalidateMeasure;
+                mouseDownTrackBackgroundSprite.BorderChanged += InvalidateMeasure;
+            }
+        }
+
         protected override void OnMouseOverStateChanged(MouseOverState oldValue, MouseOverState newValue)
         {
             base.OnMouseOverStateChanged(oldValue, newValue);
 
-            if (oldValue == MouseOverState.MouseOverElement || newValue == MouseOverState.MouseOverElement)
-            {
-                // update thumb image
-                IsDirty = true;
-            }
+            // update thumb / background image
+            IsDirty = true;
+        }
+
+        protected override void OnPreviewTouchDown(TouchEventArgs args)
+        {
+            base.OnPreviewTouchDown(args);
+
+            IsDirty = true;
+        }
+
+        protected override void OnPreviewTouchUp(TouchEventArgs args)
+        {
+            base.OnPreviewTouchUp(args);
+
+            IsDirty = true;
         }
     }
 }

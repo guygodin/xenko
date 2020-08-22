@@ -925,7 +925,7 @@ namespace Xenko.UI
 
             // update Element state variables
             DesiredSize = desiredSize;
-            DesiredSizeWithMargins = desiredSizeWithMargins;
+            DesiredSizeWithMargins = new Vector2(desiredSizeWithMargins.X, (int)(desiredSizeWithMargins.Y + 0.5f));
         }
 
         private void ValidateChildrenMeasure()

@@ -24,11 +24,13 @@ PublicUIElements:
     eef44bd6-bd2d-4abe-8335-0971d5d83b10: EditText
     f23d4157-8437-4285-845d-5cab68bca82a: ScrollBar
     fcd540ef-6f9e-4cab-b24d-ba1533b0fdb9: Slider
+    1a44eb3e-d363-409e-b5A2-0fd76cb605b9: LimitSlider
 Hierarchy:
     RootParts:
         - !Button ref!! e8985e3a-8d82-40a6-adb1-76619eb19cd8
         - !EditText ref!! eef44bd6-bd2d-4abe-8335-0971d5d83b10
         - !Slider ref!! fcd540ef-6f9e-4cab-b24d-ba1533b0fdb9
+        - !LimitSlider ref!! 1a44eb3e-d363-409e-b5A2-0fd76cb605b9
         - !ToggleButton ref!! 1dfd7e9f-ab5a-4849-b6e3-1c50b0974f5f
         - !CheckBox ref!! 51ba6738-85d2-4b7b-937c-b55de3814a1e
         - !Border ref!! 606486b0-61b1-498a-beed-5425893fc384
@@ -293,6 +295,33 @@ Hierarchy:
                 VerticalAlignment: Center
                 Margin: {}
                 Name: Slider
+                TrackBackgroundImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
+                    CurrentFrame: 9
+                TrackForegroundImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
+                    CurrentFrame: 12
+                TrackStartingOffsets: {X: 3.0, Y: 3.0}
+                ThumbImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
+                    CurrentFrame: 7
+                MouseOverThumbImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
+                    CurrentFrame: 6
+                TickImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
+                    CurrentFrame: 8
+                TickOffset: 13.0
+        -   UIElement: !LimitSlider
+                Id: 1a44eb3e-d363-409e-b5A2-0fd76cb605b9
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                DrawLayerNumber: 5
+                CanBeHitByUser: true
+                HorizontalAlignment: Center
+                VerticalAlignment: Center
+                Margin: {}
+                Name: LimitSlider
                 TrackBackgroundImage: !SpriteFromSheet
                     Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:XenkoUIDesigns
                     CurrentFrame: 9

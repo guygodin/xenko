@@ -10,11 +10,11 @@ using Xenko.UI.Controls;
 namespace Xenko.UI.Renderers
 {
     /// <summary>
-    /// The default renderer for <see cref="Slider"/>.
+    /// The default renderer for <see cref="LimitSlider"/>.
     /// </summary>
-    internal class DefaultSliderRenderer : ElementRenderer
+    internal class DefaultLimitSliderRenderer : ElementRenderer
     {
-        public DefaultSliderRenderer(IServiceRegistry services)
+        public DefaultLimitSliderRenderer(IServiceRegistry services)
             : base(services)
         {
         }
@@ -23,12 +23,14 @@ namespace Xenko.UI.Renderers
         {
             base.RenderColor(element, context);
 
-            var slider = (Slider)element;
+            var slider = (LimitSlider)element;
             var axis = (int)slider.Orientation;
             var axisPrime = (axis + 1) % 2;
             var color = slider.RenderOpacity * Color.White;
             var isGaugeReverted = axis == 1 ? !slider.IsDirectionReversed : slider.IsDirectionReversed; // we want the track going up from the bottom in vertical mode by default
             var sliderRatio = MathUtil.InverseLerp(slider.Minimum, slider.Maximum, slider.Value);
+            var limitRatio = MathUtil.InverseLerp(slider.Minimum, slider.Maximum, slider.Limit);
+            var hasLimit = !MathUtil.IsZero(limitRatio);
             var trackOffsets = new Vector2(slider.TrackStartingOffsets[axis], slider.TrackStartingOffsets[axisPrime]);
             var fullGaugeSize = slider.RenderSizeInternal[axis] - trackOffsets.X - trackOffsets.Y;
             var isMouseDown = slider.IsTouched;
@@ -48,7 +50,7 @@ namespace Xenko.UI.Renderers
                 Batch.DrawImage(image.Texture, ref worldMatrix, ref image.RegionInternal, ref slider.RenderSizeInternal, ref image.BordersInternal, ref color, context.DepthBias, imageOrientation);
                 context.DepthBias += 1;
             }
-            
+
             // draw the track foreground
             image = slider.TrackForegroundImage?.GetSprite();
             if (image?.Texture != null)
@@ -56,9 +58,10 @@ namespace Xenko.UI.Renderers
                 var imageAxis = (int)image.Orientation;
                 var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
                 var shouldRotate180Degrees = (axis & imageAxis) == 1;
+                var filledBarEnd = Math.Max(6f, (hasLimit ? Math.Min(limitRatio, sliderRatio) : sliderRatio) * fullGaugeSize);
 
                 var size = new Vector3();
-                size[axis] = Math.Max(6f, sliderRatio * fullGaugeSize);
+                size[axis] = filledBarEnd;
                 size[axisPrime] = image.SizeInPixels.Y;
                 if (trackIdealSize.HasValue)
                     size[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
@@ -80,11 +83,99 @@ namespace Xenko.UI.Renderers
                 }
 
                 var borders = image.BordersInternal;
-                var borderStartIndex = (imageAxis) + (slider.IsDirectionReversed? 2 : 0);
+                var borderStartIndex = (imageAxis) + (slider.IsDirectionReversed ? 2 : 0);
                 var borderStopIndex = (imageAxis) + (slider.IsDirectionReversed ? 0 : 2);
                 borders[borderStartIndex] = Math.Min(borders[borderStartIndex], size[axis]);
                 borders[borderStopIndex] = Math.Max(0, size[axis] - fullGaugeSize + borders[borderStopIndex]);
-                
+
+                var position = image.RegionInternal.Location;
+                var oldRegionSize = new Vector2(image.RegionInternal.Width, image.RegionInternal.Height);
+                var originalBordersSize = image.BordersInternal[borderStartIndex] + image.BordersInternal[borderStopIndex];
+
+                var newRegionSize = oldRegionSize;
+                newRegionSize[imageAxis] = borders[borderStartIndex] + borders[borderStopIndex] + (oldRegionSize[imageAxis] - originalBordersSize) * Math.Min(1, (size[axis] - borders[borderStartIndex]) / (fullGaugeSize - originalBordersSize));
+                if (slider.IsDirectionReversed)
+                {
+                    position[imageAxis] = position[imageAxis] + oldRegionSize[imageAxis] - newRegionSize[imageAxis];
+                }
+                var region = new RectangleF(position.X, position.Y, newRegionSize.X, newRegionSize.Y);
+
+                Batch.DrawImage(image.Texture, ref worldMatrix, ref region, ref size, ref borders, ref color, context.DepthBias, imageOrientation);
+
+                if (hasLimit && sliderRatio > limitRatio)
+                {
+                    size[axis] = (sliderRatio - limitRatio) * fullGaugeSize;
+
+                    worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, false);
+                    halfSizeLeft = (slider.RenderSizeInternal[axis] - size[axis]) / 2;
+                    worldTranslation = GetAdjustedTranslation(filledBarEnd - halfSizeLeft, false);
+                    if (axis == 0)
+                    {
+                        worldMatrix.M41 += worldTranslation * worldMatrix.M11;
+                        worldMatrix.M42 += worldTranslation * worldMatrix.M12;
+                        worldMatrix.M43 += worldTranslation * worldMatrix.M13;
+                    }
+                    else
+                    {
+                        worldMatrix.M41 += worldTranslation * worldMatrix.M21;
+                        worldMatrix.M42 += worldTranslation * worldMatrix.M22;
+                        worldMatrix.M43 += worldTranslation * worldMatrix.M23;
+                    }
+
+                    borders[borderStartIndex] = Math.Min(borders[borderStartIndex], size[axis]);
+                    borders[borderStopIndex] = Math.Max(0, size[axis] - fullGaugeSize + borders[borderStopIndex]);
+
+                    position = image.RegionInternal.Location;
+                    oldRegionSize = new Vector2(image.RegionInternal.Width, image.RegionInternal.Height);
+                    originalBordersSize = image.BordersInternal[borderStartIndex] + image.BordersInternal[borderStopIndex];
+
+                    newRegionSize = oldRegionSize;
+                    newRegionSize[imageAxis] = borders[borderStartIndex] + borders[borderStopIndex] + (oldRegionSize[imageAxis] - originalBordersSize) * Math.Min(1, (size[axis] - borders[borderStartIndex]) / (fullGaugeSize - originalBordersSize));
+                    position[imageAxis] = position[imageAxis] + oldRegionSize[imageAxis] - newRegionSize[imageAxis];
+                    region = new RectangleF(position.X, position.Y, newRegionSize.X, newRegionSize.Y);
+
+                    var edgeColor = 0.65f * color;
+                    Batch.DrawImage(image.Texture, ref worldMatrix, ref region, ref size, ref borders, ref edgeColor, context.DepthBias, imageOrientation);
+                }
+                context.DepthBias += 1;
+            }
+
+            // draw the track limit
+            image = slider.TrackLimitImage?.GetSprite();
+            if (image?.Texture != null && hasLimit)
+            {
+                var imageAxis = (int)image.Orientation;
+                var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
+                var shouldRotate180Degrees = (axis & imageAxis) == 1;
+
+                var size = new Vector3();
+                size[axis] = Math.Max(6f, limitRatio * fullGaugeSize);
+                size[axisPrime] = image.SizeInPixels.Y;
+                if (trackIdealSize.HasValue)
+                    size[axisPrime] *= slider.RenderSizeInternal[axisPrime] / trackIdealSize.Value.Y;
+
+                var worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, shouldRotate180Degrees);
+                var halfSizeLeft = (slider.RenderSizeInternal[axis] - size[axis]) / 2;
+                var worldTranslation = GetAdjustedTranslation(isGaugeReverted ? halfSizeLeft - trackOffsets.Y : trackOffsets.X - halfSizeLeft, shouldRotate180Degrees);
+                if (axis == 0)
+                {
+                    worldMatrix.M41 += worldTranslation * worldMatrix.M11;
+                    worldMatrix.M42 += worldTranslation * worldMatrix.M12;
+                    worldMatrix.M43 += worldTranslation * worldMatrix.M13;
+                }
+                else
+                {
+                    worldMatrix.M41 += worldTranslation * worldMatrix.M21;
+                    worldMatrix.M42 += worldTranslation * worldMatrix.M22;
+                    worldMatrix.M43 += worldTranslation * worldMatrix.M23;
+                }
+
+                var borders = image.BordersInternal;
+                var borderStartIndex = (imageAxis) + (slider.IsDirectionReversed ? 2 : 0);
+                var borderStopIndex = (imageAxis) + (slider.IsDirectionReversed ? 0 : 2);
+                borders[borderStartIndex] = Math.Min(borders[borderStartIndex], size[axis]);
+                borders[borderStopIndex] = Math.Max(0, size[axis] - fullGaugeSize + borders[borderStopIndex]);
+
                 var position = image.RegionInternal.Location;
                 var oldRegionSize = new Vector2(image.RegionInternal.Width, image.RegionInternal.Height);
                 var originalBordersSize = image.BordersInternal[borderStartIndex] + image.BordersInternal[borderStopIndex];
@@ -148,7 +239,7 @@ namespace Xenko.UI.Renderers
                 var imageAxis = (int)image.Orientation;
                 var imageOrientation = (ImageOrientation)(axis ^ imageAxis);
                 var shouldRotate180Degrees = (axis & imageAxis) == 1;
-                
+
                 var size = new Vector3();
                 size[axis] = image.SizeInPixels.X;
                 size[axisPrime] = image.SizeInPixels.Y;
