@@ -413,6 +413,23 @@ namespace Xenko.Graphics
             Draw(texture, in elementInfo);
         }
 
+        public void DrawString(SpriteFont font, string text, in Color color, in Vector2 position, in Vector2 boxSize, TextAlignment alignment)
+        {            
+            var matrix = Matrix.Identity;
+            matrix.TranslationVector = new Vector3(position.X, position.Y, 0f);
+            var drawCommand = new SpriteFont.InternalUIDrawCommand
+            {
+                Color = color,
+                RealVirtualResolutionRatio = Vector2.One,
+                RequestedFontSize = font.Size,
+                Batch = this,
+                SnapText = true,
+                Matrix = matrix,
+                Alignment = alignment,
+                TextBoxSize = boxSize
+            };
+            DrawString(font, text, ref drawCommand);
+        }
 
         internal void DrawCharacter(Texture texture, in Matrix worldViewProjectionMatrix, in RectangleF sourceRectangle, in Color color, int depthBias, SwizzleMode swizzle)
         {
