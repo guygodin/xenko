@@ -413,7 +413,7 @@ namespace Xenko.Graphics
             Draw(texture, in elementInfo);
         }
 
-        public void DrawString(SpriteFont font, string text, in Color color, in Vector2 position, in Vector2 boxSize, TextAlignment alignment)
+        public void DrawString(SpriteFont font, string text, in Color color, in Vector2 position, in Vector2 boxSize, TextAlignment alignment, int depthBias)
         {            
             var matrix = Matrix.Identity;
             matrix.TranslationVector = new Vector3(position.X, position.Y, 0f);
@@ -426,7 +426,8 @@ namespace Xenko.Graphics
                 SnapText = true,
                 Matrix = matrix,
                 Alignment = alignment,
-                TextBoxSize = boxSize
+                TextBoxSize = boxSize,
+                DepthBias = depthBias,
             };
             DrawString(font, text, ref drawCommand);
         }

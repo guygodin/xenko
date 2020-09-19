@@ -317,6 +317,12 @@ unsupported:
                     type = PixelType.UnsignedByte;
                     pixelSize = 4;
                     break;
+                case PixelFormat.R8G8B8A8_UNorm_SRgb:
+                    internalFormat = PixelInternalFormat.Srgb8Alpha8;
+                    format = PixelFormatGl.Rgba;
+                    type = PixelType.UnsignedByte;
+                    pixelSize = 4;
+                    break;
                 case PixelFormat.B8G8R8A8_UNorm:
 #if XENKO_GRAPHICS_API_OPENGLES
                     if (!graphicsDevice.HasExtTextureFormatBGRA8888)
@@ -336,20 +342,26 @@ unsupported:
                     type = PixelType.UnsignedByte;
                     pixelSize = 4;
                     break;
-                case PixelFormat.R8G8B8A8_UNorm_SRgb:
-                    internalFormat = PixelInternalFormat.Srgb8Alpha8;
-                    format = PixelFormatGl.Rgba;
-                    type = PixelType.UnsignedByte;
-                    pixelSize = 4;
-                    break;
-#if XENKO_GRAPHICS_API_OPENGLCORE
                 case PixelFormat.B8G8R8A8_UNorm_SRgb:
-                    // TODO: Check on iOS/Android and OpenGL 3
+#if XENKO_GRAPHICS_API_OPENGLES
+                    if (!graphicsDevice.HasExtTextureFormatBGRA8888)
+                        throw new NotSupportedException();
+
+                    // It seems iOS and Android expects different things
+#if XENKO_PLATFORM_IOS
+                    internalFormat = PixelInternalFormat.Rgba;
+#else
+                    internalFormat = (PixelInternalFormat)ExtTextureFormatBgra8888.BgraExt;
+#endif
+                    format = (PixelFormatGl)ExtTextureFormatBgra8888.BgraExt;
+#else
                     internalFormat = PixelInternalFormat.Srgb8Alpha8;
                     format = PixelFormatGl.Bgra;
+#endif
                     type = PixelType.UnsignedByte;
                     pixelSize = 4;
-                    break;
+                    break;                
+#if XENKO_GRAPHICS_API_OPENGLCORE
                 case PixelFormat.BC1_UNorm:
                     if (!graphicsDevice.HasDXT)
                         throw new NotSupportedException();
