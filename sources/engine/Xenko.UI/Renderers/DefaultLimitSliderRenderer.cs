@@ -108,7 +108,7 @@ namespace Xenko.UI.Renderers
 
                     worldMatrix = GetAdjustedWorldMatrix(ref slider.WorldMatrixInternal, false);
                     halfSizeLeft = (slider.RenderSizeInternal[axis] - size[axis]) / 2;
-                    worldTranslation = GetAdjustedTranslation(filledBarEnd - halfSizeLeft, false);
+                    worldTranslation = GetAdjustedTranslation(filledBarEnd + trackOffsets.X - halfSizeLeft, false);
                     if (axis == 0)
                     {
                         worldMatrix.M41 += worldTranslation * worldMatrix.M11;
