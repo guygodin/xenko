@@ -137,6 +137,11 @@ namespace Xenko.UI.Controls
             }
         }
 
+        public Vector2 ActualScrollOffsets
+        {
+            get { return _actualScrollOffsets; }
+        }
+
         /// <summary>
         /// The viewport of the <see cref="ScrollViewer"/> in virtual pixels.
         /// </summary>
