@@ -101,6 +101,14 @@ namespace Xenko.Graphics
                         {
                             Utilities.CopyMemory(pixelData, (IntPtr)pSrc, sizeToCopy);
                         }
+                        else if (description.Format == PixelFormat.R32_Float)
+                        {
+                            CopyMemoryR32(pixelData, (IntPtr)pSrc, sizeToCopy);
+                        }
+                        else if (description.Format == PixelFormat.R8_UNorm)
+                        {
+                            CopyMemoryRRR1(pixelData, (IntPtr)pSrc, sizeToCopy);
+                        }
                         else
                         {
                             throw new NotSupportedException(string.Format("Pixel format [{0}] is not supported", description.Format));

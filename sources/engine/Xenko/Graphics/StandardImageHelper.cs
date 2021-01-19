@@ -26,6 +26,23 @@ namespace Xenko.Graphics
             }
         }
 
+        private static unsafe void CopyMemoryR32(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
+        {
+            if (sizeInBytesToCopy % 4 != 0)
+                throw new ArgumentException("Should be a multiple of 4.", "sizeInBytesToCopy");
+
+            var bufferSize = sizeInBytesToCopy / 4;
+            var srcPtr = (float*)src;
+            var destPtr = (uint*)dest;
+            for (int i = 0; i < bufferSize; ++i)
+            {
+                float value = *srcPtr++;
+                // R32 => RGBA
+                var b = (uint)(value * 255f);
+                *destPtr++ = (0xFF000000) | ((b) << 8) | (b) | ((b) << 16);
+            }
+        }
+
         private static unsafe void CopyMemoryRRR1(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
         {
             var bufferSize = sizeInBytesToCopy;
