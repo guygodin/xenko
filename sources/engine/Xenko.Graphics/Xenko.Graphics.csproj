@@ -125,6 +125,12 @@
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTexture.xksl</DependentUpon>
+    </Compile>    
+    <Compile Update="Shaders\SpriteEffectExtTextureCube.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SpriteEffectExtTextureCube.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SpriteEffectExtTextureHalfSBS.cs">
       <AutoGen>True</AutoGen>
@@ -339,6 +345,9 @@
     <None Update="Shaders\LightSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>LightSpriteEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureCube.xksl">
+      <LastGenOutput>SpriteEffectExtTextureCube.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

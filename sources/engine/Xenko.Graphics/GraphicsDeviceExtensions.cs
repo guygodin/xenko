@@ -28,6 +28,21 @@ namespace Xenko.Graphics
             graphicsContext.CommandList.GraphicsDevice.PrimitiveQuad.Draw(graphicsContext, effectInstance);
         }
 
+        /// <summary>
+        /// Draws a fullscreen quad with the specified effect and parameters.
+        /// </summary>
+        /// <param name="device">The device.</param>
+        /// <param name="effectInstance">The effect instance.</param>
+        /// <param name="vertexBuffer">The vertex buffer.</param>
+        /// <exception cref="System.ArgumentNullException">effect</exception>
+        public static void DrawQuad(this GraphicsContext graphicsContext, EffectInstance effectInstance, VertexBufferBinding vertexBuffer)
+        {
+            if (effectInstance == null) throw new ArgumentNullException("effectInstance");
+
+            // Draw a full screen quad
+            graphicsContext.CommandList.GraphicsDevice.PrimitiveQuad.Draw(graphicsContext, effectInstance, vertexBuffer);
+        }
+
         #region DrawQuad/DrawTexture Helpers
         /// <summary>
         /// Draws a full screen quad. An <see cref="Effect"/> must be applied before calling this method.

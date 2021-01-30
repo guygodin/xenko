@@ -1,0 +1,16 @@
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+shader SpriteEffectExtTextureCube : SpriteBase
+{
+    // Color used to tint the sprite
+    [Color]
+    stage float4 Color = float4(1,1,1,1);
+
+    stage Texture2D XenkoInternal_TextureExt0;    // DO NOT RENAME THIS VARIABLE! The ShaderCompiler specifically looks for "TextureExt0".
+
+    stage override float4 Shading()
+    {
+        float4 textureColor = XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord);
+		return ColorUtility.ToLinear(textureColor) * Color;
+    }
+};
