@@ -90,6 +90,30 @@ namespace Xenko.Graphics
         }
 
         /// <summary>
+        /// Draws a quad. The effect must have been applied before calling this method with pixel shader having the signature float2:TEXCOORD.
+        /// </summary>
+        /// <param name="texture"></param>
+        public void Draw(GraphicsContext graphicsContext, EffectInstance effectInstance, VertexBufferBinding vertexBuffer)
+        {
+            effectInstance.UpdateEffect(GraphicsDevice);
+
+            pipelineState.State.RootSignature = effectInstance.RootSignature;
+            pipelineState.State.EffectBytecode = effectInstance.Effect.Bytecode;
+            pipelineState.State.BlendState = BlendStates.Default;
+            pipelineState.State.Output.CaptureState(graphicsContext.CommandList);
+            pipelineState.Update();
+
+            var commandList = graphicsContext.CommandList;
+            commandList.SetPipelineState(pipelineState.CurrentState);
+
+            // Apply the effect
+            effectInstance.Apply(graphicsContext);
+
+            commandList.SetVertexBuffer(0, vertexBuffer.Buffer, vertexBuffer.Offset, vertexBuffer.Stride);
+            commandList.Draw(vertexBuffer.Count);
+        }
+
+        /// <summary>
         /// Draws a quad with a texture. This Draw method is using the current effect bound to this instance.
         /// </summary>
         /// <param name="texture">The texture.</param>
