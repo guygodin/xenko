@@ -24,6 +24,7 @@ namespace Xenko.UI.Controls
         private float value;
 
         private bool shouldSnapToTicks;
+        private bool isTouchedDown;
 
         private Orientation orientation = Orientation.Horizontal;
         private float tickFrequency = 10.0f;
@@ -339,7 +340,15 @@ namespace Xenko.UI.Controls
         /// Gets a value that indicates whether the is currently touched down.
         /// </summary>
         [DataMemberIgnore]
-        protected virtual bool IsTouchedDown { get; set; }
+        protected bool IsTouchedDown
+        {
+            get { return isTouchedDown; }
+            set
+            {
+                isTouchedDown = value;
+                TouchCapturedElement = value ? this : null;
+            }
+        }
 
         /// <summary>
         /// Snap the current <see cref="Value"/> to the closest tick.

@@ -89,6 +89,11 @@ namespace Xenko.UI
         internal static UIElement FocusedElement { get; set; }
 
         /// <summary>
+        /// The <see cref="UIElement"/> that is captured for touch events.
+        /// </summary>
+        public static UIElement TouchCapturedElement { get; set; }
+
+        /// <summary>
         /// A unique ID defining the UI element.
         /// </summary>
         /// <userdoc>A unique ID defining the UI element.</userdoc>

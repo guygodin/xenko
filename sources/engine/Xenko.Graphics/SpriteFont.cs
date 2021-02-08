@@ -195,9 +195,9 @@ namespace Xenko.Graphics
         /// <remarks>Line spacing is the distance between the base lines of two consecutive lines of text (blank space as well as characters' height are thus included).</remarks>
         public float GetTotalLineSpacing(float fontSize)
         {
-            return GetExtraLineSpacing(fontSize) + GetFontDefaultLineSpacing(fontSize);
+            return (float)Math.Round(GetExtraLineSpacing(fontSize) + GetFontDefaultLineSpacing(fontSize));
         }
-        
+
         internal void InternalDraw(CommandList commandList, ref StringProxy text, ref InternalDrawCommand drawCommand, TextAlignment alignment)
         {
             // If the text is mirrored, offset the start position accordingly.
@@ -514,6 +514,7 @@ namespace Xenko.Graphics
             else
             {
                 // scan the text line by line incrementing y start position
+                var totalLineSpacing = GetTotalLineSpacing(requestedFontSize.Y);
 
                 // measure the whole string in order to be able to determine xStart
                 var wholeSize = textBoxSize ?? MeasureString(ref text, ref requestedFontSize);
@@ -539,7 +540,7 @@ namespace Xenko.Graphics
                     ForGlyph(commandList, ref text, ref requestedFontSize, action, ref parameters, startIndex, endIndex, updateGpuResources, xStart, yStart);
                     
                     // update variable before going to next line
-                    yStart += GetTotalLineSpacing(requestedFontSize.Y);
+                    yStart += totalLineSpacing;
                     startIndex = endIndex + 1;
                     endIndex = FindCariageReturn(ref text, startIndex);
                 }
