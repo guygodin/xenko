@@ -349,6 +349,9 @@
     <None Update="Shaders\SpriteEffectExtTextureCube.xksl">
       <LastGenOutput>SpriteEffectExtTextureCube.cs</LastGenOutput>
     </None>
+    <None Update="Shaders\SpriteEffectExtTextureFullSBS.xksl">
+      <LastGenOutput>SpriteEffectExtTextureFullSBS.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Update="SDL2-CS">

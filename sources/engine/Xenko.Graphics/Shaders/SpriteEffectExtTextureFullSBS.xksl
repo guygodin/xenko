@@ -6,12 +6,13 @@ shader SpriteEffectExtTextureFullSBS : SpriteEffectExtTexture
 	stage uint FrameHeight = 0;
 	stage uint TextureWidth = 0;
 	stage uint TextureHeight = 0;
+	stage bool Letterboxed = true;
 
     stage override float4 Shading()
     {
 		float4 color = base.Shading();
-		uint startHeight = FrameHeight * 0.25f;
-		uint endHeight = FrameHeight * 0.75f;
+		uint startHeight = Letterboxed ? FrameHeight * 0.25f : 0;
+		uint endHeight = Letterboxed ? FrameHeight * 0.75f : FrameHeight;
 
 		uint x = streams.TexCoord.x * TextureWidth;
 		uint y = streams.TexCoord.y * TextureHeight;
