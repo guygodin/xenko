@@ -144,6 +144,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTextureFullSBS.xksl</DependentUpon>
     </Compile>
+	<Compile Update="Shaders\SpriteEffectExtTextureHQ.cs">
+	  <DesignTime>True</DesignTime>
+	  <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	  <AutoGen>True</AutoGen>
+	  <DependentUpon>SpriteEffectExtTextureHQ.xksl</DependentUpon>
+	</Compile>
     <Compile Update="Shaders\SpriteEffectExtTextureOU.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -351,6 +357,9 @@
     </None>
     <None Update="Shaders\SpriteEffectExtTextureFullSBS.xksl">
       <LastGenOutput>SpriteEffectExtTextureFullSBS.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureHQ.xksl">
+      <LastGenOutput>SpriteEffectExtTextureHQ.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
