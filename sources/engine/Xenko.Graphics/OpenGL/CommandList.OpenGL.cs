@@ -177,6 +177,49 @@ namespace Xenko.Graphics
                 GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
         }
 
+        public unsafe void Invalidate(Texture depthStencilBuffer, DepthStencilClearOptions options)
+        {
+#if DEBUG
+            GraphicsDevice.EnsureContextActive();
+#endif
+
+#if XENKO_PLATFORM_ANDROID
+            // Device with no background loading context: check if some loading is pending
+            if (GraphicsDevice.AsyncPendingTaskWaiting)
+                GraphicsDevice.ExecutePendingTasks();
+#endif
+
+            var invalidateFBO = GraphicsDevice.FindOrCreateFBO(depthStencilBuffer);
+            if (invalidateFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(invalidateFBO.Target, invalidateFBO.Id);
+
+            var attachments = stackalloc All[2];
+            attachments[0] = All.DepthAttachment;
+            attachments[1] = All.StencilAttachment;
+            GL.InvalidateFramebuffer((DebugSourceExternal)invalidateFBO.Target, 2, attachments);
+
+            if (invalidateFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
+        }
+
+        public unsafe void Invalidate(Texture renderTarget)
+        {
+#if DEBUG
+            GraphicsDevice.EnsureContextActive();
+#endif
+
+            var invalidateFBO = GraphicsDevice.FindOrCreateFBO(renderTarget);
+            if (invalidateFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(invalidateFBO.Target, invalidateFBO.Id);
+
+            var attachments = stackalloc All[1];
+            attachments[0] = All.ColorAttachment0;
+            GL.InvalidateFramebuffer((DebugSourceExternal)invalidateFBO.Target, 1, attachments);
+
+            if (invalidateFBO.Id != boundFBO.Id)
+                GL.BindFramebuffer(boundFBO.Target, boundFBO.Id);
+        }
+
         public unsafe void ClearReadWrite(Buffer buffer, Vector4 value)
         {
 #if DEBUG
