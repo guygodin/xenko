@@ -4,15 +4,15 @@ shader SpriteEffectExtTextureHalfSBS : SpriteEffectExtTexture
 {
 	stage uint FrameWidth = 0;
 	stage uint FrameHeight = 0;
-	stage uint TextureWidth = 0;
-	stage uint TextureHeight = 0;
+	stage uint ViewportWidth = 0;
+	stage uint ViewportHeight = 0;
 
     stage override float4 Shading()
     {
 		float4 color = base.Shading();
 
-		uint x = streams.TexCoord.x * TextureWidth;
-		uint y = streams.TexCoord.y * TextureHeight;
+		uint x = streams.TexCoord.x * ViewportWidth;
+		uint y = streams.TexCoord.y * ViewportHeight;
 		uint middle = FrameWidth / 2;
 		if (y < 4)
 		{
