@@ -75,6 +75,35 @@ namespace Xenko.Graphics
         /// <summary>
         /// Initializes a new instance of the <see cref="Viewport"/> struct.
         /// </summary>
+        /// <param name="width">The width of the viewport in pixels.</param>
+        /// <param name="height">The height of the viewport in pixels.</param>
+        public Viewport(int width, int height)
+        {
+            X = 0f;
+            Y = 0f;
+            Width = width;
+            Height = height;
+            MinDepth = 0;
+            MaxDepth = 1;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Viewport"/> struct.
+        /// </summary>
+        /// <param name="size">The size of the viewport in pixels</param>
+        public Viewport(Size2 size)
+        {
+            X = 0f;
+            Y = 0f;
+            Width = size.Width;
+            Height = size.Height;
+            MinDepth = 0;
+            MaxDepth = 1;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Viewport"/> struct.
+        /// </summary>
         /// <param name="bounds">A bounding box that defines the location and size of the viewport in a render target.</param>
         public Viewport(Rectangle bounds)
         {
