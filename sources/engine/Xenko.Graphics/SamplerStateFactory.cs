@@ -32,6 +32,12 @@ namespace Xenko.Graphics
 
             AnisotropicClamp = SamplerState.New(device, new SamplerStateDescription(TextureFilter.Anisotropic, TextureAddressMode.Clamp)).DisposeBy(this);
             AnisotropicClamp.Name = "SamplerState.AnisotropicClamp";
+
+            CubicWrap = SamplerState.New(device, new SamplerStateDescription(TextureFilter.Cubic, TextureAddressMode.Wrap)).DisposeBy(this);
+            CubicWrap.Name = "SamplerState.CubicWrap";
+
+            CubicClamp = SamplerState.New(device, new SamplerStateDescription(TextureFilter.Cubic, TextureAddressMode.Clamp)).DisposeBy(this);
+            CubicClamp.Name = "SamplerState.CubicClamp";
         }
 
         /// <summary>
@@ -63,5 +69,15 @@ namespace Xenko.Graphics
         /// Default state for anisotropic filtering with texture coordinate clamping.
         /// </summary>
         public readonly SamplerState AnisotropicClamp;
+
+        /// <summary>
+        /// Default state for cubic filtering with texture coordinate wrapping.
+        /// </summary>
+        public readonly SamplerState CubicWrap;
+
+        /// <summary>
+        /// Default state for cubic filtering with texture coordinate clamping.
+        /// </summary>
+        public readonly SamplerState CubicClamp;
     }
 }

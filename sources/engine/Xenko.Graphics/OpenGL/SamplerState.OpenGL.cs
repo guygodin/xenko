@@ -16,6 +16,8 @@ namespace Xenko.Graphics
     {
         private const TextureFilter AnisotropicMask = TextureFilter.Anisotropic & ~TextureFilter.Linear;
         private const TextureFilter ComparisonMask = TextureFilter.ComparisonLinear & ~TextureFilter.Linear;
+        private const int CUBIC_IMG = 0x9139;
+        private const int CUBIC_MIPMAP_LINEAR_IMG = 0x913B;
 
         private TextureWrapMode textureWrapS;
         private TextureWrapMode textureWrapT;
@@ -85,6 +87,10 @@ namespace Xenko.Graphics
                     minFilter = TextureMinFilter.LinearMipmapLinear;
                     magFilter = TextureMagFilter.Nearest;
                     break;
+                case TextureFilter.Cubic:
+                    minFilter = (TextureMinFilter)CUBIC_MIPMAP_LINEAR_IMG;
+                    magFilter = (TextureMagFilter)CUBIC_IMG;
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -98,6 +104,8 @@ namespace Xenko.Graphics
                 minFilterNoMipmap = TextureMinFilter.Linear;
             else if (minFilterNoMipmap == TextureMinFilter.NearestMipmapLinear)
                 minFilterNoMipmap = TextureMinFilter.Nearest;
+            else if (minFilterNoMipmap == (TextureMinFilter)CUBIC_MIPMAP_LINEAR_IMG)
+                minFilterNoMipmap = (TextureMinFilter)CUBIC_IMG;
 #endif
         }
 

@@ -102,5 +102,10 @@ namespace Xenko.Graphics
         /// Use anisotropic interpolation for minification, magnification, and mip-level sampling. Compare the result to the comparison value. 
         /// </summary>
         ComparisonAnisotropic = 213,
+
+        /// <summary>
+        /// Use cubic interpolation for minification, magnification, and mip-level sampling. 
+        /// </summary>
+        Cubic = 512,
     }
 }
