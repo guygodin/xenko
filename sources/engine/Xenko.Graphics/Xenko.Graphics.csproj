@@ -361,6 +361,9 @@
     <None Update="Shaders\SpriteEffectExtTextureHQ.xksl">
       <LastGenOutput>SpriteEffectExtTextureHQ.cs</LastGenOutput>
     </None>
+    <None Update="Shaders\SpriteEffectExtTextureVR.xksl">
+      <LastGenOutput>SpriteEffectExtTextureVR.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Update="SDL2-CS">
