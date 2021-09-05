@@ -23,18 +23,24 @@ shader SpriteEffectExtTextureVR : SpriteEffectExtTexture
 		{
 			// Left eye
 			uv.x = uv.x / 2;
-			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
+			textureColor =  XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
 		else if (StereoMode == 2)
 		{
 			// Right eye
 			uv.x = (uv.x / 2) + 0.5f;
-			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
+			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
 		else
 		{
 			// None
-			return XenkoInternal_TextureExt0.Sample(Sampler, uv);
+			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
+
+		if (HasSRgb)
+		{
+			textureColor = ColorUtility.ToLinear(textureColor);
+		}
+		return textureColor;
     }
 };
