@@ -162,11 +162,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTextureRegular.xksl</DependentUpon>
     </Compile>
-    <Compile Update="Shaders\SpriteEffectExtTextureVR.cs">
+    <Compile Update="Shaders\DefoveationEffect.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>SpriteEffectExtTextureVR.xksl</DependentUpon>
+      <DependentUpon>DefoveationEffect.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SpriteSignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
@@ -281,10 +281,6 @@
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>SpriteEffectExtTexture.cs</LastGenOutput>
     </None>
-    <None Include="Shaders\SpriteEffectExtTextureRegular.xksl">
-      <Generator>XenkoShaderKeyGenerator</Generator>
-      <LastGenOutput>SpriteEffectExtTextureRegular.cs</LastGenOutput>
-    </None>
     <None Include="Shaders\SpriteSignedDistanceFieldFontShader.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>SpriteSignedDistanceFieldFontShader.cs</LastGenOutput>
@@ -361,8 +357,11 @@
     <None Update="Shaders\SpriteEffectExtTextureHQ.xksl">
       <LastGenOutput>SpriteEffectExtTextureHQ.cs</LastGenOutput>
     </None>
-    <None Update="Shaders\SpriteEffectExtTextureVR.xksl">
-      <LastGenOutput>SpriteEffectExtTextureVR.cs</LastGenOutput>
+    <None Update="Shaders\DefoveationEffect.xksl">
+      <LastGenOutput>DefoveationEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureRegular.xksl">
+      <LastGenOutput>SpriteEffectExtTextureRegular.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -6,14 +6,17 @@ shader SpriteEffectExtTexture : ShaderBase
     [Color]
     stage float4 Color = float4(1,1,1,1);
 
-	stage bool HasSRgb = true;
-
     stage Texture2D XenkoInternal_TextureExt0;    // DO NOT RENAME THIS VARIABLE! The ShaderCompiler specifically looks for "TextureExt0".
-
-    stage SamplerState Sampler;
 
     stage stream float2 TexCoord : TEXCOORD0;
     stage stream float4 Position : POSITION;
+
+    stage SamplerState Sampler
+    {
+        Filter = MIN_MAG_MIP_LINEAR;
+        AddressU = Clamp;
+        AddressV = Clamp;
+    };
 
     stage override void VSMain()
     {
@@ -27,11 +30,6 @@ shader SpriteEffectExtTexture : ShaderBase
 
     stage float4 Shading()
     {
-        float4 textureColor = XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord);
-		if (HasSRgb)
-		{
-			textureColor = ColorUtility.ToLinear(textureColor);
-		}
-		return textureColor * Color;
+        return XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord) * Color;
     }
 };

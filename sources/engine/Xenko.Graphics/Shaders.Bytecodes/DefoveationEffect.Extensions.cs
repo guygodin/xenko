@@ -5,7 +5,7 @@ using Xenko.Shaders;
 
 namespace Xenko.Graphics
 {
-    public partial class SpriteEffectExtTextureStereoVR
+    public partial class DefoveationEffect
     {
         private static EffectBytecode bytecode = null;
 

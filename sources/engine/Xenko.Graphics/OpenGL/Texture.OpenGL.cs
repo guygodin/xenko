@@ -39,7 +39,7 @@ namespace Xenko.Graphics
     public partial class Texture
     {
         private const int TextureRowPitchAlignment = 1;
-        private const int TextureSubresourceAlignment = 1;
+        private const int TextureSubresourceAlignment = 1;        
 
         internal const TextureFlags TextureFlagsCustomResourceId = (TextureFlags)0x1000;
 
@@ -153,11 +153,13 @@ namespace Xenko.Graphics
             {
                 GL.GenTextures(1, out TextureId);
 
-                //Android.Opengl.GLES20.GlBindTexture(Android.Opengl.GLES11Ext.GlTextureExternalOes, TextureId);
-
                 //Any "proper" way to do this? (GLES20 could directly accept it, not GLES30 anymore)
                 TextureTarget = (TextureTarget)Android.Opengl.GLES11Ext.GlTextureExternalOes;
                 GL.BindTexture(TextureTarget, TextureId);
+                GL.TexParameter(TextureTarget, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
                 GL.BindTexture(TextureTarget, 0);
             }
         }

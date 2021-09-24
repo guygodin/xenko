@@ -14,6 +14,7 @@ namespace Xenko.Graphics
         // For FakeSamplerState.
         protected SamplerState()
         {
+            Description = new SamplerStateDescription(TextureFilter.Linear, TextureAddressMode.Clamp);
         }
 
         // For FakeSamplerState.

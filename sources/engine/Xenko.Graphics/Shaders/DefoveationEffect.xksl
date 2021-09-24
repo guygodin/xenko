@@ -1,6 +1,6 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
-shader SpriteEffectExtTextureVR : SpriteEffectExtTexture
+shader DefoveationEffect : SpriteEffect
 {
 	stage float BorderSize;
 	stage float CompressedBorderSize;
@@ -18,29 +18,16 @@ shader SpriteEffectExtTextureVR : SpriteEffectExtTexture
 		float2 inverseTex = 1.0f - tex;
 		float2 uv = (nearBorder * tex * tex * DefoveationRatio) + (farBorder * (1.0f - (inverseTex * inverseTex * DefoveationRatio))) + (center * ((tex - BorderSize) * DecompressionRatio + CompressedBorderSize));
 		
-		float4 textureColor;
 		if (StereoMode == 1)
 		{
 			// Left eye
 			uv.x = uv.x / 2;
-			textureColor =  XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
 		else if (StereoMode == 2)
 		{
 			// Right eye
 			uv.x = (uv.x / 2) + 0.5f;
-			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
-		}
-		else
-		{
-			// None
-			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
-		}
-
-		if (HasSRgb)
-		{
-			textureColor = ColorUtility.ToLinear(textureColor);
-		}
-		return textureColor;
+		}		
+		return Texture0.Sample(Sampler, uv);
     }
 };

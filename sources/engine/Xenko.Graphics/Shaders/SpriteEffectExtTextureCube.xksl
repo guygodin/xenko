@@ -13,24 +13,16 @@ shader SpriteEffectExtTextureCube : SpriteBase
     stage override float4 Shading()
     {
 		float2 uv = streams.TexCoord;
-		float4 textureColor;
 		if (StereoMode == 1)
 		{
 			// Left eye
 			uv.x = uv.x / 2;
-			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
 		else if (StereoMode == 2)
 		{
 			// Right eye
 			uv.x = (uv.x / 2) + 0.5f;
-			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
 		}
-		else
-		{
-			// None
-			textureColor = XenkoInternal_TextureExt0.Sample(Sampler, uv);
-		}
-		return ColorUtility.ToLinear(textureColor) * Color;
+		return XenkoInternal_TextureExt0.Sample(Sampler, uv) * Color;
     }
 };
