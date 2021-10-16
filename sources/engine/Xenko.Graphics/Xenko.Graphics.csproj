@@ -91,6 +91,48 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Update="Shaders\DefovationSharpLeft.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefovationSharpLeft.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationLeftEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationLeftEffect.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationRightEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationRightEffect.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationSharpEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationSharpEffect.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationSharpLeft.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationSharpLeft.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationSharpLeftEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationSharpLeftEffect.xksl</DependentUpon>
+    </Compile>
+    <Compile Update="Shaders\DefoveationSharpRightEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DefoveationSharpRightEffect.xksl</DependentUpon>
+    </Compile>
     <Compile Update="Shaders\SignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -131,6 +173,18 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>SpriteEffectExtTextureCube.xksl</DependentUpon>
+    </Compile>    
+    <Compile Update="Shaders\SpriteEffectExtTextureCubeLeft.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SpriteEffectExtTextureCubeLeft.xksl</DependentUpon>
+    </Compile>    
+    <Compile Update="Shaders\SpriteEffectExtTextureCubeRight.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SpriteEffectExtTextureCubeRight.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SpriteEffectExtTextureHalfSBS.cs">
       <AutoGen>True</AutoGen>
@@ -155,12 +209,6 @@
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTextureOU.xksl</DependentUpon>
-    </Compile>
-    <Compile Update="Shaders\SpriteEffectExtTextureRegular.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>SpriteEffectExtTextureRegular.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\DefoveationEffect.cs">
       <AutoGen>True</AutoGen>
@@ -209,12 +257,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Update="Shaders\SpriteBase.cs">
-      <DependentUpon>SpriteBase.xksl</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Update="Shaders\SpriteBatchShader.cs">
       <DependentUpon>SpriteBatchShader.xksl</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -229,12 +271,6 @@
     </Compile>
     <Compile Update="Shaders\SpriteEffect.cs">
       <DependentUpon>SpriteEffect.xksl</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Update="Shaders\Texturing.cs">
-      <DependentUpon>Texturing.xksl</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DesignTime>True</DesignTime>
@@ -336,6 +372,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Update="Shaders\DefovationSharpLeft.xksl">
+      <LastGenOutput>DefovationSharpLeft.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationEffect - Copy.xksl">
+      <LastGenOutput>DefoveationEffect - Copy.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationRightEffect.xksl">
+      <LastGenOutput>DefoveationRightEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationLeftEffect.xksl">
+      <LastGenOutput>DefoveationLeftEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationSharpEffect.xksl">
+      <LastGenOutput>DefoveationSharpEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationSharpLeft.xksl">
+      <LastGenOutput>DefoveationSharpLeft.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationSharpLeftEffect.xksl">
+      <LastGenOutput>DefoveationSharpLeftEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\DefoveationSharpRightEffect.xksl">
+      <LastGenOutput>DefoveationSharpRightEffect.cs</LastGenOutput>
+    </None>
     <None Update="Shaders\EmissiveSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
@@ -351,14 +411,26 @@
     <None Update="Shaders\SpriteEffectExtTextureCube.xksl">
       <LastGenOutput>SpriteEffectExtTextureCube.cs</LastGenOutput>
     </None>
+    <None Update="Shaders\SpriteEffectExtTextureCubeLeft.xksl">
+      <LastGenOutput>SpriteEffectExtTextureCubeLeft.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureCubeRight.xksl">
+      <LastGenOutput>SpriteEffectExtTextureCubeRight.cs</LastGenOutput>
+    </None>
     <None Update="Shaders\SpriteEffectExtTextureFullSBS.xksl">
       <LastGenOutput>SpriteEffectExtTextureFullSBS.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureHalfSBS.xksl">
+      <LastGenOutput>SpriteEffectExtTextureHalfSBS.cs</LastGenOutput>
     </None>
     <None Update="Shaders\SpriteEffectExtTextureHQ.xksl">
       <LastGenOutput>SpriteEffectExtTextureHQ.cs</LastGenOutput>
     </None>
     <None Update="Shaders\DefoveationEffect.xksl">
       <LastGenOutput>DefoveationEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SpriteEffectExtTextureOU.xksl">
+      <LastGenOutput>SpriteEffectExtTextureOU.cs</LastGenOutput>
     </None>
     <None Update="Shaders\SpriteEffectExtTextureRegular.xksl">
       <LastGenOutput>SpriteEffectExtTextureRegular.cs</LastGenOutput>

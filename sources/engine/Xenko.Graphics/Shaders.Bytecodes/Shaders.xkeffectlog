@@ -89,10 +89,44 @@ UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics
     EffectSourceCode.FieldName: binaryBytecode
-
 ---
 !EffectCompileRequest
 EffectName: DefoveationEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: DefoveationLeftEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: DefoveationRightEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: DefoveationSharpEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: DefoveationSharpLeftEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: DefoveationSharpRightEffect
 UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics

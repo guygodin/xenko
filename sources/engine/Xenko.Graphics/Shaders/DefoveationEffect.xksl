@@ -2,32 +2,24 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 shader DefoveationEffect : SpriteEffect
 {
-	stage float BorderSize;
-	stage float CompressedBorderSize;
-	stage float DefoveationRatio;
-	stage float DecompressionRatio;
-	stage int StereoMode;
+    static const float BorderSize = 0.25f;
+	static const float CompressedBorderSize = 0.125f;
+	static const float DefoveationRatio = 2.0f;
+	static const float DecompressionRatio = 1.5f;
+
+	stage float2 Defoveate(in float2 tex)
+	{
+		float2 nearBorder = 1.0 - step(BorderSize, tex);
+		float2 farBorder = step((1.0 - BorderSize), tex);
+		float2 center = 1.0 - nearBorder - farBorder;
+
+		float2 inverseTex = 1.0 - tex;
+		return (nearBorder * tex * tex * DefoveationRatio) + (farBorder * (1.0 - (inverseTex * inverseTex * DefoveationRatio))) + (center * ((tex - BorderSize) * DecompressionRatio + CompressedBorderSize));
+	}
 
     stage override float4 Shading()
     {
-		float2 tex = streams.TexCoord;
-		float2 nearBorder = 1.0f - step(BorderSize, tex);
-		float2 farBorder = step((1.0f - BorderSize), tex);
-		float2 center = 1.0f - nearBorder - farBorder;
-
-		float2 inverseTex = 1.0f - tex;
-		float2 uv = (nearBorder * tex * tex * DefoveationRatio) + (farBorder * (1.0f - (inverseTex * inverseTex * DefoveationRatio))) + (center * ((tex - BorderSize) * DecompressionRatio + CompressedBorderSize));
-		
-		if (StereoMode == 1)
-		{
-			// Left eye
-			uv.x = uv.x / 2;
-		}
-		else if (StereoMode == 2)
-		{
-			// Right eye
-			uv.x = (uv.x / 2) + 0.5f;
-		}		
+		float2 uv = Defoveate(streams.TexCoord);
 		return Texture0.Sample(Sampler, uv);
     }
 };

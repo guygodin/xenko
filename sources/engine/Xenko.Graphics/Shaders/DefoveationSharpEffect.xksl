@@ -1,0 +1,42 @@
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+shader DefoveationSharpEffect : SpriteEffect
+{
+	stage float2 OneOverTexSize;
+    stage float Sharpening = -0.175f; // -0.1 to -0.2
+
+    static const float BorderSize = 0.25f;
+	static const float CompressedBorderSize = 0.125f;
+	static const float DefoveationRatio = 2.0f;
+	static const float DecompressionRatio = 1.5f;
+
+	stage float2 Defoveate(in float2 tex)
+	{
+		float2 nearBorder = 1.0 - step(BorderSize, tex);
+		float2 farBorder = step((1.0 - BorderSize), tex);
+		float2 center = 1.0 - nearBorder - farBorder;
+
+		float2 inverseTex = 1.0 - tex;
+		return (nearBorder * tex * tex * DefoveationRatio) + (farBorder * (1.0 - (inverseTex * inverseTex * DefoveationRatio))) + (center * ((tex - BorderSize) * DecompressionRatio + CompressedBorderSize));
+	}
+
+	stage float3 CAS(in float2 uv)
+    {
+        float3 a = Texture0.Sample(Sampler, uv).rgb;
+        float3 b = Texture0.Sample(Sampler, uv + float2(-OneOverTexSize.x, 0.0)).rgb;
+        float3 c = Texture0.Sample(Sampler, uv + float2( 0.0, -OneOverTexSize.y)).rgb;
+        float3 d = Texture0.Sample(Sampler, uv + float2( OneOverTexSize.x, 0.0)).rgb;
+        float3 e = Texture0.Sample(Sampler, uv + float2( 0.0,  OneOverTexSize.y)).rgb;
+        float2 minMaxG = float2(min(a.g, min(b.g, min(c.g, min(d.g, e.g)))), max(a.g, max(b.g, max(c.g, max(d.g, e.g)))));
+        minMaxG.y += 0.00001f;
+        float AA = sqrt(min(1.0 - minMaxG.y, minMaxG.x) / minMaxG.y);
+        float w = Sharpening * AA;
+        return (w * (b + c + d + e) + a) / (w * 4.0 + 1.0);
+    }
+
+    stage override float4 Shading()
+    {
+        float2 uv = Defoveate(streams.TexCoord);
+		return float4(CAS(uv), 1.0);
+    }
+};

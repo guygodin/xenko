@@ -154,3 +154,9 @@ fastlane/screenshots
 *.user
 project.lock.json
 /.vs
+/sources/engine/Xenko.Graphics/Shaders/UIEffectShader.cs
+/sources/engine/Xenko.Graphics/Shaders/Texturing.cs
+/sources/engine/Xenko.Graphics/Shaders/SpriteSuperSampler.cs
+/sources/engine/Xenko.Graphics/Shaders/SpriteEffectExtTextureRegular.cs
+/sources/engine/Xenko.Graphics/Shaders/SpriteBase.cs
+/sources/engine/Xenko.Graphics/Shaders/SignedDistanceFieldFontShader.cs
