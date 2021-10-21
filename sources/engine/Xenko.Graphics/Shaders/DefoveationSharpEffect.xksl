@@ -28,7 +28,7 @@ shader DefoveationSharpEffect : SpriteEffect
         float3 d = Texture0.Sample(Sampler, uv + float2( OneOverTexSize.x, 0.0)).rgb;
         float3 e = Texture0.Sample(Sampler, uv + float2( 0.0,  OneOverTexSize.y)).rgb;
         float2 minMaxG = float2(min(a.g, min(b.g, min(c.g, min(d.g, e.g)))), max(a.g, max(b.g, max(c.g, max(d.g, e.g)))));
-        minMaxG.y += 0.0001f;
+        minMaxG.y += 0.0005f;
         float AA = sqrt(min(1.0 - minMaxG.y, minMaxG.x) / minMaxG.y);
         float w = Sharpening * AA;
         return (w * (b + c + d + e) + a) / (w * 4.0 + 1.0);
