@@ -6,6 +6,8 @@ shader SpriteEffectExtTexture : ShaderBase
     [Color]
     stage float4 Color = float4(1,1,1,1);
 
+    stage bool IsHDR = false;
+
     stage Texture2D XenkoInternal_TextureExt0;    // DO NOT RENAME THIS VARIABLE! The ShaderCompiler specifically looks for "TextureExt0".
 
     stage stream float2 TexCoord : TEXCOORD0;
@@ -30,6 +32,11 @@ shader SpriteEffectExtTexture : ShaderBase
 
     stage float4 Shading()
     {
-        return XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord) * Color;
+        var value = XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord).rgb;
+        if (IsHDR)
+        {
+            value = ColorUtility.ToSDR(value);
+        }
+        return float4(value, 1.0) * Color;
     }
 };

@@ -21,4 +21,45 @@ shader ColorUtility
         float3 sRGB = sRGBa.rgb;
         return float4(sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878), sRGBa.a);
     }
+
+    float3 ToSDR(float3 hdr)
+    {
+        // Configuration
+        static const float peakLuminance = 100.0; // Peak playback screen luminance in nits
+        static const float knee = 0.75; // Compressor knee position
+        static const float ratio = 5.0; // Compressor ratio: 1 = disabled, <1 = expander
+        static const float maxCLL = 10000.0; // Maximum content light level in nits
+
+        // Precalculated values
+        static const float gain = maxCLL / peakLuminance;
+        static const float compressor = 1.0 / ratio;
+
+        // PQ constants
+        static const float m1inv = 16384 / 2610.0;
+        static const float m2inv = 32 / 2523.0;
+        static const float c1 = 3424 / 4096.0;
+        static const float c2 = 2413 / 128.0;
+        static const float c3 = 2392 / 128.0;
+
+        static const float3x3 bt2020_to_bt709 =
+        {
+            1.6604910021, -0.5876411388, -0.0728498633,
+            -0.1245504745, 1.1328998971, -0.0083494226,
+            -0.0181507634, -0.1005788980, 1.1187296614
+        };
+
+        float3 p = pow(abs(hdr), m2inv);
+        float3 d = max(p - c1, 0) / (c2 - c3 * p);
+        float3 luminance = pow(abs(d), m1inv) * gain;
+
+        float3 pixel = mul(bt2020_to_bt709, luminance);
+
+        float peekGain = max(pixel.r, max(pixel.g, pixel.b));
+        float3 rgb = pixel * (peekGain < knee ? peekGain : knee + max(peekGain - knee, 0) * compressor) / peekGain;
+
+        float3 S1 = sqrt(rgb);
+        float3 S2 = sqrt(S1);
+        float3 S3 = sqrt(S2);
+        return 0.585122381 * S1 + 0.783140355 * S2 - 0.368262736 * S3;
+    }
 };

@@ -19,6 +19,7 @@ namespace Xenko.Rendering
     public static partial class SpriteEffectExtTextureKeys
     {
         public static readonly ValueParameterKey<Color4> Color = ParameterKeys.NewValue<Color4>(new Color4(1,1,1,1));
+        public static readonly ValueParameterKey<bool> IsHDR = ParameterKeys.NewValue<bool>(false);
         public static readonly ObjectParameterKey<Texture> XenkoInternal_TextureExt0 = ParameterKeys.NewObject<Texture>();
         public static readonly ObjectParameterKey<SamplerState> Sampler = ParameterKeys.NewObject<SamplerState>();
     }
