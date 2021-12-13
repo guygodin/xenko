@@ -51,7 +51,9 @@ namespace Xenko.Assets.SpriteFont.Compiler
         {
             var factory = new Factory();
 
-            var fontFace = options.FontSource.GetFontFace();
+            var font = options.FontSource.GetFont();
+            var fontFace = font != null ? new FontFace(font) : options.FontSource.GetFontFace();
+            var fallbackFontFace = options.FontSource.GetFallbackFontFace();
             
             var fontMetrics = fontFace.Metrics;
 
@@ -82,15 +84,19 @@ namespace Xenko.Assets.SpriteFont.Compiler
 
             // Rasterize each character in turn.
             foreach (var character in characters)
-                glyphList.Add(ImportGlyph(factory, fontFace, character, fontMetrics, fontSize, options.FontType.AntiAlias));
+                glyphList.Add(ImportGlyph(factory, font, fontFace, fallbackFontFace, character, fontMetrics, fontSize, options.FontType.AntiAlias));
 
             Glyphs = glyphList;
 
             factory.Dispose();
         }
         
-        private Glyph ImportGlyph(Factory factory, FontFace fontFace, char character, FontMetrics fontMetrics, float fontSize, FontAntiAliasMode antiAliasMode)
+        private Glyph ImportGlyph(Factory factory, SharpDX.DirectWrite.Font font, FontFace fontFace, FontFace fallbackFontFace, char character, FontMetrics fontMetrics, float fontSize, FontAntiAliasMode antiAliasMode)
         {
+            if (font != null && fallbackFontFace != null && !font.HasCharacter(character))
+            {
+                fontFace = fallbackFontFace;
+            }
             var indices = fontFace.GetGlyphIndices(new int[] { character });
 
             var metrics = fontFace.GetDesignGlyphMetrics(indices, false);

@@ -14,10 +14,22 @@ namespace Xenko.Assets.SpriteFont
         public virtual Graphics.Font.FontStyle Style { get; set; } = Graphics.Font.FontStyle.Regular;
 
         /// <summary>
+        /// Gets the associated <see cref="Font"/>
+        /// </summary>
+        /// <returns><see cref="Font"/> from the specified source or <c>null</c> if not found</returns>
+        public abstract Font GetFont();
+
+        /// <summary>
         /// Gets the associated <see cref="FontFace"/>
         /// </summary>
         /// <returns><see cref="FontFace"/> from the specified source or <c>null</c> if not found</returns>
         public abstract FontFace GetFontFace();
+
+        /// <summary>
+        /// Gets the fallback <see cref="FontFace"/>
+        /// </summary>
+        /// <returns>Fallback <see cref="FontFace"/> from the specified source or <c>null</c> if not found</returns>
+        public abstract FontFace GetFallbackFontFace();
 
         /// <summary>
         /// Gets the actual file path to the font file

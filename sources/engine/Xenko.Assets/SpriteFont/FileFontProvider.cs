@@ -28,6 +28,11 @@ namespace Xenko.Assets.SpriteFont
         [Display("Source")]
         public UFile Source { get; set; } = new UFile("");
 
+        public override Font GetFont()
+        {
+            return null;
+        }
+
         /// <inheritdoc/>
         public override FontFace GetFontFace()
         {
@@ -66,6 +71,11 @@ namespace Xenko.Assets.SpriteFont
 
                 return new FontFace(factory, faceType, new[] { fontFile }, 0, fontSimulations);
             }
+        }
+
+        public override FontFace GetFallbackFontFace()
+        {
+            return null;
         }
 
         /// <inheritdoc/>

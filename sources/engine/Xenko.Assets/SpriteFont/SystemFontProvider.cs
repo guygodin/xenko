@@ -40,6 +40,16 @@ namespace Xenko.Assets.SpriteFont
         public string FontName { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the font family to use when the <see cref="Source"/> is not specified.
+        /// </summary>
+        /// <userdoc>
+        /// The name of the font family to use. Only the fonts installed on the system can be used here.
+        /// </userdoc>
+        [DataMember(30)]
+        [Display("Fallback Font Name")]
+        public string FallbackFontName { get; set; }
+
+        /// <summary>
         /// Gets or sets the style of the font. A combination of 'regular', 'bold', 'italic'. Default is 'regular'.
         /// </summary>
         /// <userdoc>
@@ -50,11 +60,11 @@ namespace Xenko.Assets.SpriteFont
         public override Xenko.Graphics.Font.FontStyle Style { get; set; } = Graphics.Font.FontStyle.Regular;
 
         /// <inheritdoc/>
-        public override FontFace GetFontFace()
+        public override Font GetFont()
         {
             var factory = new Factory();
 
-            SharpDX.DirectWrite.Font font;
+            Font font;
             using (var fontCollection = factory.GetSystemFontCollection(false))
             {
                 int index;
@@ -62,6 +72,40 @@ namespace Xenko.Assets.SpriteFont
                 {
                     // Lets try to import System.Drawing for old system bitmap fonts (like MS Sans Serif)
                     throw new FontNotFoundException(FontName);
+                }
+
+                using (var fontFamily = fontCollection.GetFontFamily(index))
+                {
+                    var weight = Style.IsBold() ? FontWeight.Bold : FontWeight.Regular;
+                    var style = Style.IsItalic() ? SharpDX.DirectWrite.FontStyle.Italic : SharpDX.DirectWrite.FontStyle.Normal;
+                    font = fontFamily.GetFirstMatchingFont(weight, FontStretch.Normal, style);
+                }
+            }
+
+            return font;
+        }
+
+        /// <inheritdoc/>
+        public override FontFace GetFontFace()
+        {
+            return new FontFace(GetFont());
+        }
+
+        public override FontFace GetFallbackFontFace()
+        {
+            if (FallbackFontName == null)
+                return null;
+
+            var factory = new Factory();
+
+            Font font;
+            using (var fontCollection = factory.GetSystemFontCollection(false))
+            {
+                int index;
+                if (!fontCollection.FindFamilyName(FallbackFontName, out index))
+                {
+                    // Lets try to import System.Drawing for old system bitmap fonts (like MS Sans Serif)
+                    throw new FontNotFoundException(FallbackFontName);
                 }
 
                 using (var fontFamily = fontCollection.GetFontFamily(index))

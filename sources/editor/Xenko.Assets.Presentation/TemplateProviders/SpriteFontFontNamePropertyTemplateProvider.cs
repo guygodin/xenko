@@ -12,6 +12,7 @@ namespace Xenko.Assets.Presentation.TemplateProviders
     public class SpriteFontFontNamePropertyTemplateProvider : NodeViewModelTemplateProvider
     {
         public static string FontNamePropertyName = nameof(SystemFontProvider.FontName);
+        public static string FallbackFontNamePropertyName = nameof(SystemFontProvider.FallbackFontName);
 
         public override string Name => "SpriteFontFontName";
 
@@ -20,7 +21,7 @@ namespace Xenko.Assets.Presentation.TemplateProviders
             if (!typeof(SpriteFontAsset).IsAssignableFrom(node.Root.Type))
                 return false;
 
-            return node.Name == FontNamePropertyName;
+            return node.Name == FontNamePropertyName || node.Name == FallbackFontNamePropertyName;
         }
     }
 }
