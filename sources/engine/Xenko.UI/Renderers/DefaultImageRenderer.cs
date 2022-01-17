@@ -26,6 +26,10 @@ namespace Xenko.UI.Renderers
                 return;
 
             var color = element.RenderOpacity != 1f ? element.RenderOpacity * image.Color : image.Color;
+            if (!element.IsEnabled)
+            {
+                color *= 0.65f;
+            }
             Batch.DrawImage(sprite.Texture, ref element.WorldMatrixInternal, ref sprite.RegionInternal, ref element.RenderSizeInternal, ref sprite.BordersInternal, ref color, context.DepthBias, sprite.Orientation);
         }
     }

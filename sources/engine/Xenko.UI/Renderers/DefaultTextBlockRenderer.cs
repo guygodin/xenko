@@ -32,9 +32,11 @@ namespace Xenko.UI.Renderers
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var color = textBlock.IsEnabled ? textBlock.TextColor : Color.FromBgra(0xFF555555);
+            var color = textBlock.TextColor;
             if (textBlock.RenderOpacity != 1f)
                 color *= textBlock.RenderOpacity;
+            if (!textBlock.IsEnabled)
+                color *= 0.65f;
             // optimization: don't draw the text if transparent
             if (color.A == 0)
                 return;

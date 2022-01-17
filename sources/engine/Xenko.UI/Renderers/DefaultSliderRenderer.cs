@@ -26,7 +26,7 @@ namespace Xenko.UI.Renderers
             var slider = (Slider)element;
             var axis = (int)slider.Orientation;
             var axisPrime = (axis + 1) % 2;
-            var color = slider.RenderOpacity * Color.White;
+            var color = slider.IsEnabled ? (slider.RenderOpacity * Color.White) : (0.65f * slider.RenderOpacity * Color.White);
             var isGaugeReverted = axis == 1 ? !slider.IsDirectionReversed : slider.IsDirectionReversed; // we want the track going up from the bottom in vertical mode by default
             var sliderRatio = MathUtil.InverseLerp(slider.Minimum, slider.Maximum, slider.Value);
             var trackOffsets = new Vector2(slider.TrackStartingOffsets[axis], slider.TrackStartingOffsets[axisPrime]);
@@ -34,7 +34,7 @@ namespace Xenko.UI.Renderers
             var isMouseDown = slider.IsTouched;
             var isMouseOver = slider.MouseOverState == MouseOverState.MouseOverElement;
 
-            var image = (isMouseDown ? slider.MouseDownTrackBackgroundImage : (isMouseOver ? slider.MouseOverTrackBackgroundImage : slider.TrackBackgroundImage))?.GetSprite();
+            var image = (isMouseDown ? slider.MouseDownTrackBackgroundImage : ((slider.IsEnabled && isMouseOver) ? slider.MouseOverTrackBackgroundImage : slider.TrackBackgroundImage))?.GetSprite();
             var trackIdealSize = image != null ? new Vector2?(image.SizeInPixels) : null;
             // draws the track background
             if (image?.Texture != null)
@@ -142,7 +142,7 @@ namespace Xenko.UI.Renderers
             }
 
             //draws the thumb
-            image = (isMouseOver ? slider.MouseOverThumbImage : slider.ThumbImage)?.GetSprite();
+            image = ((slider.IsEnabled && isMouseOver) ? slider.MouseOverThumbImage : slider.ThumbImage)?.GetSprite();
             if (image?.Texture != null)
             {
                 var imageAxis = (int)image.Orientation;
