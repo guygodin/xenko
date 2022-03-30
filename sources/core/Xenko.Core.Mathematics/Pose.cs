@@ -46,6 +46,20 @@ namespace Xenko.Core.Mathematics
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="scale"></param>
+        /// <param name="matrix"></param>
+        public void GetViewMatrix(ref Matrix scale, out Matrix matrix)
+        {
+            Matrix.RotationQuaternion(ref Orientation, out var view);
+            view.TranslationVector = Position;
+            view.Invert();
+
+            Matrix.Multiply(ref scale, ref view, out matrix);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="matrix"></param>
         public void GetWorldMatrix(out Matrix matrix)
         {
