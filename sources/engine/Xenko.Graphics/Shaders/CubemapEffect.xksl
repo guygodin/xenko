@@ -1,0 +1,16 @@
+
+shader CubemapEffect : SpriteBase
+{
+    stage float Opacity = 1.0f;
+
+    stage override void VSMain()
+    {
+        streams.ShadingPosition = mul(streams.Position, MatrixTransform).xyww;
+    }
+
+    // Shading of the sprite
+    stage override float4 Shading()
+    {
+        return float4(TextureCube0.Sample(Sampler, streams.Position.xyz).rgb * Opacity, 1.0f);
+    }
+};

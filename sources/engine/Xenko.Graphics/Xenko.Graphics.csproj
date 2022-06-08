@@ -91,6 +91,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DesignTime>True</DesignTime>
     </Compile>
+	  <Compile Update="Shaders\CubemapEffect.cs">
+		  <DesignTime>True</DesignTime>
+		  <DesignTimeSharedInput>True</DesignTimeSharedInput>
+		  <AutoGen>True</AutoGen>
+		  <DependentUpon>CubemapEffect.xksl</DependentUpon>
+	  </Compile>
     <Compile Update="Shaders\DefovationSharpLeft.cs">
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -400,6 +406,10 @@
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>EmissiveSpriteEffect.cs</LastGenOutput>
     </None>
+	<None Update="Shaders\CubemapEffect.xksl">
+	  <Generator>XenkoShaderKeyGenerator</Generator>
+	  <LastGenOutput>CubemapEffect.cs</LastGenOutput>
+	</None>
     <None Update="Shaders\HandEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>HandEffect.cs</LastGenOutput>

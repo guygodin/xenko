@@ -107,5 +107,26 @@ namespace Xenko.Graphics
 
             return new Texture(device).InitializeFrom(TextureDescription.NewCube(size, format, textureFlags, usage), textureData);
         }
+
+        /// <summary>
+        /// Creates a new Cube <see cref="Texture" /> from a initial data..
+        /// </summary>
+        /// <param name="device">The <see cref="GraphicsDevice" />.</param>
+        /// <param name="size">The size (in pixels) of the top-level faces of the cube texture.</param>
+        /// <param name="mipCount">Number of mipmaps, set to true to have all mipmaps, set to an int &gt;=1 for a particular mipmap count.</param>
+        /// <param name="format">Describes the format to use.</param>
+        /// <param name="textureData">an array of 6 textures. See remarks</param>
+        /// <param name="textureFlags">The texture flags.</param>
+        /// <param name="usage">The usage.</param>
+        /// <returns>A new instance of Cube <see cref="Texture" /> class.</returns>
+        /// <exception cref="System.ArgumentException">Invalid texture datas. First dimension must be equal to 6;textureData</exception>
+        /// <remarks>The first dimension of mipMapTextures describes the number of array (TextureCube Array), the second is the texture data for a particular cube face.</remarks>
+        public static Texture NewCube(GraphicsDevice device, int size, MipMapCount mipCount, PixelFormat format, DataBox[] textureData, TextureFlags textureFlags = TextureFlags.ShaderResource, GraphicsResourceUsage usage = GraphicsResourceUsage.Immutable)
+        {
+            //if (textureData.Length != 6)
+            //    throw new ArgumentException("Invalid texture datas. First dimension must be equal to 6", "textureData");
+
+            return new Texture(device).InitializeFrom(TextureDescription.NewCube(size, mipCount, format, textureFlags, usage), textureData);
+        }
     }
 }
