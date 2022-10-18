@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
@@ -20,7 +20,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
     /// When a registed navigation mesh is reloaded, <see cref="Changed"/> will get called
     /// </summary>
     [DataContract]
-    public class NavigationMeshManager : IAsyncDisposable
+    public class NavigationMeshManager : Core.IAsyncDisposable
     {
         [DataMember]
         public readonly Dictionary<AssetId, NavigationMesh> Meshes = new Dictionary<AssetId, NavigationMesh>();

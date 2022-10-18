@@ -11,7 +11,7 @@ using Xenko.Core.Reflection;
 
 namespace Xenko.Editor.EditorGame.Game
 {
-    public sealed class EditorGameServiceRegistry : IAsyncDisposable
+    public sealed class EditorGameServiceRegistry : Core.IAsyncDisposable
     {
         public List<IEditorGameService> Services { get; } = new List<IEditorGameService>();
 
