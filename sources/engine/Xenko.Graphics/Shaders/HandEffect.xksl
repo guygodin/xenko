@@ -13,7 +13,7 @@ shader HandEffect : ShaderBase
     {
         stage matrix MatrixTransform;
         stage matrix View;
-        stage matrix Joints[25];
+        stage matrix Joints[26];
     }
 	
     stage float Opacity = 1.0f;
