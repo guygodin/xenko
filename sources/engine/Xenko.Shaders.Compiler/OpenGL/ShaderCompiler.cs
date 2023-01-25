@@ -91,13 +91,15 @@ namespace Xenko.Shaders.Compiler.OpenGL
                     shader = shader.Replace("#version 300 es", "#version 300 es\n#extension GL_OES_EGL_image_external_essl3 : require");
                 }
 
-                if (sourceFilename.Contains("Defoveation"))
+                if (sourceFilename.Contains("Defoveation") || sourceFilename.Contains("Sharpen"))
                 {
                     shader = shader.Replace("precision highp", "precision mediump");
                     shader = shader.Replace("Defoveate_id4(streams.TexCoord_id62)", "Defoveate_id4(v_TEXCOORD0)");
+                    shader = shader.Replace("uv = streams.TexCoord_id62", "uv = v_TEXCOORD0");
                     shader = shader.Replace("vec2 OneOverTexSize", "highp vec2 OneOverTexSize");
                     shader = shader.Replace("in vec2 v_TEXCOORD0", "in highp vec2 v_TEXCOORD0");
                     shader = shader.Replace("vec2 uv", "highp vec2 uv");
+                    shader = shader.Replace("vec2 normUV", "highp vec2 normUV");
                     shader = shader.Replace("uv + vec2(", "uv + highp vec2(");
                     shader = shader.Replace("vec2 tex", "highp vec2 tex");
                     shader = shader.Replace("vec2 inverseTex", "highp vec2 inverseTex");

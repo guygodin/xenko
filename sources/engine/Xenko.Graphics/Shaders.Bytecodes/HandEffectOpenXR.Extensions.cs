@@ -5,7 +5,7 @@ using Xenko.Shaders;
 
 namespace Xenko.Graphics
 {
-    public partial class DefoveationSharpLeftEffect
+    public partial class HandEffectOpenXR
     {
         private static EffectBytecode bytecode = null;
 

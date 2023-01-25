@@ -11,7 +11,7 @@ namespace Xenko.Core.Mathematics
     /// Position and orientation together.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose
+    public struct Pose : IEquatable<Pose>
     {
         #region Static Fields
         /// <summary>
@@ -29,6 +29,13 @@ namespace Xenko.Core.Mathematics
         /// The position
         /// </summary>
         public Vector3 Position;
+        /// <summary>
+        /// Gets a value indicating if the is pose is 
+        /// </summary>
+        public bool IsIdentity
+        {
+            get { return Equals(Identity); }
+        }
         #endregion
 
         #region Methods
@@ -79,12 +86,69 @@ namespace Xenko.Core.Mathematics
         }
         #endregion
 
+        #region Overrides
+        /// <summary>
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// </summary>
+        /// <param name="value">The <see cref="object"/> to compare with this instance.</param>
+        /// <returns>
+        /// <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object value)
+        {
+            if (value == null)
+                return false;
+
+            if (value.GetType() != GetType())
+                return false;
+
+            return Equals((Pose)value);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return Position.GetHashCode() + Orientation.GetHashCode();
+        }
+        #endregion
+
+        #region IEquatable<Pose>
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Pose"/> is equal to this instance.
+        /// </summary>
+        /// <param name="other">The <see cref="Pose"/> to compare with this instance.</param>
+        /// <returns>
+        /// <c>true</c> if the specified <see cref="Pose"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Equals(Pose other)
+        {
+            return Position.Equals(other.Position) && Orientation.Equals(other.Orientation);
+        }
+        #endregion
+
         #region Operators
         public static Pose operator *(Pose left, Pose right)
         {
             Pose result;
             Multiply(ref left, ref right, out result);
             return result;
+        }
+
+        public static bool operator ==(in Pose left, in Pose right)
+        {
+            return left.Equals(right);
+        }
+
+
+        public static bool operator !=(in Pose left, in Pose right)
+        {
+            return !left.Equals(right);
         }
         #endregion
 

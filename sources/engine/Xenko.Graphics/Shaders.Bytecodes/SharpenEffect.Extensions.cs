@@ -5,7 +5,7 @@ using Xenko.Shaders;
 
 namespace Xenko.Graphics
 {
-    public partial class DefoveationLeftEffect
+    public partial class SharpenEffect
     {
         private static EffectBytecode bytecode = null;
 

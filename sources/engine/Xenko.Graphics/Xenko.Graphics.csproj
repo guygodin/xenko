@@ -103,18 +103,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DefovationSharpLeft.xksl</DependentUpon>
     </Compile>
-    <Compile Update="Shaders\DefoveationLeftEffect.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DefoveationLeftEffect.xksl</DependentUpon>
-    </Compile>
-    <Compile Update="Shaders\DefoveationRightEffect.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DefoveationRightEffect.xksl</DependentUpon>
-    </Compile>
     <Compile Update="Shaders\DefoveationSharpEffect.cs">
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -127,17 +115,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DefoveationSharpLeft.xksl</DependentUpon>
     </Compile>
-    <Compile Update="Shaders\DefoveationSharpLeftEffect.cs">
+    <Compile Update="Shaders\SharpenEffect.cs">
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>DefoveationSharpLeftEffect.xksl</DependentUpon>
-    </Compile>
-    <Compile Update="Shaders\DefoveationSharpRightEffect.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DefoveationSharpRightEffect.xksl</DependentUpon>
+      <DependentUpon>SharpenEffect.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
@@ -246,6 +228,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DesignTime>True</DesignTime>
     </Compile>
+	<Compile Update="Shaders\HandEffectOpenXR.cs">
+		<DependentUpon>HandEffectOpenXR.xksl</DependentUpon>
+		<AutoGen>True</AutoGen>
+		<DesignTimeSharedInput>True</DesignTimeSharedInput>
+		<DesignTime>True</DesignTime>
+	</Compile>
     <Compile Update="Shaders\SpriteBatch.cs">
       <DependentUpon>SpriteBatch.xkfx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -384,23 +372,11 @@
     <None Update="Shaders\DefoveationEffect - Copy.xksl">
       <LastGenOutput>DefoveationEffect - Copy.cs</LastGenOutput>
     </None>
-    <None Update="Shaders\DefoveationRightEffect.xksl">
-      <LastGenOutput>DefoveationRightEffect.cs</LastGenOutput>
-    </None>
-    <None Update="Shaders\DefoveationLeftEffect.xksl">
-      <LastGenOutput>DefoveationLeftEffect.cs</LastGenOutput>
-    </None>
     <None Update="Shaders\DefoveationSharpEffect.xksl">
       <LastGenOutput>DefoveationSharpEffect.cs</LastGenOutput>
     </None>
     <None Update="Shaders\DefoveationSharpLeft.xksl">
       <LastGenOutput>DefoveationSharpLeft.cs</LastGenOutput>
-    </None>
-    <None Update="Shaders\DefoveationSharpLeftEffect.xksl">
-      <LastGenOutput>DefoveationSharpLeftEffect.cs</LastGenOutput>
-    </None>
-    <None Update="Shaders\DefoveationSharpRightEffect.xksl">
-      <LastGenOutput>DefoveationSharpRightEffect.cs</LastGenOutput>
     </None>
     <None Update="Shaders\EmissiveSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
@@ -414,9 +390,16 @@
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>HandEffect.cs</LastGenOutput>
     </None>
+    <None Update="Shaders\HandEffectOpenXR.xksl">
+		<Generator>XenkoShaderKeyGenerator</Generator>
+      <LastGenOutput>HandEffectOpenXR.cs</LastGenOutput>
+    </None>
     <None Update="Shaders\LightSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>LightSpriteEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\SharpenEffect.xksl">
+      <LastGenOutput>SharpenEffect.cs</LastGenOutput>
     </None>
     <None Update="Shaders\SpriteEffectExtTextureCube.xksl">
       <LastGenOutput>SpriteEffectExtTextureCube.cs</LastGenOutput>
