@@ -47,8 +47,8 @@ namespace Xenko.Core
             var type = typeof(T);
             lock (registeredService)
             {
-                if (registeredService.ContainsKey(type))
-                    return (T)registeredService[type];
+                if (registeredService.TryGetValue(type, out var service))
+                    return (T)service;
             }
 
             return null;
@@ -63,8 +63,6 @@ namespace Xenko.Core
             var type = typeof(T);
             lock (registeredService)
             {
-                if (registeredService.ContainsKey(type))
-                    throw new ArgumentException("Service is already registered with this type", nameof(type));
                 registeredService.Add(type, service);
             }
             OnServiceAdded(new ServiceEventArgs(type, service));

@@ -121,9 +121,6 @@ namespace Xenko.Core.IO
         {
             if (provider.RootPath != null)
             {
-               if (providers.ContainsKey(provider.RootPath))
-                   throw new InvalidOperationException(string.Format("A Virtual File Provider with the root path \"{0}\" already exists.", provider.RootPath)); 
-
                providers.Add(provider.RootPath, provider);
             }
         }

@@ -367,10 +367,10 @@ namespace Xenko.Graphics
         /// </returns>
         public static PixelFormat ToSRgb(this PixelFormat format)
         {
-            if (format.IsSRgb() || !sRgbConvertion.ContainsKey(format))
+            if (format.IsSRgb() || !sRgbConvertion.TryGetValue(format, out var sRgbFormat))
                 return format;
 
-            return sRgbConvertion[format];
+            return sRgbFormat;
         }
 
         /// <summary>
@@ -382,10 +382,10 @@ namespace Xenko.Graphics
         /// </returns>
         public static PixelFormat ToNonSRgb(this PixelFormat format)
         {
-            if (!format.IsSRgb() || !sRgbConvertion.ContainsKey(format))
+            if (!format.IsSRgb() || !sRgbConvertion.TryGetValue(format, out var nonSrgbFormat))
                 return format;
 
-            return sRgbConvertion[format];
+            return nonSrgbFormat;
         }
 
         /// <summary>

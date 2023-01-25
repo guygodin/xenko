@@ -94,11 +94,10 @@ namespace Xenko.Graphics.Font
             Glyph glyph = null;
             fixScaling = new Vector2(1, 1);
 
-            if (!CharacterToGlyph.ContainsKey(character))
+            if (!CharacterToGlyph.TryGetValue(character, out glyph))
+            {
                 Logger.Warning($"Character '{character}' is not available in the static font character map");
-            else
-                glyph = CharacterToGlyph[character];
-
+            }
             return glyph;
         }
     }

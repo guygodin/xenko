@@ -93,10 +93,10 @@ namespace Xenko.Audio
         /// <exception cref="System.ArgumentException">The provided listener was not present in the Audio System.</exception>
         internal void RemoveListener(AudioListenerComponent listener)
         {
-            if (!Listeners.ContainsKey(listener))
+            if (!Listeners.Remove(listener))
+            {
                 throw new ArgumentException("The provided listener was not present in the Audio System.");
-
-            Listeners.Remove(listener);
+            }
         }
 
         public override void Update(GameTime gameTime)
