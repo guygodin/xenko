@@ -101,12 +101,11 @@ namespace Xenko.Graphics
         }
 
         public void Reset()
-        {
+        {            
         }
 
         public void Flush()
         {
-            
         }
 
         public CompiledCommandList Close()
@@ -366,6 +365,9 @@ namespace Xenko.Graphics
             // Clear active texture state
             activeTexture = 0;
             GL.ActiveTexture(TextureUnit.Texture0);
+
+            // Clear index buffer
+            SetIndexBuffer(null, 0, false);
 
             // set default states
             currentPipelineState = GraphicsDevice.DefaultPipelineState;

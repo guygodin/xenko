@@ -43,6 +43,11 @@ namespace Xenko.Core.Mathematics
         private const string ToStringFormat = "A:{0} R:{1} G:{2} B:{3}";
 
         /// <summary>
+        /// The Transparent color (0, 0, 0, 0).
+        /// </summary>
+        public static readonly Color4 Transparent = default;
+
+        /// <summary>
         /// The Black color (0, 0, 0, 1).
         /// </summary>
         public static readonly Color4 Black = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
