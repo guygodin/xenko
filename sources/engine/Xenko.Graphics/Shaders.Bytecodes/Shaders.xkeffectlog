@@ -84,6 +84,13 @@ UsedParameters:
     EffectSourceCode.FieldName: binaryBytecode
 ---
 !EffectCompileRequest
+EffectName: SpriteEffectExtTextureChroma
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
 EffectName: HandEffect
 UsedParameters:
     EffectSourceCode.Enable: true
@@ -124,3 +131,4 @@ UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics
     EffectSourceCode.FieldName: binaryBytecode
+
