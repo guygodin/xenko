@@ -7,8 +7,8 @@ shader SpriteEffectExtTexture : ShaderBase
     stage float4 Color = float4(1,1,1,1);
 
     stage bool IsChromaActive = false;
-    stage float Similarity = 0;
-    stage float Smoothness = 0.01;
+    stage float Similarity = 0.2;
+    stage float Smoothness = 0.1;
 	[Color]
 	stage float3 ChromaKeyColor = float3(0.0, 0.0, 0.0);
 
@@ -37,7 +37,7 @@ shader SpriteEffectExtTexture : ShaderBase
 
         if(IsChromaActive) 
         {
-            float chromaDist = distance(color, ChromaKeyColor)/sqrt(3); 
+            float chromaDist = distance(color, ChromaKeyColor)/1.7320508; 
 
             float baseMask = chromaDist - Similarity;
             float fullMask = pow(saturate(baseMask/ Smoothness), 1.5);

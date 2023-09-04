@@ -23,8 +23,8 @@ namespace Xenko.Rendering
         public static readonly ObjectParameterKey<Texture> XenkoInternal_TextureExt0 = ParameterKeys.NewObject<Texture>();
         public static readonly ObjectParameterKey<SamplerState> Sampler = ParameterKeys.NewObject<SamplerState>();
         public static readonly ValueParameterKey<bool> IsChromaActive = ParameterKeys.NewValue<bool>(false);
-        public static readonly ValueParameterKey<float> Similarity = ParameterKeys.NewValue<float>(0.0f);
-        public static readonly ValueParameterKey<float> Smoothness = ParameterKeys.NewValue<float>(0.01f);
+        public static readonly ValueParameterKey<float> Similarity = ParameterKeys.NewValue<float>(0.2f);
+        public static readonly ValueParameterKey<float> Smoothness = ParameterKeys.NewValue<float>(0.1f);
         public static readonly ValueParameterKey<Color3> ChromaKeyColor = ParameterKeys.NewValue<Color3>(new Color3(0.0f, 0.0f, 0.0f));
     }
 }
