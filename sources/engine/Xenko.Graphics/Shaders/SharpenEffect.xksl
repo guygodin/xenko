@@ -27,7 +27,7 @@ shader SharpenEffect : SpriteEffect
         
         if (length(normUV) <= 0.75)
         {
-            return float4(CAS(a.rgb, uv), 1.0);
+            return float4(CAS(a.rgb, uv), a.a);
         }
         return a;
     }
