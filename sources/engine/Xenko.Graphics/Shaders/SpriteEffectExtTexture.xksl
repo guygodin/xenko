@@ -43,7 +43,8 @@ shader SpriteEffectExtTexture : ShaderBase
             float fullMask = pow(saturate(baseMask / Smoothness), 1.5f);
 
             color.a = fullMask;
-        }        
+            color.rgb *= step(0.0001, fullMask);
+        }
 
 		streams.ColorTarget = color;
     }
