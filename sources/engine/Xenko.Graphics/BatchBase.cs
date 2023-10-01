@@ -245,18 +245,22 @@ namespace Xenko.Graphics
 
         protected void CheckBeginHasBeenCalled(string functionName)
         {
+#if DEBUG
             if (!isBeginCalled)
             {
                 throw new InvalidOperationException("Begin must be called before " + functionName);
             }
+#endif
         }
 
         protected void CheckEndHasBeenCalled(string functionName)
         {
+#if DEBUG
             if (isBeginCalled)
             {
                 throw new InvalidOperationException("End must be called before " + functionName);
             }
+#endif
         }
 
         /// <summary>
@@ -561,7 +565,7 @@ namespace Xenko.Graphics
         /// <param name="vexterStartOffset">The offset in the vertex buffer where the vertex of the element starts</param>
         protected abstract void UpdateBufferValuesFromElementInfo(ref ElementInfo elementInfo, IntPtr vertexPointer, IntPtr indexPointer, int vexterStartOffset);
         
-        #region Nested types
+#region Nested types
 
         protected struct DrawTextures
         {
@@ -793,6 +797,6 @@ namespace Xenko.Graphics
             }
         }
 
-        #endregion
+#endregion
     }
 }
