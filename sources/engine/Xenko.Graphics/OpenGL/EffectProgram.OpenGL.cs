@@ -224,7 +224,10 @@ void main()
                         ActiveAttribType type;
                         var attribName = GL.GetActiveAttrib(ProgramId, activeAttribIndex, out size, out type);
                         var attribIndex = GL.GetAttribLocation(ProgramId, attribName);
-                        Attributes.Add(attribName, attribIndex);
+                        if (!Attributes.ContainsKey(attribName))
+                        {
+                            Attributes.Add(attribName, attribIndex);
+                        }
                     }
                 }
 
