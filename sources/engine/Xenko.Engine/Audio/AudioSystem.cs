@@ -48,19 +48,14 @@ namespace Xenko.Audio
 
         public override void Initialize()
         {
-            base.Initialize();
-
             lock (AudioEngineStaticLock)
             {
-                if (audioEngineSingleton == null)
-                {
-                    var settings = Services.GetService<IGameSettingsService>()?.Settings?.Configurations?.Get<AudioEngineSettings>();
-                    audioEngineSingleton = AudioEngineFactory.NewAudioEngine(RequestedAudioDevice, settings != null && settings.HrtfSupport ? AudioLayer.DeviceFlags.Hrtf : AudioLayer.DeviceFlags.None);
-                }
-                else
-                {
-                    ((IReferencable)audioEngineSingleton).AddReference();
-                }
+                // GG: Can be called before rest of GameSystems so prevent re-init
+                if (audioEngineSingleton != null)
+                    return;
+
+                var settings = Services.GetService<IGameSettingsService>()?.Settings?.Configurations?.Get<AudioEngineSettings>();
+                audioEngineSingleton = AudioEngineFactory.NewAudioEngine(RequestedAudioDevice, settings != null && settings.HrtfSupport ? AudioLayer.DeviceFlags.Hrtf : AudioLayer.DeviceFlags.None);
 
                 AudioEngine = audioEngineSingleton;
             }
