@@ -47,6 +47,19 @@ namespace Xenko.UI.Controls
             }
         }
 
+        public override bool IsEnabled
+        {
+            get { return base.IsEnabled; }
+            set
+            {
+                if (!value)
+                {
+                    IsPressed = false;
+                }
+                base.IsEnabled = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the image displayed when the button is pressed.
         /// </summary>
