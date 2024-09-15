@@ -85,7 +85,10 @@ namespace Xenko.Core.IO
             PlatformFolders.IsVirtualFileSystemInitialized = true;
             // TODO: find a better solution to customize the ApplicationDataDirectory, now we're very limited due to the initialization from a static constructor
 #if XENKO_PLATFORM_ANDROID
-            ApplicationData = new ZipFileSystemProvider("/data", PlatformAndroid.Context.ApplicationInfo.SourceDir);
+            var baseApk = PlatformAndroid.Context.ApplicationInfo.SourceDir;
+            // Check if Assets are in a separate 'data' asset pack
+            var dataApkPath = Path.Combine(Path.GetDirectoryName(baseApk), "split_data.apk");
+            ApplicationData = new ZipFileSystemProvider("/data", File.Exists(dataApkPath) ? dataApkPath : baseApk);
 #else
             ApplicationData = new FileSystemProvider("/data", Path.Combine(PlatformFolders.ApplicationDataDirectory, PlatformFolders.ApplicationDataSubDirectory));
 #endif
