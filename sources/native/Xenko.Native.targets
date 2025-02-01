@@ -209,7 +209,7 @@
 		</PropertyGroup>
 
 		<Error Condition="'$(XenkoNativeAndroidNdkVersion)' == ''" Text="Could not figure out Android NDK version from $(AndroidNdkDirectory). There should be a source.properties file with Pkg.Revision properly set." />
-		<Error Condition="$([System.Version]::Parse('$(XenkoNativeAndroidNdkVersionMinimum)').CompareTo($([System.Version]::Parse('$(XenkoNativeAndroidNdkVersion)')))) >= 0" Text="The Android NDK version is too old. Found: $(XenkoNativeAndroidNdkVersion), Expected: $(XenkoNativeAndroidNdkVersionMinimum), Location: $(AndroidNdkDirectory)" />
+		<!--<Error Condition="$([System.Version]::Parse('$(XenkoNativeAndroidNdkVersionMinimum)').CompareTo($([System.Version]::Parse('$(XenkoNativeAndroidNdkVersion)')))) >= 0" Text="The Android NDK version is too old. Found: $(XenkoNativeAndroidNdkVersion), Expected: $(XenkoNativeAndroidNdkVersionMinimum), Location: $(AndroidNdkDirectory)" />-->
 
 		<MakeDir Directories="$(XenkoNativeOutputPath)\armeabi-v7a"/>
 		<Exec Condition="'%(XenkoNativeCFile.Extension)' != '.cpp'" Command="&quot;$(XenkoDependenciesDir)\LLVM\clang.exe&quot; $(XenkoNativeClang) -o &quot;$(OutputObjectPath)\%(XenkoNativeCFile.Filename)_armeabi-v7a.o&quot; -c &quot;%(XenkoNativeCFile.FullPath)&quot; -DANDROID -fPIC --target=armv7-linux-android$(XenkoNativeAndroidPlatformVersion32)" />

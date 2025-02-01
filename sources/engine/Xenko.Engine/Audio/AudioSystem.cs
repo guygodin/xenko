@@ -96,7 +96,7 @@ namespace Xenko.Audio
 
         public override void Update(GameTime gameTime)
         {
-            AudioEngine.Update();
+            AudioEngine?.Update();
         }
 
         // called on dispose
@@ -114,10 +114,14 @@ namespace Xenko.Audio
             lock (AudioEngineStaticLock)
             {
                 AudioEngine = null;
-                var count = ((IReferencable)audioEngineSingleton).Release();
-                if (count == 0)
+                var singleton = audioEngineSingleton as IReferencable;
+                if (singleton != null)
                 {
-                    audioEngineSingleton = null;
+                    var count = singleton.Release();
+                    if (count == 0)
+                    {
+                        audioEngineSingleton = null;
+                    }
                 }
             }
         }
@@ -125,14 +129,14 @@ namespace Xenko.Audio
         private void OnActivated(object sender, EventArgs e)
         {
             // resume the audio
-            AudioEngine.ResumeAudio();
+            AudioEngine?.ResumeAudio();
         }
 
         private void OnDeactivated(object sender, EventArgs e)
         {
             // pause the audio
-            AudioEngine.PauseAudio();
-            AudioEngine.Update(); // force the update of the audio to pause the Musics
+            AudioEngine?.PauseAudio();
+            AudioEngine?.Update(); // force the update of the audio to pause the Musics
         }
     }
 }
