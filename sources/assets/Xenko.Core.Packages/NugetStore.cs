@@ -44,8 +44,6 @@ namespace Xenko.Core.Packages
         public const string MainExecutables = @"lib\net472\Xenko.GameStudio.exe,Bin\Windows\Xenko.GameStudio.exe,Bin\Windows-Direct3D11\Xenko.GameStudio.exe";
         public const string PrerequisitesInstaller = @"Bin\Prerequisites\install-prerequisites.exe";
 
-        public const string DefaultPackageSource = "https://packages.xenko.com/nuget";
-
         private IPackagesLogger logger;
         private readonly ISettings settings, localSettings;
         private ProgressReport currentProgressReport;
@@ -72,11 +70,6 @@ namespace Xenko.Core.Packages
             this.oldRootDirectory = oldRootDirectory;
 
             settings = NuGet.Configuration.Settings.LoadDefaultSettings(null);
-
-            // Add dev source
-            RemoveDeletedSources(settings, "Xenko");
-            CheckPackageSource("Xenko", DefaultPackageSource);
-            settings.SaveToDisk();
 
             InstallPath = SettingsUtility.GetGlobalPackagesFolder(settings);
 
