@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <XenkoAssemblySign>true</XenkoAssemblySign>
     <XenkoRuntime>true</XenkoRuntime>
@@ -84,6 +84,12 @@
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Update="Shaders\AdditiveSpriteEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdditiveSpriteEffect.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\ColorUtility.cs">
       <DependentUpon>ColorUtility.xksl</DependentUpon>
@@ -366,6 +372,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Update="Shaders\AdditiveSpriteEffect.xksl">
+      <LastGenOutput>AdditiveSpriteEffect.cs</LastGenOutput>
+    </None>
     <None Update="Shaders\DefovationSharpLeft.xksl">
       <LastGenOutput>DefovationSharpLeft.cs</LastGenOutput>
     </None>
