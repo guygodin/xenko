@@ -124,4 +124,10 @@ UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics
     EffectSourceCode.FieldName: binaryBytecode
+---
+!EffectCompileRequest
+EffectName: AdditiveSpriteEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
 
