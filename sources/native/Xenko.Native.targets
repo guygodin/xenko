@@ -201,10 +201,10 @@
 
 			<_XenkoNativeAndroidNdkSourceProperties Condition="Exists('$(AndroidNdkDirectory)\source.properties')">$([System.IO.File]::ReadAllText('$(AndroidNdkDirectory)\source.properties'))</_XenkoNativeAndroidNdkSourceProperties>
 			<XenkoNativeAndroidNdkVersion>$([System.Text.RegularExpressions.Regex]::Match($(_XenkoNativeAndroidNdkSourceProperties), `Pkg\.Revision = (.*)`).Groups[1].Value)</XenkoNativeAndroidNdkVersion>
-			<XenkoNativeAndroidNdkVersionMinimum>19.0</XenkoNativeAndroidNdkVersionMinimum>
+			<XenkoNativeAndroidNdkVersionMinimum>29.0</XenkoNativeAndroidNdkVersionMinimum>
 
 			<!-- Android NDK version is equivalent to minSdkVersion; note: 64 bits exist only from platform version 21 -->
-			<XenkoNativeAndroidPlatformVersion32>16</XenkoNativeAndroidPlatformVersion32>
+			<XenkoNativeAndroidPlatformVersion32>21</XenkoNativeAndroidPlatformVersion32>
 			<XenkoNativeAndroidPlatformVersion64>21</XenkoNativeAndroidPlatformVersion64>
 		</PropertyGroup>
 
