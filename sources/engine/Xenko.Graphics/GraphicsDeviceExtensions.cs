@@ -20,12 +20,12 @@ namespace Xenko.Graphics
         /// <param name="device">The device.</param>
         /// <param name="effectInstance">The effect instance.</param>
         /// <exception cref="System.ArgumentNullException">effect</exception>
-        public static void DrawQuad(this GraphicsContext graphicsContext, EffectInstance effectInstance)
+        public static void DrawQuad(this GraphicsContext graphicsContext, EffectInstance effectInstance, BlendStateDescription? blendState = null)
         {
             if (effectInstance == null) throw new ArgumentNullException("effectInstance");
 
             // Draw a full screen quad
-            graphicsContext.CommandList.GraphicsDevice.PrimitiveQuad.Draw(graphicsContext, effectInstance);
+            graphicsContext.CommandList.GraphicsDevice.PrimitiveQuad.Draw(graphicsContext, effectInstance, blendState);
         }
 
         /// <summary>

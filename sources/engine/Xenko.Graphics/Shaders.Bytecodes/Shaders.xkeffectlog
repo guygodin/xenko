@@ -130,4 +130,10 @@ EffectName: AdditiveSpriteEffect
 UsedParameters:
     EffectSourceCode.Enable: true
     EffectSourceCode.Namespace: Xenko.Graphics
-
+---
+!EffectCompileRequest
+EffectName: FoveaEffect
+UsedParameters:
+    EffectSourceCode.Enable: true
+    EffectSourceCode.Namespace: Xenko.Graphics
+    EffectSourceCode.FieldName: binaryBytecode

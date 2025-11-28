@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoAssemblySign>true</XenkoAssemblySign>
     <XenkoRuntime>true</XenkoRuntime>
@@ -127,6 +127,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SharpenEffect.xksl</DependentUpon>
     </Compile>
+	<Compile Update="Shaders\FoveaEffect.cs">
+	  <DesignTime>True</DesignTime>
+	  <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	  <AutoGen>True</AutoGen>
+	  <DependentUpon>FoveaEffect.xksl</DependentUpon>
+	</Compile>
     <Compile Update="Shaders\SignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -378,9 +384,6 @@
     <None Update="Shaders\DefovationSharpLeft.xksl">
       <LastGenOutput>DefovationSharpLeft.cs</LastGenOutput>
     </None>
-    <None Update="Shaders\DefoveationEffect - Copy.xksl">
-      <LastGenOutput>DefoveationEffect - Copy.cs</LastGenOutput>
-    </None>
     <None Update="Shaders\DefoveationSharpEffect.xksl">
       <LastGenOutput>DefoveationSharpEffect.cs</LastGenOutput>
     </None>
@@ -406,6 +409,9 @@
     <None Update="Shaders\LightSpriteEffect.xksl">
       <Generator>XenkoShaderKeyGenerator</Generator>
       <LastGenOutput>LightSpriteEffect.cs</LastGenOutput>
+    </None>
+    <None Update="Shaders\FoveaEffect.xksl">
+      <LastGenOutput>FoveaEffect.cs</LastGenOutput>
     </None>
     <None Update="Shaders\SharpenEffect.xksl">
       <LastGenOutput>SharpenEffect.cs</LastGenOutput>

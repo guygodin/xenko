@@ -91,7 +91,7 @@ namespace Xenko.Shaders.Compiler.OpenGL
                     shader = shader.Replace("#version 300 es", "#version 300 es\n#extension GL_OES_EGL_image_external_essl3 : require");
                 }
 
-                if (sourceFilename.Contains("Defoveation") || sourceFilename.Contains("Sharpen"))
+                if (sourceFilename.IndexOf("fovea", StringComparison.OrdinalIgnoreCase) >= 0 || sourceFilename.IndexOf("sharpen", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     shader = shader.Replace("precision highp", "precision mediump");
                     shader = shader.Replace("Defoveate_id4(streams.TexCoord_id62)", "Defoveate_id4(v_TEXCOORD0)");

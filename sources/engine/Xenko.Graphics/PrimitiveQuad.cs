@@ -71,13 +71,13 @@ namespace Xenko.Graphics
         /// Draws a quad. The effect must have been applied before calling this method with pixel shader having the signature float2:TEXCOORD.
         /// </summary>
         /// <param name="texture"></param>
-        public void Draw(GraphicsContext graphicsContext, EffectInstance effectInstance)
+        public void Draw(GraphicsContext graphicsContext, EffectInstance effectInstance, BlendStateDescription? blendState = null)
         {
             effectInstance.UpdateEffect(GraphicsDevice);
 
             pipelineState.State.RootSignature = effectInstance.RootSignature;
             pipelineState.State.EffectBytecode = effectInstance.Effect.Bytecode;
-            pipelineState.State.BlendState = BlendStates.Default;
+            pipelineState.State.BlendState = blendState ?? BlendStates.Default;
             pipelineState.State.Output.CaptureState(graphicsContext.CommandList);
             pipelineState.Update();
 
