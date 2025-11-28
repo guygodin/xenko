@@ -38,8 +38,8 @@ shader FoveaEffect : SpriteEffect
         
         if (UseSharpening)
         {
-            return float4(CAS(a, uv), alpha);
+            return float4(CAS(a, uv) * alpha, alpha);
         }
-        return float4(a, alpha);
+        return float4(a * alpha, alpha);
     }
 };
