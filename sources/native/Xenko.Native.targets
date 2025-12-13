@@ -197,7 +197,7 @@
 	<Target Name="CompileNativeClang_Android" Inputs="@(XenkoNativeCFile);@(XenkoNativeHFile)" Outputs="@(XenkoNativeOutput)" Condition="'$(XenkoPlatform)' == 'Android' And $(DesignTimeBuild) != true And $(BuildingProject) != false" BeforeTargets="CoreCompile" DependsOnTargets="_XenkoRegisterNativeOutputs">
 		<Error Text="The AndroidNdkDirectory environment variable is not set!" Condition="'$(AndroidNdkDirectory)' == ''" />
 		<PropertyGroup>
-			<XenkoNativeAndroidClang>-lc++abi -lm --sysroot=&quot;$(AndroidNdkDirectory)\toolchains\llvm\prebuilt\windows-x86_64\sysroot&quot;</XenkoNativeAndroidClang>
+			<XenkoNativeAndroidClang>-lc++abi -lm -Wl,--pack-dyn-relocs=android --sysroot=&quot;$(AndroidNdkDirectory)\toolchains\llvm\prebuilt\windows-x86_64\sysroot&quot;</XenkoNativeAndroidClang>
 
 			<_XenkoNativeAndroidNdkSourceProperties Condition="Exists('$(AndroidNdkDirectory)\source.properties')">$([System.IO.File]::ReadAllText('$(AndroidNdkDirectory)\source.properties'))</_XenkoNativeAndroidNdkSourceProperties>
 			<XenkoNativeAndroidNdkVersion>$([System.Text.RegularExpressions.Regex]::Match($(_XenkoNativeAndroidNdkSourceProperties), `Pkg\.Revision = (.*)`).Groups[1].Value)</XenkoNativeAndroidNdkVersion>
