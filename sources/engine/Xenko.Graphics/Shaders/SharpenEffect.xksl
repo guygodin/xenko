@@ -1,10 +1,11 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
-shader SharpenEffect : SpriteEffect
+shader SharpenEffect : SpriteBase
 {
 	stage float2 OneOverTexSize;
     stage float Sharpening = -0.175f; // -0.1 to -0.2
     stage float Radius = 0.75f;
+    stage bool GammaBoost = false;
 
 	stage float3 CAS(in float3 a, in float2 uv)
     {
@@ -24,11 +25,15 @@ shader SharpenEffect : SpriteEffect
         float2 uv = streams.TexCoord;
         float2 normUV = uv * 2.0 - 1.0;
 
-        float4 a = Texture0.Sample(Sampler, uv).rgba;
+        float4 a = Texture0.Sample(Sampler, uv);
         
         if (length(normUV) <= Radius)
         {
-            return float4(CAS(a.rgb, uv), a.a);
+            a = float4(CAS(a.rgb, uv), a.a);
+        }
+        if (GammaBoost)
+        {
+            a = ColorUtility.ToLinear(a);
         }
         return a;
     }

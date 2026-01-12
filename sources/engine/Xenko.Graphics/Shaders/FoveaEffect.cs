@@ -20,5 +20,6 @@ namespace Xenko.Rendering
         public static readonly ValueParameterKey<Vector2> OneOverTexSize = ParameterKeys.NewValue<Vector2>();
         public static readonly ValueParameterKey<bool> UseSharpening = ParameterKeys.NewValue<bool>(true);
         public static readonly ValueParameterKey<float> Sharpening = ParameterKeys.NewValue<float>(-0.175f);
+        public static readonly ValueParameterKey<bool> GammaBoost = ParameterKeys.NewValue<bool>(false);
     }
 }

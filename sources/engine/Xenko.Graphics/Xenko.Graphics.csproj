@@ -91,6 +91,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AdditiveSpriteEffect.xksl</DependentUpon>
     </Compile>
+    <Compile Update="Shaders\ChromaKeyingEffect.xksl.cs">
+      <DependentUpon>ChromaKeyingEffect.xksl</DependentUpon>
+    </Compile>
     <Compile Update="Shaders\ColorUtility.cs">
       <DependentUpon>ColorUtility.xksl</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -108,12 +111,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>DefovationSharpLeft.xksl</DependentUpon>
-    </Compile>
-    <Compile Update="Shaders\DefoveationSharpEffect.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DefoveationSharpEffect.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\DefoveationSharpLeft.cs">
       <DesignTime>True</DesignTime>
@@ -209,12 +206,6 @@
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTextureOU.xksl</DependentUpon>
-    </Compile>
-    <Compile Update="Shaders\DefoveationEffect.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>DefoveationEffect.xksl</DependentUpon>
     </Compile>
     <Compile Update="Shaders\SpriteSignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
@@ -384,9 +375,6 @@
     <None Update="Shaders\DefovationSharpLeft.xksl">
       <LastGenOutput>DefovationSharpLeft.cs</LastGenOutput>
     </None>
-    <None Update="Shaders\DefoveationSharpEffect.xksl">
-      <LastGenOutput>DefoveationSharpEffect.cs</LastGenOutput>
-    </None>
     <None Update="Shaders\DefoveationSharpLeft.xksl">
       <LastGenOutput>DefoveationSharpLeft.cs</LastGenOutput>
     </None>
@@ -434,14 +422,14 @@
     <None Update="Shaders\SpriteEffectExtTextureHQ.xksl">
       <LastGenOutput>SpriteEffectExtTextureHQ.cs</LastGenOutput>
     </None>
-    <None Update="Shaders\DefoveationEffect.xksl">
-      <LastGenOutput>DefoveationEffect.cs</LastGenOutput>
-    </None>
     <None Update="Shaders\SpriteEffectExtTextureOU.xksl">
       <LastGenOutput>SpriteEffectExtTextureOU.cs</LastGenOutput>
     </None>
     <None Update="Shaders\SpriteEffectExtTextureRegular.xksl">
       <LastGenOutput>SpriteEffectExtTextureRegular.cs</LastGenOutput>
+    </None>
+	<None Update="Shaders\ChromaKeyingEffect.xksl">
+      <LastGenOutput>AlphaChromaKey.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

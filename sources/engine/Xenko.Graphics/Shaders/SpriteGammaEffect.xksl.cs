@@ -16,10 +16,8 @@ using Buffer = Xenko.Graphics.Buffer;
 
 namespace Xenko.Rendering
 {
-    public static partial class DefoveationSharpEffectKeys
+    public static partial class SpriteGammaEffectKeys
     {
-        public static readonly ValueParameterKey<Vector2> OneOverTexSize = ParameterKeys.NewValue<Vector2>();
-        public static readonly ValueParameterKey<float> Sharpening = ParameterKeys.NewValue<float>(-0.175f);
-        public static readonly ValueParameterKey<float> Radius = ParameterKeys.NewValue<float>(0.75f);
+        public static readonly ValueParameterKey<bool> GammaBoost = ParameterKeys.NewValue<bool>(false);
     }
 }
