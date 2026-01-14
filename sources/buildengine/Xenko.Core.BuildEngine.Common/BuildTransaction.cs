@@ -22,7 +22,12 @@ namespace Xenko.Core.BuildEngine
 
         public IEnumerable<KeyValuePair<ObjectUrl, ObjectId>> GetTransactionIdMap()
         {
-            return transactionOutputObjects;
+            // Return a snapshot to avoid "collection was modified" exceptions
+            // when other threads modify transactionOutputObjects during enumeration
+            lock (transactionOutputObjects)
+            {
+                return transactionOutputObjects.ToList();
+            }
         }
 
         public IEnumerable<KeyValuePair<string, ObjectId>> SearchValues(Func<KeyValuePair<string, ObjectId>, bool> predicate)
