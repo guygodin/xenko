@@ -207,6 +207,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>SpriteEffectExtTextureOU.xksl</DependentUpon>
     </Compile>
+    <Compile Update="Shaders\SpriteGammaEffect.cs">
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SpriteGammaEffect.xksl</DependentUpon>
+    </Compile>
     <Compile Update="Shaders\SpriteSignedDistanceFieldFontShader.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -431,6 +437,9 @@
 	<None Update="Shaders\ChromaKeyingEffect.xksl">
       <LastGenOutput>AlphaChromaKey.cs</LastGenOutput>
     </None>
+	<None Update="Shaders\SpriteGammaEffect.xksl">
+	  <LastGenOutput>SpriteGammaEffect.cs</LastGenOutput>
+	</None>
   </ItemGroup>
   <ItemGroup>
     <Reference Update="SDL2-CS">

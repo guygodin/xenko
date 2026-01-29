@@ -10,7 +10,7 @@ shader SpriteGammaEffect : SpriteBase
         float4 color = base.Shading();
         if (GammaBoost)
         {
-            return ColorUtility.ToLinear(color);
+            color = float4(pow(saturate(color.rgb), 1.5f), color.a);
         }
         return color;
     }

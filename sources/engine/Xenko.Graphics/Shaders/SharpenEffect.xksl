@@ -33,7 +33,7 @@ shader SharpenEffect : SpriteBase
         }
         if (GammaBoost)
         {
-            a = ColorUtility.ToLinear(a);
+            a = float4(pow(saturate(a.rgb), 1.5f), a.a);
         }
         return a;
     }
