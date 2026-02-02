@@ -23,28 +23,6 @@ namespace Xenko.Graphics.OpenGL.Android
         public const int EGL_NONE = 0x3038;
         public const int EGL_NO_CONTEXT = 0;
 
-        // GL_TEXTURE_2D constant (matches OpenTK.Graphics.ES31.TextureTarget.Texture2D)
-        public const int GL_TEXTURE_2D = 0x0DE1;
-
-        /// <summary>
-        /// Handle to an EGLImage (pointer-sized).
-        /// </summary>
-        public struct EGLImageKHR
-        {
-            public IntPtr Handle;
-            public static readonly EGLImageKHR None = new EGLImageKHR { Handle = IntPtr.Zero };
-            public bool IsValid { get { return Handle != IntPtr.Zero; } }
-        }
-
-        /// <summary>
-        /// Handle to an EGL client buffer.
-        /// </summary>
-        public struct EGLClientBuffer
-        {
-            public IntPtr Handle;
-            public bool IsValid { get { return Handle != IntPtr.Zero; } }
-        }
-
         // Delegate types for extension functions
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr EglGetNativeClientBufferANDROIDDelegate(IntPtr buffer);
@@ -117,12 +95,12 @@ namespace Xenko.Graphics.OpenGL.Android
         /// <param name="ahardwareBuffer">Native pointer to AHardwareBuffer.</param>
         /// <returns>EGLClientBuffer that can be used with eglCreateImageKHR.</returns>
         /// <exception cref="NotSupportedException">If the extension is not available.</exception>
-        public static EGLClientBuffer GetNativeClientBuffer(IntPtr ahardwareBuffer)
+        public static IntPtr GetNativeClientBuffer(IntPtr ahardwareBuffer)
         {
             if (_getNativeClientBuffer == null)
                 throw new NotSupportedException("eglGetNativeClientBufferANDROID extension not available");
 
-            return new EGLClientBuffer { Handle = _getNativeClientBuffer(ahardwareBuffer) };
+            return _getNativeClientBuffer(ahardwareBuffer);
         }
 
         /// <summary>
@@ -133,7 +111,7 @@ namespace Xenko.Graphics.OpenGL.Android
         /// <returns>An EGLImage handle that can be bound to a GL texture.</returns>
         /// <exception cref="NotSupportedException">If the extension is not available.</exception>
         /// <exception cref="InvalidOperationException">If EGLImage creation fails.</exception>
-        public static EGLImageKHR CreateImageFromNativeBuffer(IntPtr eglDisplay, EGLClientBuffer clientBuffer)
+        public static IntPtr CreateImageFromNativeBuffer(IntPtr eglDisplay, IntPtr clientBuffer)
         {
             if (_createImageKHR == null)
                 throw new NotSupportedException("eglCreateImageKHR extension not available");
@@ -142,15 +120,15 @@ namespace Xenko.Graphics.OpenGL.Android
             var attribs = stackalloc int[] { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
 
             // EGL_NO_CONTEXT (IntPtr.Zero) is required for EGL_NATIVE_BUFFER_ANDROID target
-            IntPtr result = _createImageKHR(eglDisplay, IntPtr.Zero, EGL_NATIVE_BUFFER_ANDROID, clientBuffer.Handle, attribs);
+            var eglImage = _createImageKHR(eglDisplay, IntPtr.Zero, EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attribs);
 
-            if (result == IntPtr.Zero)
+            if (eglImage == IntPtr.Zero)
             {
                 int error = eglGetError();
                 throw new InvalidOperationException("eglCreateImageKHR failed with error: 0x" + error.ToString("X"));
             }
 
-            return new EGLImageKHR { Handle = result };
+            return eglImage;
         }
 
         /// <summary>
@@ -158,12 +136,12 @@ namespace Xenko.Graphics.OpenGL.Android
         /// </summary>
         /// <param name="eglDisplay">The EGL display handle.</param>
         /// <param name="image">The EGLImage to destroy.</param>
-        public static void DestroyImage(IntPtr eglDisplay, EGLImageKHR image)
+        public static void DestroyImage(IntPtr eglDisplay, IntPtr eglImage)
         {
-            if (_destroyImageKHR == null || !image.IsValid)
+            if (_destroyImageKHR == null)
                 return;
 
-            _destroyImageKHR(eglDisplay, image.Handle);
+            _destroyImageKHR(eglDisplay, eglImage);
         }
 
         /// <summary>
@@ -173,12 +151,12 @@ namespace Xenko.Graphics.OpenGL.Android
         /// <param name="textureTarget">GL texture target (typically GL_TEXTURE_2D = 0x0DE1).</param>
         /// <param name="image">The EGLImage to bind.</param>
         /// <exception cref="NotSupportedException">If the extension is not available.</exception>
-        public static void BindImageToTexture(int textureTarget, EGLImageKHR image)
+        public static void BindImageToTexture(int textureTarget, IntPtr eglImage)
         {
             if (_imageTargetTexture2D == null)
                 throw new NotSupportedException("glEGLImageTargetTexture2DOES extension not available");
 
-            _imageTargetTexture2D(textureTarget, image.Handle);
+            _imageTargetTexture2D(textureTarget, eglImage);
         }
     }
 }
