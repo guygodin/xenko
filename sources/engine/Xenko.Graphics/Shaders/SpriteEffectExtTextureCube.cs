@@ -18,8 +18,7 @@ namespace Xenko.Rendering
 {
     public static partial class SpriteEffectExtTextureCubeKeys
     {
-        public static readonly ValueParameterKey<Color4> Color = ParameterKeys.NewValue<Color4>(new Color4(1,1,1,1));
-        public static readonly ObjectParameterKey<Texture> XenkoInternal_TextureExt0 = ParameterKeys.NewObject<Texture>();
         public static readonly ValueParameterKey<int> StereoMode = ParameterKeys.NewValue<int>();
+        public static readonly ValueParameterKey<Matrix> MatrixTransform = ParameterKeys.NewValue<Matrix>();
     }
 }

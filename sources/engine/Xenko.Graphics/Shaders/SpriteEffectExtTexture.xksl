@@ -4,17 +4,18 @@ shader SpriteEffectExtTexture : ShaderBase
 {
     // Color used to tint the sprite
     [Color]
-    stage float4 Color = float4(1,1,1,1);
+    stage float4 Color = float4(1.0f,1.0f,1.0f,1.0f);
 
     stage bool IsChromaActive = false;
     stage float Similarity = 0.2f;
     stage float Smoothness = 0.1f;
 	[Color]
-	stage float3 ChromaKeyColor = float3(0.0, 0.0, 0.0);
+	stage float3 ChromaKeyColor = float3(0.0f,0.0f,0.0f);
 
     stage bool IsHDR = false;
+    stage bool IsFullRange = false;
 
-    stage Texture2D XenkoInternal_TextureExt0;    // DO NOT RENAME THIS VARIABLE! The ShaderCompiler specifically looks for "TextureExt0".
+    stage Texture2D Texture;
 
     stage stream float2 TexCoord : TEXCOORD0;
     stage stream float4 Position : POSITION;
@@ -26,6 +27,35 @@ shader SpriteEffectExtTexture : ShaderBase
         AddressV = Clamp;
     };
 
+    stage float3 YUVToRGB(in float3 value)
+    {
+        float3 yuv;
+	    float3 rgb;
+
+        if (IsFullRange)
+        {
+            yuv.x = value.x;
+            yuv.y = value.y - 0.5;
+            yuv.z = value.z - 0.5;
+
+            rgb.x = yuv.x + 1.5748022598870055 * yuv.z;
+            rgb.y = yuv.x - 0.4681242876829077 * yuv.z - 0.187324826121567 * yuv.y;
+            rgb.z = yuv.x + 1.855631138801164 * yuv.y;
+        }
+        else
+        {
+            yuv.x = 1.164383561643836 * (value.x - 0.0625);
+	        yuv.y = value.y - 0.5;
+	        yuv.z = value.z - 0.5;
+
+	        rgb.x = yuv.x + 1.792741071428571 * yuv.z;
+	        rgb.y = yuv.x - 0.532909328559444 * yuv.z - 0.21324861427373 * yuv.y;
+	        rgb.z = yuv.x + 2.112401785714286 * yuv.y;
+        }
+
+        return saturate(rgb);
+    }
+
     stage override void VSMain()
     {
         streams.ShadingPosition = streams.Position;
@@ -35,6 +65,10 @@ shader SpriteEffectExtTexture : ShaderBase
     {
         float4 color = Shading();
 
+        if (IsHDR)
+        {
+            color = float4(ColorUtility.ToSDR(color.rgb), color.a);
+        }
         if (IsChromaActive)
         {
             float chromaDist = distance(color.rgb, ChromaKeyColor) / 1.7320508f; 
@@ -46,16 +80,13 @@ shader SpriteEffectExtTexture : ShaderBase
             color.rgb *= step(0.0001, fullMask);
         }
 
-		streams.ColorTarget = color;
+		streams.ColorTarget = color * Color;
     }
 
     stage float4 Shading()
     {
-        var value = XenkoInternal_TextureExt0.Sample(Sampler, streams.TexCoord).rgb;
-        if (IsHDR)
-        {
-            value = ColorUtility.ToSDR(value);
-        }
-        return float4(value, 1.0) * Color;
+        var value = Texture.Sample(Sampler, streams.TexCoord).rgb;
+        
+        return float4(YUVToRGB(value), 1.0);
     }
 };

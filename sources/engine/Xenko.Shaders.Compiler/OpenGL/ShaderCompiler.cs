@@ -94,8 +94,7 @@ namespace Xenko.Shaders.Compiler.OpenGL
                 if (sourceFilename.IndexOf("fovea", StringComparison.OrdinalIgnoreCase) >= 0 || sourceFilename.IndexOf("sharpen", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     shader = shader.Replace("precision highp", "precision mediump");
-                    shader = shader.Replace("Defoveate_id4(streams.TexCoord_id62)", "Defoveate_id4(v_TEXCOORD0)");
-                    shader = shader.Replace("uv = streams.TexCoord_id62", "uv = v_TEXCOORD0");
+                    shader = shader.Replace("uv = streams.TexCoord_id22", "uv = v_TEXCOORD0");
                     shader = shader.Replace("vec2 OneOverTexSize", "highp vec2 OneOverTexSize");
                     shader = shader.Replace("in vec2 v_TEXCOORD0", "in highp vec2 v_TEXCOORD0");
                     shader = shader.Replace("vec2 uv", "highp vec2 uv");
@@ -103,7 +102,6 @@ namespace Xenko.Shaders.Compiler.OpenGL
                     shader = shader.Replace("uv + vec2(", "uv + highp vec2(");
                     shader = shader.Replace("vec2 tex", "highp vec2 tex");
                     shader = shader.Replace("vec2 inverseTex", "highp vec2 inverseTex");
-                    shader = shader.Replace("vec2 Defoveate", "highp vec2 Defoveate");
                     //File.WriteAllText("D:\\" + Path.GetFileNameWithoutExtension(sourceFilename) + ".txt", shader);
                 }
             }

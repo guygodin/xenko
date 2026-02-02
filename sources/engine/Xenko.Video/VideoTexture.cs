@@ -125,7 +125,7 @@ namespace Xenko.Video
                         effectDecoderTextureCopy,
                         decoderOutputTexture, // Use the inputTexture as the input texture.
                         renderTargetMipMaps[0], // Set the highest mip map level as the render target.
-                        SpriteEffectExtTextureKeys.XenkoInternal_TextureExt0);
+                        SpriteEffectExtTextureKeys.Texture);
 
             // Restore the original framebuffer configuration:
             context.CommandList.SetRenderTargetAndViewport(previousDepthStencilBuffer, previousRenderTarget); // TODO: STABILITY: This wont work if we're using MRT!

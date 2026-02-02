@@ -86,6 +86,11 @@ namespace Xenko.Graphics
 
         // Workarounds for specific GPUs
         internal bool Workaround_Context_Tegra2_Tegra3;
+
+        // AHardwareBuffer/EGLImage extension support (for AImage textures)
+        internal bool HasEGLImageExtensions;
+        internal bool HasAHardwareBufferSupport;
+        internal IntPtr EglDisplayHandle;
 #endif
 
         internal SamplerState DefaultSamplerState;

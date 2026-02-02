@@ -26,7 +26,13 @@ using Xenko.Graphics.OpenGL;
 using Xenko.Core.Diagnostics;
 #if XENKO_GRAPHICS_API_OPENGLES
 using OpenTK.Graphics.ES31;
-#else
+#endif
+#if XENKO_PLATFORM_ANDROID
+using Android.Opengl;
+using Xenko.Graphics.OpenGL.Android;
+using System.Diagnostics;
+#endif
+#if !XENKO_GRAPHICS_API_OPENGLES
 using OpenTK.Graphics.OpenGL;
 #endif
 
@@ -97,7 +103,7 @@ namespace Xenko.Graphics
             using (deviceRoot.UseOpenGLCreationContext())
             {
                 Vendor = GL.GetString(StringName.Vendor);
-                Renderer = GL.GetString(StringName.Renderer);
+                Renderer = GL.GetString(StringName.Renderer);                
 #if XENKO_GRAPHICS_API_OPENGLES
                 SupportedExtensions = GL.GetString(StringName.Extensions).Split(' ');
 #else
@@ -147,6 +153,29 @@ namespace Xenko.Graphics
 
             // GG: Needed for Oculus Mobile SDK
             HasClampToBorder = SupportedExtensions.Contains("GL_EXT_texture_border_clamp") || SupportedExtensions.Contains("GL_OES_texture_border_clamp");
+
+#if XENKO_PLATFORM_ANDROID
+            // AHardwareBuffer support for AImage textures (always available on Android 14+)
+            deviceRoot.HasAHardwareBufferSupport = true;
+
+            // Query EGL extensions for EGLImage support
+            var eglDisplay = EGL14.EglGetDisplay(EGL14.EglDefaultDisplay);
+            var eglExtensions = EGL14.EglQueryString(eglDisplay, EGL14.EglExtensions) ?? "";
+
+            deviceRoot.HasEGLImageExtensions = eglExtensions.Contains("EGL_ANDROID_get_native_client_buffer", StringComparison.OrdinalIgnoreCase)
+                                            && eglExtensions.Contains("EGL_KHR_image_base", StringComparison.OrdinalIgnoreCase);
+
+            // Store EGL display handle for later use
+            deviceRoot.EglDisplayHandle = eglDisplay?.Handle ?? IntPtr.Zero;
+
+            // Initialize extension function pointers if supported
+            if (deviceRoot.HasEGLImageExtensions)
+            {
+                EglImageExtensions.Initialize();
+                // Verify all function pointers were loaded
+                deviceRoot.HasEGLImageExtensions = EglImageExtensions.IsSupported;
+            }
+#endif
 
             // TODO: from 3.1: draw indirect, separate shader object
             // TODO: check tessellation & geometry shaders: GL_ANDROID_extension_pack_es31a
