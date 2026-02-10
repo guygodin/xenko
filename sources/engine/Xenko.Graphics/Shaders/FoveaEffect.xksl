@@ -3,7 +3,7 @@
 shader FoveaEffect : SpriteEffectExtTexture
 {
 	stage float2 OneOverTexSize;
-    stage float Sharpening = -0.175f; // -0.1 to -0.2
+    stage float Sharpening = -0.1275f; // 0.0 to -0.170
     stage bool UseSharpening = true;
     stage bool GammaBoost = false;
 
@@ -17,8 +17,7 @@ shader FoveaEffect : SpriteEffectExtTexture
         minMaxY.y += 0.0005f;
         float AA = sqrt(min(1.0 - minMaxY.y, minMaxY.x) / minMaxY.y);
         float w = Sharpening * AA;
-        float filteredR = (w * (b.r + c.r + d.r + e.r) + a.r) / (w * 4.0 + 1.0);
-        return float3(filteredR, a.g, a.b);
+        return (w * (b + c + d + e) + a) / (w * 4.0 + 1.0);
     }
 
     stage override float4 Shading()

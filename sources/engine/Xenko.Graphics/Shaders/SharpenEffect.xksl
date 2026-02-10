@@ -3,7 +3,7 @@
 shader SharpenEffect : SpriteEffectExtTexture
 {
 	stage float2 OneOverTexSize;
-    stage float Sharpening = -0.175f; // -0.1 to -0.2
+    stage float Sharpening = -0.1275f; // 0.0 to -0.170
     stage float Radius = 0.75f;
     stage bool GammaBoost = false;
 
@@ -17,8 +17,7 @@ shader SharpenEffect : SpriteEffectExtTexture
         minMaxY.y += 0.0005f;
         float AA = sqrt(min(1.0 - minMaxY.y, minMaxY.x) / minMaxY.y);
         float w = Sharpening * AA;
-        float filteredR = (w * (b.r + c.r + d.r + e.r) + a.r) / (w * 4.0 + 1.0);
-        return float3(filteredR, a.g, a.b);
+        return (w * (b + c + d + e) + a) / (w * 4.0 + 1.0);
     }
 
     stage override float4 Shading()
@@ -27,12 +26,12 @@ shader SharpenEffect : SpriteEffectExtTexture
         float2 normUV = uv * 2.0 - 1.0;
 
         float3 a = Texture.Sample(Sampler, uv).rgb;
-        
+
         if (length(normUV) <= Radius)
         {
             a = CAS(a, uv);
         }
-
+        
         a = YUVToRGB(a);
 
         if (GammaBoost)
