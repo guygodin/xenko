@@ -3,11 +3,11 @@
 shader FoveaEffect : SpriteEffectExtTexture
 {
 	stage float2 OneOverTexSize;
-    stage float Sharpening = -0.1275f; // 0.0 to -0.170
+    stage float Sharpening = -0.13125f; // 0.0 to -0.175
     stage bool UseSharpening = true;
     stage bool GammaBoost = false;
 
-	stage float3 CAS(in float3 a, in float2 uv)
+	stage float3 CAS(in float3 a, in float2 uv, in float strength)
     {
         float3 b = Texture.Sample(Sampler, uv + float2(-OneOverTexSize.x, 0.0)).rgb;
         float3 c = Texture.Sample(Sampler, uv + float2( 0.0, -OneOverTexSize.y)).rgb;
@@ -16,7 +16,7 @@ shader FoveaEffect : SpriteEffectExtTexture
         float2 minMaxY = float2(min(a.r, min(b.r, min(c.r, min(d.r, e.r)))), max(a.r, max(b.r, max(c.r, max(d.r, e.r)))));
         minMaxY.y += 0.0005f;
         float AA = sqrt(min(1.0 - minMaxY.y, minMaxY.x) / minMaxY.y);
-        float w = Sharpening * AA;
+        float w = Sharpening * AA * strength;
         return (w * (b + c + d + e) + a) / (w * 4.0 + 1.0);
     }
 
@@ -24,22 +24,14 @@ shader FoveaEffect : SpriteEffectExtTexture
     {
         float2 uv = streams.TexCoord;
 
-        // Edge distances
-        float edgeX = min(uv.x, 1.0 - uv.x);
-        float edgeY = min(uv.y, 1.0 - uv.y);
-
-        // Axis fades 
-        float fadeX = min(edgeX * 20.0, 1.0);
-        float fadeY = min(edgeY * 20.0, 1.0);
-
-        // Combined fade
-        float alpha = fadeX * fadeY;
+        float dist = length(uv - 0.5);
+        float alpha = saturate((0.5 - dist) * 20.0);
 
         float3 a = Texture.Sample(Sampler, uv).rgb;
         
         if (UseSharpening)
         {
-            a = CAS(a, uv);
+            a = CAS(a, uv, alpha);
         }
 
         a = YUVToRGB(a);
