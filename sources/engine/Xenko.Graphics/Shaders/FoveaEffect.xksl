@@ -40,6 +40,6 @@ shader FoveaEffect : SpriteEffectExtTexture
         {
             a = saturate(pow(saturate(a), 1.5));
         }
-        return float4(a * alpha, alpha);
+        return float4(a, alpha);
     }
 };
