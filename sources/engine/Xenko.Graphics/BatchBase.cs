@@ -293,23 +293,23 @@ namespace Xenko.Graphics
         
         private void SortSprites()
         {
-            IComparer<int> comparer;
+            Comparison<int> comparison;
 
             switch (sortMode)
             {
                 case SpriteSortMode.Texture:
                     TextureComparer.SpriteTextures = drawTextures;
-                    comparer = TextureComparer;
+                    comparison = TextureComparer.Comparison;
                     break;
 
                 case SpriteSortMode.BackToFront:
                     BackToFrontComparer.ImageInfos = drawsQueue;
-                    comparer = BackToFrontComparer;
+                    comparison = BackToFrontComparer.Comparison;
                     break;
 
                 case SpriteSortMode.FrontToBack:
                     FrontToBackComparer.ImageInfos = drawsQueue;
-                    comparer = FrontToBackComparer;
+                    comparison = FrontToBackComparer.Comparison;
                     break;
                 default:
                     throw new NotSupportedException();
@@ -327,7 +327,7 @@ namespace Xenko.Graphics
                 sortIndices[i] = i;
             }
 
-            Array.Sort(sortIndices, 0, drawsQueueCount, comparer);
+            SortRange(sortIndices, 0, drawsQueueCount, comparison);
         }
 
         private void FlushBatch()
@@ -564,8 +564,29 @@ namespace Xenko.Graphics
         /// <param name="indexPointer">The pointer to the index array buffer to update. This value is null if the index buffer used is static.</param>
         /// <param name="vexterStartOffset">The offset in the vertex buffer where the vertex of the element starts</param>
         protected abstract void UpdateBufferValuesFromElementInfo(ref ElementInfo elementInfo, IntPtr vertexPointer, IntPtr indexPointer, int vexterStartOffset);
-        
-#region Nested types
+
+        #region Static Methods
+        private static void SortRange<T>(T[] array, int index, int length, Comparison<T> comparison)
+        {
+            if (length <= 1)
+                return;
+
+            for (int i = index + 1; i < index + length; i++)
+            {
+                T key = array[i];
+                int j = i - 1;
+
+                while (j >= index && comparison(array[j], key) > 0)
+                {
+                    array[j + 1] = array[j];
+                    j--;
+                }
+                array[j + 1] = key;
+            }
+        }
+        #endregion
+
+        #region Nested types
 
         protected struct DrawTextures
         {
@@ -698,37 +719,37 @@ namespace Xenko.Graphics
             }
         }
 
-        protected class TextureIdComparer : IComparer<int>
+        protected class TextureIdComparer
         {
+            public readonly Comparison<int> Comparison;
             public Texture[] SpriteTextures;
 
-            public int Compare(int left, int right)
+            public TextureIdComparer()
             {
-                return ReferenceEquals(SpriteTextures[left], SpriteTextures[right]) ? 0 : 1;
+                Comparison = (int left, int right) => ReferenceEquals(SpriteTextures[left], SpriteTextures[right]) ? 0 : 1;
             }
         }
 
         private class SpriteBackToFrontComparer : QueueComparer<ElementInfo>
         {
-            public override int Compare(int left, int right)
+            public SpriteBackToFrontComparer()
             {
-                return ImageInfos[left].Depth.CompareTo(ImageInfos[right].Depth);
+                Comparison = (int left, int right) => ImageInfos[left].Depth.CompareTo(ImageInfos[right].Depth);
             }
         }
 
         private class SpriteFrontToBackComparer : QueueComparer<ElementInfo>
         {
-            public override int Compare(int left, int right)
+            public SpriteFrontToBackComparer()
             {
-                return ImageInfos[right].Depth.CompareTo(ImageInfos[left].Depth);
+                Comparison = (int left, int right) => ImageInfos[right].Depth.CompareTo(ImageInfos[left].Depth);
             }
         }
         
-        protected abstract class QueueComparer<TInfo> : IComparer<int>
+        protected abstract class QueueComparer<TInfo>
         {
             public TInfo[] ImageInfos;
-
-            public abstract int Compare(int x, int y);
+            public Comparison<int> Comparison;
         }
         
         /// <summary>
@@ -796,7 +817,6 @@ namespace Xenko.Graphics
                 InputElements = declaration.CreateInputElements();
             }
         }
-
-#endregion
+        #endregion
     }
 }

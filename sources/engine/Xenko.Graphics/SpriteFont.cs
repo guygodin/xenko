@@ -527,7 +527,7 @@ namespace Xenko.Graphics
                 {
                     // measure the size of the current line
                     var lineSize = Vector2.Zero;
-                    ForGlyph(commandList, ref text, ref requestedFontSize, MeasureStringGlyph, ref lineSize, startIndex, endIndex, updateGpuResources);
+                    ForGlyph(commandList, ref text, ref requestedFontSize, measureStringGlyphAction, ref lineSize, startIndex, endIndex, updateGpuResources);
 
                     // Determine the start position of the line along the x axis
                     // We round this value to the closest integer to force alignment of all characters to the same pixels

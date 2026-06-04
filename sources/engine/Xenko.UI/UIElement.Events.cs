@@ -53,6 +53,7 @@ namespace Xenko.UI
         #endregion
 
         private static readonly Queue<List<RoutedEventHandlerInfo>> RoutedEventHandlerInfoListPool = new Queue<List<RoutedEventHandlerInfo>>();
+        private static readonly PropertyChangedArgs<MouseOverState> _mouseOverStateEventsArgs = new PropertyChangedArgs<MouseOverState>();
 
         static UIElement()
         {
@@ -101,7 +102,9 @@ namespace Xenko.UI
         {
             if (MouseOverStateChanged != null)
             {
-                MouseOverStateChanged(this, new PropertyChangedArgs<MouseOverState> { NewValue = newValue, OldValue = oldValue });
+                _mouseOverStateEventsArgs.NewValue = newValue;
+                _mouseOverStateEventsArgs.OldValue = oldValue;
+                MouseOverStateChanged(this, _mouseOverStateEventsArgs);
             }
         }
 

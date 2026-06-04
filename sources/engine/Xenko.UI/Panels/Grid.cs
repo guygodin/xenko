@@ -19,7 +19,9 @@ namespace Xenko.UI.Panels
     [DebuggerDisplay("Grid - Name={Name}")]
     public class Grid : GridBase
     {
-        private readonly Logger logger = GlobalLogger.GetLogger("UI");
+        private static readonly Comparison<StripDefinition> sortByIncreasingMaximumComparer = (x, y) => x.ValueRelativeMaximum().CompareTo(y.ValueRelativeMaximum());
+        private static readonly Comparison<StripDefinition> sortByIncreasingMinimumComparer = (x, y) => x.ValueRelativeMinimum().CompareTo(y.ValueRelativeMinimum());
+        private static readonly Logger logger = GlobalLogger.GetLogger("UI");
 
         private readonly StripDefinitionCollection[] stripDefinitions = new StripDefinitionCollection[Dims];
 
@@ -103,9 +105,6 @@ namespace Xenko.UI.Panels
         /// </summary>
         private readonly HashSet<UIElement> autoDefinedElements = new HashSet<UIElement>();
 
-        private readonly IComparer<StripDefinition> sortByIncreasingMaximumComparer = new StripDefinition.SortByIncreasingStarRelativeMaximumValues();
-        private readonly IComparer<StripDefinition> sortByIncreasingMinimumComparer = new StripDefinition.SortByIncreasingStarRelativeMinimumValues();
-
         public Grid()
         {
             RowDefinitions.CollectionChanged += DefinitionCollectionChanged;
@@ -180,7 +179,7 @@ namespace Xenko.UI.Panels
 
             // 2. Update the autoStripNumberToElements cache data structure for the next Measure and Arrange sequence
             RebuildMeasureCacheData();
-            
+
             // 3. Measure all children that are contained in a least one auto-strip with the best estimation possible of the strips final size.
             // Note that only an estimation of the final strip size can be used at this point, since the final sizes can only be determined once all auto-children have been measured.
             //

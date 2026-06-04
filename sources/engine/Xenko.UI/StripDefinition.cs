@@ -138,43 +138,21 @@ namespace Xenko.UI
         /// <returns>The size clamped by the minimum and maximum values of the strip definition</returns>
         public float ClampSizeByMinimumMaximum(float desiredSize)
         {
-            return MathUtil.Clamp(desiredSize, MinimumSize, MaximumSize);
+            return MathUtil.Clamp(desiredSize, minimumSize, maximumSize);
         }
 
         internal float ValueRelativeMinimum()
         {
             if (sizeValue < MathUtil.ZeroTolerance)
                 return 0;
-            return MinimumSize / SizeValue;
+            return minimumSize / sizeValue;
         }
 
         internal float ValueRelativeMaximum()
         {
             if (sizeValue < MathUtil.ZeroTolerance)
                 return 0;
-            return MaximumSize / SizeValue;
-        }
-
-        internal class SortByIncreasingStarRelativeMinimumValues : IComparer<StripDefinition>
-        {
-            public int Compare(StripDefinition def1, StripDefinition def2)
-            {
-                var val1 = def1.ValueRelativeMinimum();
-                var val2 = def2.ValueRelativeMinimum();
-
-                return val1.CompareTo(val2);
-            }
-        }
-
-        internal class SortByIncreasingStarRelativeMaximumValues : IComparer<StripDefinition>
-        {
-            public int Compare(StripDefinition def1, StripDefinition def2)
-            {
-                var val1 = def1.ValueRelativeMaximum();
-                var val2 = def2.ValueRelativeMaximum();
-
-                return val1.CompareTo(val2);
-            }
+            return maximumSize / sizeValue;
         }
 
         private void CoerceMaximumSize(float newValue)
