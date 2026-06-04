@@ -327,7 +327,14 @@ namespace Xenko.Graphics
                 sortIndices[i] = i;
             }
 
-            SortRange(sortIndices, 0, drawsQueueCount, comparison);
+            if (drawsQueueCount == sortIndices.Length)
+            {
+                Array.Sort(sortIndices, comparison);
+            }
+            else if (drawsQueueCount > 1)
+            {
+                SortRange(sortIndices, 0, drawsQueueCount, comparison);
+            }
         }
 
         private void FlushBatch()
@@ -568,9 +575,6 @@ namespace Xenko.Graphics
         #region Static Methods
         private static void SortRange<T>(T[] array, int index, int length, Comparison<T> comparison)
         {
-            if (length <= 1)
-                return;
-
             for (int i = index + 1; i < index + length; i++)
             {
                 T key = array[i];
