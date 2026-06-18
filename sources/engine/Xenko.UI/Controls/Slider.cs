@@ -365,10 +365,7 @@ namespace Xenko.UI.Controls
         /// <returns>The value adjusted to the closest tick</returns>
         protected float CalculateClosestTick(float rawValue)
         {
-            var absoluteValue = rawValue - Minimum;
-            var step = (Maximum - Minimum) / TickFrequency;
-            var times = (float)Math.Round(absoluteValue / step);
-            return times * step;
+            return (float)Math.Round(rawValue);
         }
 
         /// <summary>
@@ -391,7 +388,7 @@ namespace Xenko.UI.Controls
 
         private float CalculateIncreamentValue()
         {
-            return shouldSnapToTicks ? Math.Max(Step, (Maximum - Minimum)/TickFrequency) : Step;
+            return Step;
         }
 
         protected override Vector2 MeasureOverride(ref Vector2 availableSizeWithoutMargins)
