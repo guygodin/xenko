@@ -31,7 +31,7 @@ namespace Xenko.Core.Assets
             // Note: this should be called only once
             if (MSBuildInstance == null && Interlocked.Increment(ref MSBuildLocatorCount) == 1)
             {
-                MSBuildInstance = MSBuildLocator.QueryVisualStudioInstances().FirstOrDefault(x => x.Version.Major >= 16);
+                MSBuildInstance = MSBuildLocator.QueryVisualStudioInstances().FirstOrDefault(x => x.Version.Major == 16);
 
                 // Make sure it is not already loaded (otherwise MSBuildLocator.RegisterDefaults() throws an exception)
                 if (MSBuildInstance != null && !AppDomain.CurrentDomain.GetAssemblies().Any(IsMSBuildAssembly))
