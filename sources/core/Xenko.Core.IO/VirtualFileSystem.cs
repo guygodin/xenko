@@ -88,7 +88,11 @@ namespace Xenko.Core.IO
             var baseApk = PlatformAndroid.Context.ApplicationInfo.SourceDir;
             // Check if Assets are in a separate 'data' asset pack
             var dataApkPath = Path.Combine(Path.GetDirectoryName(baseApk), "split_data.apk");
-            ApplicationData = new ZipFileSystemProvider("/data", File.Exists(dataApkPath) ? dataApkPath : baseApk);
+            // Check if Assets are in an expansion file: <ObbDir>/<package name>.obb
+            var obbDir = PlatformAndroid.Context.ObbDir?.AbsolutePath;
+            var obbPath = obbDir != null ? Path.Combine(obbDir, PlatformAndroid.Context.PackageName + ".obb") : null;
+            var dataPath = File.Exists(dataApkPath) ? dataApkPath : obbPath != null && File.Exists(obbPath) ? obbPath  : baseApk;
+            ApplicationData = new ZipFileSystemProvider("/data", dataPath);
 #else
             ApplicationData = new FileSystemProvider("/data", Path.Combine(PlatformFolders.ApplicationDataDirectory, PlatformFolders.ApplicationDataSubDirectory));
 #endif
