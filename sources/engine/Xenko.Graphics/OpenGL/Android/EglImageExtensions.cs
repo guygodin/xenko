@@ -22,6 +22,7 @@ namespace Xenko.Graphics.OpenGL.Android
         public const int EGL_TRUE = 1;
         public const int EGL_NONE = 0x3038;
         public const int EGL_NO_CONTEXT = 0;
+        public const int EGL_SYNC_NATIVE_FENCE_ANDROID = 0x3144;
 
         // Delegate types for extension functions
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -51,6 +52,15 @@ namespace Xenko.Graphics.OpenGL.Android
 
         [DllImport("libEGL.so")]
         private static extern IntPtr eglGetCurrentDisplay();
+
+        [DllImport("libEGL.so")]
+        private static extern IntPtr eglCreateSyncKHR(IntPtr dpy, uint type, int[] attribs);
+
+        [DllImport("libEGL.so")]
+        private static extern int eglDupNativeFenceFDANDROID(IntPtr dpy, IntPtr sync);
+
+        [DllImport("libEGL.so")]
+        private static extern uint eglDestroySyncKHR(IntPtr dpy, IntPtr sync);
 
         /// <summary>
         /// Gets the current EGL display. Use this instead of a cached display handle.
@@ -157,6 +167,18 @@ namespace Xenko.Graphics.OpenGL.Android
                 throw new NotSupportedException("glEGLImageTargetTexture2DOES extension not available");
 
             _imageTargetTexture2D(textureTarget, eglImage);
+        }
+
+        public static int FlushAndCreateDupSync(IntPtr eglDisplay)
+        {
+            var sync = eglCreateSyncKHR(eglDisplay, EGL_SYNC_NATIVE_FENCE_ANDROID, null);
+
+            OpenTK.Graphics.ES31.GL.Flush();
+
+            int fd = eglDupNativeFenceFDANDROID(eglDisplay, sync);
+            eglDestroySyncKHR(eglDisplay, sync);
+
+            return fd;
         }
     }
 }
